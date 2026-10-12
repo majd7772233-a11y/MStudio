@@ -301,3 +301,9 @@ Additional Phase 2 update:
 - README follow-up commits `b09dfc089daeff9fcbae70c5f2448c100b15e520` and `ded14a43e57c65631e79dfc4715b08229c6051e0` clean the limitations/acknowledgement section and fix intro markup.
 - Current source confirms the root project name and generated repository metadata already target MStudio, CONTRIBUTING.md is fork-adapted, active launcher/splash resources use the MStudio vector, the old `XZ` is absent from styles.xml, and shared terminal error strings already say MStudio. Earlier roadmap discoveries that contradict this live state are historical, not current tasks.
 - Preserve upstream AndroidIDE attribution and GPL notice. No build/test/Actions until the explicit verification gate.
+
+
+### Phase 2 About icon consistency — 2026-10-12
+
+- Roadmap updated first in commit `9c25cd3fb5dbda89e674485c335e91013218aa6b`.
+- `AboutActivity.kt` labels the first action “GitHub Repository” and opens the MStudio repo, but still uses `R.drawable.ic_website`. The shared `R.drawable.ic_github` is confirmed to exist at `core/resources/src/main/res/drawable/ic_github.xml`; switch only that icon reference.
