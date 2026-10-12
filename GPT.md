@@ -163,3 +163,6 @@ Additional Phase 1 update:
 
 - AAPT2 now uses temporary-file extraction and replace-after-success, validates that the destination is a non-empty file, and reports missing source or failed executable permissions as setup errors.
 - Device/build verification remains intentionally deferred. Existing corrupt AAPT2 files and color-scheme directory updates still need dedicated repair handling.
+
+
+**Important application-ID caveat:** The manifest's documents provider still uses the hard-coded authority `dev.mutwakil.androidide.documents`. Since the current scope changes only `applicationId`, this authority was deliberately not renamed; it may conflict with an installed upstream AndroidIDE. Do not claim side-by-side installation compatibility until the authority is reviewed and both install scenarios are tested.
