@@ -531,3 +531,9 @@ The following entries above record what was discovered at the time; use these li
 - Updated `btn_donate` across all 12 maintained locale resources to a localized “Project repository” label, matching the actual MStudio GitHub destination and the default English string. This removes the false donation/support promise without restoring any unverified sponsor/payment link.
 - Commits by locale: Arabic `8c3d7635f37a02d4e88c079f08dd9cef94b32104`; Bengali `267910bd0da9b5412b55fe2f3505182db0544f69`; German `1c5b760d3982eb5b5a2639fabec212b2df63493e`; Spanish `df537248246a6b7b02e9dd1cb6219b13f2af39db`; French `473f6bd6f195c729bda1227dfe8b8171d260ce91`; Hindi `87c2793eafe4c65d534014affd2de4f24c062f8d`; Indonesian `a940cbf142a5bc31c9c6dd236c5ff4a8feeef848`; Portuguese `9be9dc3aee6183b29cfa1db83451555b77336882`; Romanian `227ff05a07d16acb0b02be941953ca802bbbcbdb`; Russian `930394f482ab47f30859c7fab641bd5f329f9d98`; Turkish `5840f6d254ae0ab6ec5bf92abba77620aef500ac`; Chinese `d7dabb1cb091fb3f8d2bae74c8526e2fdfbb7ac0`.
 - No build, test, workflow dispatch, or Actions run was launched.
+
+
+### Phase 3 Android API compatibility correction — managed Java output reader (2026-10-12)
+
+- The new version parser currently uses `Files.readString(Path, Charset)`, a Java 11 API whose Android platform availability must not be assumed for MStudio's min SDK 26. Avoid introducing a runtime API gap in the repair path: read the short `java -version` output through Java 8-compatible `FileReader`/reader APIs (the output is ASCII), then keep the same version parsing and timeout logic.
+- No build or device test yet; source-level API compatibility review only.
