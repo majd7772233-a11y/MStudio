@@ -33,7 +33,6 @@ import com.blankj.utilcode.util.SizeUtils
 import dev.mutwakil.androidide.BuildConfig
 import dev.mutwakil.androidide.R
 import dev.mutwakil.androidide.adapters.SimpleIconTitleDescriptionAdapter
-import dev.mutwakil.androidide.app.BaseApplication
 import dev.mutwakil.androidide.app.EdgeToEdgeIDEActivity
 import dev.mutwakil.androidide.app.configuration.IDEBuildConfigProvider
 import dev.mutwakil.androidide.buildinfo.BuildInfo
@@ -64,6 +63,8 @@ class AboutActivity : EdgeToEdgeIDEActivity() {
     private val ACTION_CONTRIBUTE = id++
     private val ACTION_CONTRIBUTORS = id++
     private const val PROJECT_URL = "https://github.com/majd7772233-a11y/MStudio"
+    private const val CONTRIBUTING_URL =
+        "https://github.com/majd7772233-a11y/MStudio/blob/dev/CONTRIBUTING.md"
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -113,7 +114,7 @@ class AboutActivity : EdgeToEdgeIDEActivity() {
   private fun handleActionClick(action: SimpleIconTitleDescriptionItem) {
     when (action.id) {
       ACTION_WEBSITE -> app.openUrl(PROJECT_URL)
-      ACTION_CONTRIBUTE -> app.openUrl(PROJECT_URL)
+      ACTION_CONTRIBUTE -> app.openUrl(CONTRIBUTING_URL)
       ACTION_CONTRIBUTORS -> startActivity(Intent(this, ContributorsActivity::class.java))
     }
   }
