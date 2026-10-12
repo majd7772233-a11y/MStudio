@@ -387,3 +387,10 @@ No build, test task, workflow dispatch or Actions run was launched. Phase 1 base
 ### Phase 3 localization requirement — runtime recovery dialog (2026-10-12)
 
 - The new runtime failure/retry dialog strings are currently defined in the default English resource only. Add matching translations to the maintained locale resource files (at minimum Arabic, plus all currently maintained locales) so runtime recovery does not unexpectedly switch localized users to English. Preserve RTL behavior and resource keys.
+
+
+### Phase 2 final UI sweep — shared terminal errors and About icon (2026-10-12)
+
+- The shared Termux-derived resource files `values/termux_app_strings.xml` and `values/termux_shared_strings.xml` still label runtime/setup errors as AndroidIDE; these are visible to users and must use MStudio wording while preserving upstream license headers and package/path identifiers.
+- `core/app/src/main/res/layout/layout_about_header.xml` uses the old `@mipmap/ic_launcher_foreground` PNG, even though the launcher and onboarding greeting now use the MStudio vector. Change the About header to `@drawable/mstudio_launcher_foreground` so About does not show the old logo.
+- The onboarding greeting references `@drawable/ic_launcher_fg_vector`, which has been updated to the MStudio mark. Preserve the package namespace/authorities; this sweep is branding only.
