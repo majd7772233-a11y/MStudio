@@ -469,9 +469,9 @@
   <string name="msg_terminal_new_sessions_disabled">Tidak dapat membuat sesi. Sesi baru dinonaktifkan!</string>
   <string name="title_install_location_error">Kesalahan lokasi pemasangan</string>
   <string name="title_unsupported_user">Pengguna tidak didukung</string>
-  <string name="title_socials">Sosial</string>
+  <string name="title_socials">Tautan proyek</string>
   <string name="title_contributors">Kontributor</string>
-   <string name="summary_contributors">Kredit untuk kontributor proyek AndroidIDE asli yang menjadi dasar MStudio.</string>
+   <string name="summary_contributors">Kredit untuk kontributor GitHub MStudio dan penerjemah proyek AndroidIDE asli.</string>
   <string name="title_github_contributors">Kontributor GitHub MStudio</string>
   <string name="title_crowdin_translators">Penerjemah proyek AndroidIDE asli</string>
   <string name="title_misc">Lain-lain</string>
