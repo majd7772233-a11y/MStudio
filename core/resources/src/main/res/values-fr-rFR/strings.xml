@@ -445,7 +445,7 @@ Dernier projet ouvert : \n%s</string>
   <string name="msg_files_being_saved">A file save operation is already in progress!</string>
   <string name="title_install_tools">SDK Installation</string>
   <string name="subtitle_install_tools">Install the development tools</string>
-  <string name="msg_install_tools">The development tools must be installed for the IDE to work. Clicking the done button will open terminal to install the tools. To install, follow the instructions <![CDATA[ <a href="https://github.com/majd7772233-a11y/MStudio/blob/dev/README.md">here</a>.<br/><br/>Or read the <a href="https://github.com/majd7772233-a11y/MStudio/blob/dev/README.md">documentation</a>]]>.</string>
+  <string name="msg_install_tools">Les outils de développement doivent être installés pour que MStudio fonctionne. Le bouton « Terminé » ouvrira le terminal pour les installer. <![CDATA[<a href="https://github.com/majd7772233-a11y/MStudio/blob/dev/README.md">Lire le README du projet</a> · <a href="https://github.com/majd7772233-a11y/MStudio/issues">Signaler un problème de configuration sur GitHub</a>]]></string>
   <string name="greeting_title">Welcome</string>
   <string name="greeting_subtitle">Learn, build, launch. All on your Android.</string>
   <string name="title_grant">Grant</string>
@@ -477,7 +477,7 @@ Dernier projet ouvert : \n%s</string>
   <string name="title_crowdin_translators">Traducteurs du projet AndroidIDE d’origine</string>
   <string name="title_misc">Misc</string>
   <string name="title_contribute">Contribute</string>
-  <string name="summary_contribute">It\'s not just an IDE, it\'s a community. Contribute code, ideas, and passion to MStudio.</string>
+  <string name="summary_contribute">Aidez à améliorer MStudio en signalant des problèmes, en proposant des idées ou en contribuant au code.</string>
   <string name="msg_app_unavailable_for_intent">No application available to handle intent.</string>
   <string name="title_open_source_licenses">Open source licenses</string>
   <string name="summary_open_source_licenses">View open source licenses.</string>

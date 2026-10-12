@@ -37,7 +37,7 @@
   <string name="please_wait">Te rog asteapta un moment …</string>
   <!-- Project Builder -->
   <string name="title_unsupported_device">Device Not Supported</string>
-  <string name="msg_unsupported_device">You are using %1$s variant of MStudio on a %2$s-only device. This configuration is not supported. Please install the %2$s variant of MStudio.</string>
+  <string name="msg_unsupported_device">Folosiți varianta MStudio pentru %1$s pe un dispozitiv care acceptă doar %2$s. Această configurație nu este acceptată. Instalați varianta MStudio pentru %2$s.</string>
   <string name="title_clear_output">Șterge Log</string>
   <string name="build_output">Log Ieșire</string>
   <string name="quick_run_debug">Rulare rapidă</string>
@@ -429,7 +429,7 @@
   <string name="msg_launch_failure_no_app_module">Cannot run application. No application modules found in project.</string>
   <string name="title_launch_app">Launch app</string>
   <string name="title_experiment_flavor">Experimental</string>
-  <string name="msg_experimental_flavor">You are using %1$s variant of MStudio on a %2$s device. This configuration may work, but it\'ll result in reduced performance and possible security vulnerabilities. Please avoid using this configuration whenever possible.</string>
+  <string name="msg_experimental_flavor">Folosiți varianta MStudio pentru %1$s pe un dispozitiv %2$s. Este posibil să funcționeze, dar poate reduce performanța și crește riscurile de securitate. Evitați această configurație dacă este posibil.</string>
   <string name="idepref_editor_pinLineNumbers_title">Pin line numbers</string>
   <string name="idepref_editor_pinLineNumbers_summary">Whether the editor should pin line number panel when scrolled horizontally.</string>
   <string name="theme_blue_wave">Blue Wave</string>
@@ -444,7 +444,7 @@
   <string name="msg_files_being_saved">A file save operation is already in progress!</string>
   <string name="title_install_tools">SDK Installation</string>
   <string name="subtitle_install_tools">Install the development tools</string>
-  <string name="msg_install_tools">The development tools must be installed for the IDE to work. Clicking the done button will open terminal to install the tools. To install, follow the instructions <![CDATA[ <a href="https://github.com/majd7772233-a11y/MStudio/blob/dev/README.md">here</a>.<br/><br/>Or read the <a href="https://github.com/majd7772233-a11y/MStudio/blob/dev/README.md">documentation</a>]]>.</string>
+  <string name="msg_install_tools">Instrumentele de dezvoltare trebuie instalate pentru ca MStudio să funcționeze. Apăsarea pe „Gata” va deschide terminalul pentru instalare. <![CDATA[<a href="https://github.com/majd7772233-a11y/MStudio/blob/dev/README.md">Citiți README-ul proiectului</a> · <a href="https://github.com/majd7772233-a11y/MStudio/issues">Raportați o problemă de configurare pe GitHub</a>]]></string>
   <string name="greeting_title">Welcome</string>
   <string name="greeting_subtitle">Learn, build, launch. All on your Android.</string>
   <string name="title_grant">Grant</string>
@@ -476,7 +476,7 @@
   <string name="title_crowdin_translators">Traducătorii proiectului AndroidIDE original</string>
   <string name="title_misc">Misc</string>
   <string name="title_contribute">Contribute</string>
-  <string name="summary_contribute">It\'s not just an IDE, it\'s a community. Contribute code, ideas, and passion to MStudio.</string>
+  <string name="summary_contribute">Ajutați la îmbunătățirea MStudio raportând probleme, propunând idei sau contribuind cu cod.</string>
   <string name="msg_app_unavailable_for_intent">No application available to handle intent.</string>
   <string name="title_open_source_licenses">Open source licenses</string>
   <string name="summary_open_source_licenses">View open source licenses.</string>

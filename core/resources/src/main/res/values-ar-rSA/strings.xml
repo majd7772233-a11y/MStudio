@@ -37,7 +37,7 @@
   <string name="please_wait">رجاءا انتظر لحظة…</string>
   <!-- Project Builder -->
   <string name="title_unsupported_device">هذا الجهاز غير مدعوم</string>
-  <string name="msg_unsupported_device">أنت تستخدم نسخة %1$s من MStudio على جهاز يعمل فقط بـ %2$s. هذه التكوينات غير معتمدة. يرجى تثبيت نسخة %2$s من MStudio.</string>
+  <string name="msg_unsupported_device">أنت تستخدم نسخة MStudio المخصصة لمعمارية %1$s على جهاز يدعم %2$s فقط. هذا الإعداد غير مدعوم. يُرجى تثبيت نسخة MStudio الخاصة بمعمارية %2$s.</string>
   <string name="title_clear_output">مسح المخرجات</string>
   <string name="build_output">مخرجات البناء</string>
   <string name="quick_run_debug">تشغيل سريع</string>
@@ -429,7 +429,7 @@
   <string name="msg_launch_failure_no_app_module">Cannot run application. No application modules found in project.</string>
   <string name="title_launch_app">Launch app</string>
   <string name="title_experiment_flavor">Experimental</string>
-  <string name="msg_experimental_flavor">You are using %1$s variant of MStudio on a %2$s device. This configuration may work, but it\'ll result in reduced performance and possible security vulnerabilities. Please avoid using this configuration whenever possible.</string>
+  <string name="msg_experimental_flavor">أنت تستخدم نسخة MStudio المخصصة لمعمارية %1$s على جهاز بمعمارية %2$s. قد يعمل هذا الإعداد، لكنه قد يقلل الأداء ويزيد المخاطر الأمنية. يُرجى تجنّبه متى أمكن.</string>
   <string name="idepref_editor_pinLineNumbers_title">Pin line numbers</string>
   <string name="idepref_editor_pinLineNumbers_summary">Whether the editor should pin line number panel when scrolled horizontally.</string>
   <string name="theme_blue_wave">Blue Wave</string>
@@ -444,7 +444,7 @@
   <string name="msg_files_being_saved">A file save operation is already in progress!</string>
   <string name="title_install_tools">SDK Installation</string>
   <string name="subtitle_install_tools">Install the development tools</string>
-  <string name="msg_install_tools">The development tools must be installed for the IDE to work. Clicking the done button will open terminal to install the tools. To install, follow the instructions <![CDATA[ <a href="https://github.com/majd7772233-a11y/MStudio/blob/dev/README.md">here</a>.<br/><br/>Or read the <a href="https://github.com/majd7772233-a11y/MStudio/blob/dev/README.md">documentation</a>]]>.</string>
+  <string name="msg_install_tools">يجب تثبيت أدوات التطوير لكي يعمل MStudio. عند الضغط على «تم»، ستُفتح الطرفية لتثبيتها. <![CDATA[<a href="https://github.com/majd7772233-a11y/MStudio/blob/dev/README.md">اقرأ دليل المشروع</a> · <a href="https://github.com/majd7772233-a11y/MStudio/issues">أبلغ عن مشكلة في GitHub</a>]]></string>
   <string name="greeting_title">Welcome</string>
   <string name="greeting_subtitle">Learn, build, launch. All on your Android.</string>
   <string name="title_grant">Grant</string>
@@ -476,7 +476,7 @@
   <string name="title_crowdin_translators">مترجمو مشروع AndroidIDE الأصلي</string>
   <string name="title_misc">Misc</string>
   <string name="title_contribute">Contribute</string>
-  <string name="summary_contribute">It\'s not just an IDE, it\'s a community. Contribute code, ideas, and passion to MStudio.</string>
+  <string name="summary_contribute">ساعد في تحسين MStudio عبر الإبلاغ عن المشكلات، واقتراح الأفكار، أو المساهمة بالكود.</string>
   <string name="msg_app_unavailable_for_intent">No application available to handle intent.</string>
   <string name="title_open_source_licenses">Open source licenses</string>
   <string name="summary_open_source_licenses">View open source licenses.</string>
