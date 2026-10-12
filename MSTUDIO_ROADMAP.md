@@ -79,7 +79,7 @@ Keep upstream/GPL notices. Verify README and UI claims against evidence; do not 
 
 **Acceptance:** visible MStudio identity is coherent, About links point only to verified project destinations, and package/provider caveats remain explicit.
 
-Build constants are in `composite-builds/build-logic/common/.../BuildConfig.kt`. Root name remains AndroidIDE and README/visual resources use inherited branding. The manifest includes hard-coded old namespace permission/action/provider values and an applicationId-based FileProvider.
+Build constants are in `composite-builds/build-logic/common/.../BuildConfig.kt`. Live `settings.gradle.kts` names the root project `MStudio`; README and active launcher/splash/About resources have since been rebranded, although the complete user-facing source/locale audit remains in progress. The manifest still includes hard-coded old namespace permission/action/provider values and an applicationId-based FileProvider.
 
 First change visible name, icon, splash, about/help and user-facing references while leaving app ID/package namespace unchanged. Preserve upstream/GPL attribution. Search all resources/source/templates, not only BuildConfig.
 
@@ -459,3 +459,13 @@ No build, test task, workflow dispatch or Actions run was launched. Phase 1 base
 - README destination cleanup and follow-up commits: `1aac325cef97d2ab0911f84660e246f947879606`, `b09dfc089daeff9fcbae70c5f2448c100b15e520`, `ded14a43e57c65631e79dfc4715b08229c6051e0`.
 - Localized copy corrections: Arabic footer `7d0651d489b9750f825b5e977b8201276ae689f4`; Spanish footer `43799c4ca889988a2a53b7363aa7614c26665fe6`; French unsupported-device copy `a4525ca4c5ca216114e343bfe189f11fbfa9c81c`; Turkish contribute prompt `72e25fff369bf574ae877aa60e7a91a66a8d3174`.
 - These are source/documentation changes only. Do not mark Phase 2 as verified until a complete current-source audit is finished and the planned build/device gate later provides evidence.
+
+
+## Roadmap current-state clarification — 2026-10-12
+
+The following entries above record what was discovered at the time; use these live-state corrections where an older statement conflicts:
+- Root project name is already `MStudio`; `ProjectConfig.kt` already points to the MStudio repository/site.
+- The malformed `XZ` text is no longer present in `core/resources/src/main/res/values/styles.xml`; active adaptive launcher/splash/About resources use MStudio branding.
+- `CONTRIBUTING.md`, README destinations, shared terminal user-facing strings, and the 12 maintained locale About/recovery labels have been updated. Recent locale fixes also remove French/Turkish product-name leaks. The broad source audit is not yet exhaustive.
+- Runtime failure/retry UI is already connected from `ToolsManager.InitResult` to `MainActivity`, with lifecycle listener removal. Treat this as implemented in source but unverified on-device, not as an outstanding UI hookup.
+- The earlier generated-metadata finding is superseded: current `ProjectConfig.kt` sets `REPO_OWNER`, `REPO_NAME`, and `PROJECT_SITE` to MStudio. No change is needed to those correct constants.
