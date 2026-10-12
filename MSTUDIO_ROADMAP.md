@@ -242,3 +242,8 @@ Changes committed:
 ### Explicit sequencing decision
 
 The user requested that Actions execution and actual builds happen only after substantial source-level work. Therefore Phase 0.4 (baseline Actions/build) is deferred until after the planned code review and implementation phases; Markdown-only commits are not considered build evidence.
+
+
+### Phase 1 follow-up — README/source-facing identity
+
+Updated `README.md` title and repository badges/issues/download destinations to MStudio, removed misleading instructions to download upstream AndroidIDE releases as MStudio releases, and labeled the upstream docs/community as inherited references. Preserved the original AndroidIDE GPL attribution and upstream acknowledgements. The launcher icon/splash and About screen destinations are intentionally not declared rebranded yet; their actual asset/configuration sources still need tracing before safe edits.
