@@ -349,3 +349,9 @@ Additional Phase 2 update:
 - README caveat commit: `cfdbf2f24c04ff71ec73a22938fde49c5ac224fc`. The README now says feature checkboxes describe source features, not proof of runtime verification.
 - Live refetch confirms outdated AndroidIDE docs/Telegram/Crowdin/F-Droid/package-ID/site destinations are gone, README uses `images/mstudio-icon.svg`, About uses the GitHub icon, and the four targeted locale fixes are present.
 - These are source-content checks only, not XML/resource compilation, APK build, installation, or device validation.
+
+
+### Phase 3 managed Java version check — 2026-10-12
+
+- Roadmap updated first in commit `b9e161a71886f09015a3deb4be6f739c9bde2624`.
+- `ToolsManager.isUsableJava()` currently checks that `java -version` exits zero and writes non-empty output, but does not parse the version. Strengthen it to parse the reported major version and require Java 17+; legacy `1.8.x` must parse as major 8 and fail. Preserve timeout/process cleanup. Do not run build/Actions yet.
