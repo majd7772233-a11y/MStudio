@@ -4,7 +4,7 @@
 >
 > Initial source baseline: `e4dc15adf1c670edcfce12008e822c02b0d9cb64` on `dev`. Re-check live HEAD and actual files before every implementation task.
 
-## 0. Product definition and operating principles
+## Product definition and operating principles
 
 MStudio aims to become a self-contained Android IDE for real Android development on a phone. MStudio must manage its own runtime, JDK, Android SDK tools, Gradle integration, project model, editor and previews. Beginners use a guided interface; terminal is optional for advanced users. Local build must remain available without GitHub login.
 
@@ -12,7 +12,7 @@ Preserve the actual Gradle Tooling API path in `tooling/api`, `tooling/impl`, `G
 
 Only mark an item complete when a commit and reproducible evidence exists: automated test, CI job/artifact or named device test. A class name, README checkbox or workflow definition is not proof.
 
-## 1. Source evidence register
+## Source evidence register
 
 | Source | Fact observed at baseline | Roadmap consequence |
 |---|---|---|
@@ -191,7 +191,7 @@ See `CLOUD_BUILD_PLAN.md`. Only begin after local MVP. Later flow: GitHub author
 
 Build from known commit; verify APK checksum/signature/ABI; test clean install/upgrade; create/import/build Java/XML project; resolve Maven dependency; test resources, failure/cancel, tool repair, cached offline build and install. Verify signing ownership, publication opt-in, GPL/third-party notices and limitations. README claims must match tested behavior.
 
-## 14. Local MVP evidence checklist
+## Local MVP evidence checklist
 
 - [ ] Fresh install sets up tools without separate Termux app.
 - [ ] Create Java/XML project and import supported Gradle project.
@@ -302,12 +302,14 @@ Changing `applicationId` does not change hard-coded manifest authorities. The do
 
 - Replaced the old Phase 0 + Phase 1–11 scheme with a single sequential Phase 1–12 scheme. Previous Phase 0 is now Phase 1; previous Phase 1 is Phase 2; previous Phase 2 is Phase 3; subsequent phases each move up by one. Substeps are scoped under their parent phase (for example 3.1–3.5), never standalone fractional phases.
 - Historical execution records were renumbered to the same scheme. Completion claims remain evidence-based; a source change alone does not complete an acceptance gate.
-- Active implementation order: Phase 2 (identity/rebrand) and Phase 3 (runtime/setup repair). Baseline build/Actions and device testing remain deferred until the roadmap's later verification gate; no build or workflow was launched for this update.
+- Active implementation order: finish Phase 2 (identity/rebrand), then Phase 3 (runtime/setup repair). Phase 1's baseline CI and device smoke-test subtasks 1.4–1.5 are intentionally deferred until the source work reaches the verification gate; do not run builds or Actions early.
 
 
 ## Execution update — 2026-10-12 — Phases 2 and 3 source work
 
 ### Phase 2 — identity and user-facing rebrand (in progress)
+
+Additional audit required before implementation: inspect BaseApplication hard-coded docs/contact/social URLs and every caller, shared resource strings such as msg_need_help, about_footer, and onboarding/help text. Replace inherited destinations only with verified MStudio repository/issues paths, or remove the action when no verified destination exists. Trace the actual launcher icon and splash resource source through asset/build plugins before touching visual assets.
 
 - Updated `AboutActivity` to remove inherited AndroidIDE email and Telegram destinations. The website action now opens the verified MStudio repository, and the contribution action opens the repository's existing `CONTRIBUTING.md` path.
 - Kept upstream/GPL source attribution intact. Did not invent MStudio email, website or social channels.
@@ -316,11 +318,13 @@ Changing `applicationId` does not change hard-coded manifest authorities. The do
 
 ### Phase 3 — runtime and setup repair (in progress)
 
+Before wiring readiness into onboarding, inspect the actual application startup call, setup-fragment lifecycle, UI-thread dispatch conventions and retry path. A result callback must be delivered safely to UI and must not imply that SDK/JDK setup commands in the separate terminal flow are complete merely because ToolsManager extraction completed. Review concurrent/repeated initialization and deterministic .tmp/.bak names for races.
+
 - `ToolsManager` now exposes an immutable per-component `InitResult` through `initWithResult`, records successful components and failure messages, and always reports unsupported ABI instead of silently returning without a completion callback. It separately checks that JDK distributions were discovered and that managed `java -version` and AAPT2 `version` commands exit successfully within five seconds. The original Runnable overload remains for existing callers.
 - Android API stub extraction now validates that `android.jar` is a readable non-empty JAR and atomically repairs missing/empty/invalid files while refusing to delete an unexpected directory.
 - AAPT2 extraction runs the bundled binary's `version` command with a five-second timeout, replaces missing/empty/non-executable/broken destinations from the packaged native library, and fails setup clearly if the replacement is still unusable.
 - Color-scheme updates now stage a complete directory, validate `scheme.prop`, swap only after successful extraction, and recover a prior backup after an interrupted swap. Version-read errors now schedule repair rather than incorrectly treating the installed scheme as valid.
-- Remaining Phase 3 work: connect per-component readiness to user-visible onboarding/retry UX and complete offline/interruption/low-storage/device tests. JDK and AAPT2 invocation checks are implemented in source but remain unverified on-device.
+- Remaining Phase 3 work: connect per-component readiness to user-visible onboarding/retry UX and a genuine retry action; audit concurrent/repeated initialization and deterministic staging names; complete offline/interruption/low-storage/device tests. JDK and AAPT2 invocation checks are implemented in source but remain unverified on-device.
 
 Commits for this batch:
 - `878fe9176dafb4e130dc80f3a1ca6e55c1c78113` — About destinations use the MStudio repository.
@@ -335,3 +339,11 @@ No build, test task, workflow dispatch or Actions run was launched. Phase 1 base
 
 - Commit `4618270d1497c711d95dcf3f845ebe5478711af2` splits JDK distribution discovery from managed Java execution readiness. It reports an empty distribution list and validates the managed `java -version` process with a five-second timeout.
 - This is still source-level validation only; actual runtime installation, version output and retry behavior must be verified on a supported device in the planned test phase.
+
+
+## Roadmap consistency correction — 2026-10-12
+
+- Corrected misleading section numbering: product definition, source register, evidence checklist and execution logs are document sections, not phases. Main phases remain Phase 1–12 with whole-number IDs and nested decimal substeps.
+- Corrected the earlier blanket “former Phase 0 → Phase 1” statement; it was inaccurate because the original roadmap already used Phase 1–12 for its main work and the product-definition section was not a phase. Historical execution entries now preserve their actual context rather than imply a fabricated global renumbering.
+- Kept the user's sequencing constraint explicit: no build, test task, workflow dispatch or Actions until the source-level Phase 2/3 work is substantially complete and the verification gate is deliberately reached.
+- Expanded Phase 2 scope to audit BaseApplication URLs and shared help/About strings, and to trace the real icon/splash source before visual asset edits. Expanded Phase 3 scope to inspect startup callers, UI-thread/lifecycle handling, real retry behavior and initialization races before connecting readiness to UI.
