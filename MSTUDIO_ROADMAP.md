@@ -543,3 +543,11 @@ The following entries above record what was discovered at the time; use these li
 
 - Replaced the Java 11 `Files.readString` call in the managed Java version check with `FileReader`/buffered character reading, preserving the parseable Java 17+ requirement and timeout. Commit: `1c05b4a6f8f30b4e1e4858a2cebbb8bc67f87e0e`.
 - Re-fetched the file and verified the Java check no longer calls `Files.readString`, still uses the version threshold, and uses the already-imported Java 8-compatible reader classes. This is source inspection, not API lint/build/device proof.
+
+
+## Current continuation point — 2026-10-12
+
+- Post-edit fetch verified all 12 maintained locale values for `btn_donate` now describe the repository destination (Arabic, Bengali, German, Spanish, French, Hindi, Indonesian, Portuguese, Romanian, Russian, Turkish and Chinese).
+- Phase 2 is substantially rebranded in source and documentation, but remains unverified: finish the remaining user-facing source-reference sweep, then wait for the later build/device gate before claiming the full product flow.
+- Phase 3 now includes per-component `ToolsManager.InitResult`, MainActivity retry UI/lifecycle cleanup, atomic extraction repairs, JAR/AAPT2/managed-Java checks, and Java 17+ parsing that avoids Java 11-only `Files.readString`. Remaining work is source audit of all setup dependencies and recovery semantics plus offline/interruption/low-storage/ABI/device validation at the authorized verification phase.
+- Do not run builds, tests, workflow dispatches or Actions until the roadmap explicitly reaches the verification gate.
