@@ -472,8 +472,8 @@
   <string name="title_socials">Socials</string>
   <string name="title_contributors">Contributors</string>
    <string name="summary_contributors">Créditos para quienes contribuyeron al proyecto AndroidIDE original en el que se basa MStudio.</string>
-  <string name="title_github_contributors">GitHub Contributors</string>
-  <string name="title_crowdin_translators">Crowdin Translators</string>
+  <string name="title_github_contributors">Colaboradores de MStudio en GitHub</string>
+  <string name="title_crowdin_translators">Traductores del proyecto AndroidIDE original</string>
   <string name="title_misc">Misc</string>
   <string name="title_contribute">Contribute</string>
   <string name="summary_contribute">It\'s not just an IDE, it\'s a community. Contribute code, ideas, and passion to MStudio.</string>
