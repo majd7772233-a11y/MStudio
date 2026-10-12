@@ -483,4 +483,9 @@
   <string name="summary_open_source_licenses">Просмотр лицензий открытого ПО.</string>
   <string name="idepref_jdkVersion_title">Версия JDK</string>
   <string name="idepref_jdkVersion_summary">Выбрано: %1$s (перезапустите приложение после изменения)</string>
+
+    <string name="runtime_setup_failed_title">Требуется исправить настройку среды выполнения</string>
+    <string name="runtime_setup_failed_message">Не удалось подготовить некоторые встроенные компоненты среды выполнения. Сборка проектов может завершаться ошибкой, пока настройка не будет исправлена. Повторите попытку сейчас или продолжите работу в MStudio и попробуйте позже.</string>
+    <string name="runtime_setup_retry">Повторить настройку</string>
+    <string name="runtime_setup_later">Позже</string>
 </resources>
