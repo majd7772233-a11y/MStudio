@@ -572,7 +572,14 @@ public class ToolsManager {
 
   private static void deleteIdeenv() {
     final var file = new File(Environment.BIN_DIR, "ideenv");
-    if (file.exists() && !file.delete()) {
+    if (!file.exists()) {
+      return;
+    }
+    if (!file.isFile()) {
+      throw new IllegalStateException(
+          "Unexpected non-file path blocks stale runtime cleanup; leaving it untouched: " + file);
+    }
+    if (!file.delete()) {
       throw new IllegalStateException("Unable to remove stale runtime file: " + file);
     }
   }
