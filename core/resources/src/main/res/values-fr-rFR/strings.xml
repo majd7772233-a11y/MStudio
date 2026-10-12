@@ -5,7 +5,7 @@
   <string name="terminal_more">Plus…</string>
   <string name="text_to_search">Texte à chercher</string>
    <string name="about_option_email">Signaler un problème sur GitHub</string>
-  <string name="about_option_website">Site Web</string>
+    <string name="about_option_website">Dépôt GitHub</string>
   <string name="about_footer">MStudio %1$s pour %2$s</string>
   <string name="about_subtitle">Simplement, un IDE pour Android</string>
   <string name="msg_get_package_failed">Impossible d\'extraire le nom du package !</string>
