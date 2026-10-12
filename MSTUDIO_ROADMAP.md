@@ -451,3 +451,11 @@ No build, test task, workflow dispatch or Actions run was launched. Phase 1 base
 ### Phase 2 About icon consistency — 2026-10-12
 
 - The About action now correctly says “GitHub Repository” and opens the MStudio repository, but its icon resource is still `R.drawable.ic_website`. A verified shared `R.drawable.ic_github` exists in `core/resources/src/main/res/drawable/ic_github.xml`; use that icon for the repository action so its visual affordance matches the destination. This is a source-only branding correction; do not change the contributor action or upstream attribution.
+
+
+## Execution update — Phase 2 repository action visual consistency (2026-10-12)
+
+- `AboutActivity.kt` now uses the verified GitHub icon for its “GitHub Repository” action instead of the globe/website icon. Commit: `98bb103c9b1e1f5b800e15b41253e0f0f1da871b`.
+- README destination cleanup and follow-up commits: `1aac325cef97d2ab0911f84660e246f947879606`, `b09dfc089daeff9fcbae70c5f2448c100b15e520`, `ded14a43e57c65631e79dfc4715b08229c6051e0`.
+- Localized copy corrections: Arabic footer `7d0651d489b9750f825b5e977b8201276ae689f4`; Spanish footer `43799c4ca889988a2a53b7363aa7614c26665fe6`; French unsupported-device copy `a4525ca4c5ca216114e343bfe189f11fbfa9c81c`; Turkish contribute prompt `72e25fff369bf574ae877aa60e7a91a66a8d3174`.
+- These are source/documentation changes only. Do not mark Phase 2 as verified until a complete current-source audit is finished and the planned build/device gate later provides evidence.
