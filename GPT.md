@@ -385,3 +385,10 @@ Additional Phase 2 update:
 
 - Roadmap updated first in commit `0e1004d340395877c1f3d4350ea88c828825eeea`.
 - Default English `btn_donate` already reads “Project repository”, but 12 translated resources still say Donate/Support while the inherited destination now opens MStudio's repository. Localize “Project repository” in all maintained locales so users aren't misled into expecting a payment/donation flow.
+
+
+### Phase 2 translated repository-action labels — 2026-10-12
+
+- Roadmap updated first in commit `d1ef8fdd7e4427a1c008ff089fe596a6eab76471`.
+- All 12 maintained locale resources now translate `btn_donate` as “Project repository” because the action opens the MStudio repository, not a donation/payment destination. Commit SHAs are recorded in `MSTUDIO_ROADMAP.md`.
+- This avoids a false donation promise and keeps the action consistent with the English resource. No builds/tests/Actions were run.
