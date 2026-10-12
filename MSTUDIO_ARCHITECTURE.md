@@ -83,9 +83,9 @@ Do not resolve a mismatch by changing all layers at once.
 
 ## 5. Initialization/AAPT2 details
 
-ToolsManager.init asynchronously checks ABI, loads JDK distributions and extracts the Gradle plugin, AAPT2, tooling JAR, android.jar, color schemes, init script and Kotlin-artifact download script. The new `initWithResult` API exposes an immutable per-component `InitResult` with ready component names and failures; the legacy Runnable overload remains for existing callers, so onboarding has not yet been wired to display those results. JDK distribution discovery and the managed `java -version` command are separate readiness checks; AAPT2 is likewise checked by its `version` command, each with a five-second timeout.
+ToolsManager.init asynchronously checks ABI, loads JDK distributions and extracts the Gradle plugin, AAPT2, tooling JAR, android.jar, color schemes, init script and Kotlin-artifact download script. The new `initWithResult` API exposes an immutable per-component `InitResult` with ready component names and failures; the legacy Runnable overload remains for existing callers. `MainActivity` now observes completed results through a lifecycle-managed listener and displays a localized retry/later dialog for failures. The existing onboarding wizard remains responsible for the separate SDK/JDK installation flow. JDK distribution discovery and the managed `java -version` command are separate readiness checks; AAPT2 is likewise checked by its `version` command, each with a five-second timeout.
 
-Asset JARs/scripts are staged and replaced only after successful non-empty writes. Android API stub extraction validates the JAR container and repairs missing/empty/invalid files. Color schemes are copied into a staging directory, checked for `scheme.prop`, and swapped with backup recovery for interrupted updates. AAPT2 is checked by running its `version` command with a five-second timeout; missing, empty, non-executable or unusable destinations are replaced from the packaged native library. This validation is source-only until tested on a supported device. These are source-level protections; no device validation has been recorded.
+Asset JARs/scripts are staged and replaced only after successful non-empty writes. Android API stub extraction validates the JAR container and repairs missing/empty/invalid files. Color schemes are copied into a staging directory, checked for `scheme.prop`, and swapped with backup recovery for interrupted updates. AAPT2 is checked by running its `version` command with a five-second timeout; missing, empty, non-executable or unusable destinations are replaced from the packaged native library. This validation is source-only until tested on a supported device. These are source-level protections; no device validation has been recorded. Initialization is now single-flight to prevent concurrent retry extraction jobs from colliding on deterministic staging/backup paths, and result observers are dispatched on the main thread with listener removal on Activity teardown.
 
 SetupAapt2Task downloads and verifies SHA-256 for ARM64/ARMv7 in inspected source; x86_64 is commented. Maven AAPT2 isn't assumed runnable inside Android; the service passes custom override. Require an actual resource compile/link test for every supported ABI.
 
@@ -100,7 +100,15 @@ SetupAapt2Task downloads and verifies SHA-256 for ARM64/ARMv7 in inspected sourc
 - Root heap values are high for lower-memory phones.
 - build.yml publishing needs default-off gating before routine CI.
 - Manifest contains hard-coded namespace permissions/authorities; current applicationId is `com.magd.mstudio`, while namespace/packages remain `dev.mutwakil.androidide`. DocumentsProvider authority still uses `dev.mutwakil.androidide.documents`; side-by-side installation is unverified.
-- About screen website/contribution destinations now point to the MStudio repository and its CONTRIBUTING file; inherited AndroidIDE email and Telegram destinations were removed from that screen.
+- About/help/contribution destinations now use the MStudio repository, README, issues and fork-adapted CONTRIBUTING guide; inherited AndroidIDE email/Telegram/docs destinations were replaced. The generated BuildInfo repository owner/name/site are configured from `ProjectConfig.kt`.
 - README feature boxes and module presence are not proof of function.
 
 Use MSTUDIO_ROADMAP.md for acceptance gates and GPT.md for append-only engineering findings.
+
+
+## 7. MStudio identity resources
+
+- `ProjectConfig.kt` is the source of generated repository owner/name, SCM URLs and project site. Keep it pointed at `majd7772233-a11y/MStudio`; preserve Maven coordinates and upstream GPL attribution separately.
+- Shared help/About strings and the maintained translated `values-*/strings.xml` resources use MStudio branding and GitHub issues/repository destinations. Contributor credits explicitly identify upstream AndroidIDE contributors rather than claiming them as MStudio contributors.
+- The active adaptive icon in `core/resources/src/main/res/mipmap-anydpi-v26/ic_launcher.xml` and the splash style use `drawable/mstudio_launcher_foreground.xml`, with a dark MStudio background and teal/white monogram. The stray `XZ` text in the splash style was removed. Old raster launcher PNGs and unused inherited animation resources remain in the repository and should be considered legacy, not proof of active branding.
+- Runtime failure/retry strings are added to all 12 maintained locale-specific resource files as well as the default English resources. Static source edits are not a substitute for XML resource compilation or device verification.
