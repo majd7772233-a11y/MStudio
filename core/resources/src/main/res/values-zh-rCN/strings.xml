@@ -472,8 +472,8 @@
   <string name="title_socials">社交</string>
   <string name="title_contributors">贡献者</string>
    <string name="summary_contributors">致谢 MStudio 所基于的上游 AndroidIDE 项目的贡献者。</string>
-  <string name="title_github_contributors">GitHub 贡献者</string>
-  <string name="title_crowdin_translators">Crowdin 翻译员</string>
+  <string name="title_github_contributors">MStudio 的 GitHub 贡献者</string>
+  <string name="title_crowdin_translators">上游 AndroidIDE 项目翻译者</string>
   <string name="title_misc">杂项</string>
   <string name="title_contribute">贡献</string>
   <string name="summary_contribute">它不仅仅是一个 IDE，更是一个社区。为 MStudio 贡献代码、想法和热情。</string>
