@@ -469,3 +469,9 @@ The following entries above record what was discovered at the time; use these li
 - `CONTRIBUTING.md`, README destinations, shared terminal user-facing strings, and the 12 maintained locale About/recovery labels have been updated. Recent locale fixes also remove French/Turkish product-name leaks. The broad source audit is not yet exhaustive.
 - Runtime failure/retry UI is already connected from `ToolsManager.InitResult` to `MainActivity`, with lifecycle listener removal. Treat this as implemented in source but unverified on-device, not as an outstanding UI hookup.
 - The earlier generated-metadata finding is superseded: current `ProjectConfig.kt` sets `REPO_OWNER`, `REPO_NAME`, and `PROJECT_SITE` to MStudio. No change is needed to those correct constants.
+
+
+### Phase 2 README artwork audit — 2026-10-12
+
+- Visual inspection of the tracked `images/icon.png` shows the inherited AndroidIDE robot/braces mark, while the active launcher/splash use the MStudio “M” monogram. The README therefore still shows the wrong product identity even after the text/link cleanup.
+- Add a small repository-owned SVG using the same MStudio monogram and brand colors as the active vector launcher, then point the README image to that SVG. Keep the inherited PNG untouched for history unless a complete reference audit justifies replacing it; don't claim all legacy assets have been replaced.
