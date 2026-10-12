@@ -4,16 +4,16 @@
   <string name="copy" tools:override="true">Kopyala</string>
   <string name="terminal_more">Daha…</string>
   <string name="text_to_search">Aranacak metin</string>
-  <string name="about_option_email">GitHub’da sorun bildir</string>
+   <string name="about_option_email">GitHub’da sorun bildir</string>
   <string name="about_option_website">Web Sitesi</string>
   <string name="about_footer">MStudio %1$s %2$s-için</string>
   <string name="about_subtitle">Basitçe, Android için bir IDE</string>
   <string name="msg_get_package_failed">Apk dosyası ayıklanamadı!</string>
-  <string name="msg_need_help">MStudio kullanırken veya Android uygulaması oluştururken sorun yaşarsanız MStudio GitHub Issues üzerinden bildirin ya da iyileştirme önerin.</string>
+   <string name="msg_need_help">MStudio kullanırken veya Android uygulaması oluştururken sorun yaşarsanız MStudio GitHub Issues üzerinden bildirin ya da iyileştirme önerin.</string>
   <string name="need_help">Yardım mı lazım?</string>
   <string name="ide_preferences">IDE tercihleri</string>
-  <string name="discussions_on_telegram">GitHub’da sorun bildir</string>
-  <string name="official_tg_channel">MStudio GitHub Deposu</string>
+   <string name="discussions_on_telegram">GitHub’da sorun bildir</string>
+   <string name="official_tg_channel">MStudio GitHub Deposu</string>
   <string name="msg_empty_view">Veri bulunamadı</string>
   <string name="title_terminal">Uçbirim</string>
   <string name="reset">Sıfırla</string>
@@ -471,7 +471,7 @@
   <string name="title_unsupported_user">Desteklenmeyen kullanıcı</string>
   <string name="title_socials">Sosyal Medya</string>
   <string name="title_contributors">Katkı sağlayanlar</string>
-  <string name="summary_contributors">MStudio’nun temel aldığı özgün AndroidIDE projesinin katkıda bulunanlarına teşekkür.</string>
+   <string name="summary_contributors">MStudio’nun temel aldığı özgün AndroidIDE projesinin katkıda bulunanlarına teşekkür.</string>
   <string name="title_github_contributors">GitHub\'dan Katkıda Bulunanlar</string>
   <string name="title_crowdin_translators">Crowdin Çevirmenleri</string>
   <string name="title_misc">Diğerleri</string>
