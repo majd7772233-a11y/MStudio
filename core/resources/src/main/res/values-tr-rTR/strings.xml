@@ -469,9 +469,9 @@
   <string name="msg_terminal_new_sessions_disabled">Oturum oluşturulamıyor. Yeni oturumlar devre dışı bırakıldı!</string>
   <string name="title_install_location_error">Yükleme konumu hatası</string>
   <string name="title_unsupported_user">Desteklenmeyen kullanıcı</string>
-  <string name="title_socials">Sosyal Medya</string>
+  <string name="title_socials">Proje bağlantıları</string>
   <string name="title_contributors">Katkı sağlayanlar</string>
-   <string name="summary_contributors">MStudio’nun temel aldığı özgün AndroidIDE projesinin katkıda bulunanlarına teşekkür.</string>
+   <string name="summary_contributors">MStudio GitHub katkıda bulunanlarına ve özgün AndroidIDE projesinin çevirmenlerine teşekkürler.</string>
   <string name="title_github_contributors">MStudio GitHub katkıda bulunanlar</string>
   <string name="title_crowdin_translators">Özgün AndroidIDE projesinin çevirmenleri</string>
   <string name="title_misc">Diğerleri</string>
