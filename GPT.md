@@ -478,3 +478,11 @@ Read `MSTUDIO_ROADMAP.md` first; its latest handoff checkpoint was committed in 
 - Do not record secret values. Signing variable names: `MY_KEYSTORE_JKS`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`; `MY_KEYSTORE_JKS` must be Base64-encoded JKS bytes for the inherited decoder. Cloudflare variable names: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `MY_JWT_SECRET`.
 - Never recommend `npx wrangler` for the user's Android/Termux architecture.
 - User's roadmap-first rule: if a task is not represented in the roadmap, add and prioritize it there before implementing. Update `GPT.md` after meaningful changes. Do not claim verification without actual evidence.
+
+
+## Execution update — Phase 3 project marker readiness correction (2026-10-12)
+
+- Live `ToolsManager.writeNoMediaFile()` previously logged marker-creation failures and returned normally, causing `runComponent("projects-marker", ...)` to mark the component ready. It also accepted an existing non-file `.nomedia` path.
+- Roadmap-first finding: commit `765be7e2e715c4c5f9f4885cfa821d2f9abf8f0d`. Source correction: commit `e9e97429dd559b6469e290658067f24497e95036`. Roadmap execution record: commit `159f2ee101d8bf2a5b6723534d2ba23423c71498`.
+- The method now accepts an existing marker only if it is a regular file; unexpected paths are left untouched and reported as failure. Failed creation throws a diagnostic exception so component readiness is accurate.
+- Source review only; no build, tests, Actions, or device validation was performed. Continue Phase 2 repository-wide identity/source-reference audit and Phase 3 review of remaining setup component contracts. Do not run verification until the roadmap gate explicitly permits it.
