@@ -483,4 +483,9 @@ Dernier projet ouvert : \n%s</string>
   <string name="summary_open_source_licenses">View open source licenses.</string>
   <string name="idepref_jdkVersion_title">JDK version</string>
   <string name="idepref_jdkVersion_summary">Currently selected: %1$s (requires restart if changed)</string>
+
+    <string name="runtime_setup_failed_title">La configuration de l’environnement nécessite une intervention</string>
+    <string name="runtime_setup_failed_message">Certains composants intégrés de l’environnement n’ont pas pu être préparés. La compilation de projets peut échouer tant que la configuration n’est pas réparée. Réessayez maintenant ou continuez à utiliser MStudio et réessayez plus tard.</string>
+    <string name="runtime_setup_retry">Réessayer la configuration</string>
+    <string name="runtime_setup_later">Plus tard</string>
 </resources>
