@@ -427,3 +427,10 @@ Additional Phase 2 update:
 - All 13 resource files were re-fetched and both labels confirmed after the edits. This is a content-level check only; XML/resource compilation and the online contributors screen remain unverified.
 - Locale commits are recorded in `MSTUDIO_ROADMAP.md` under “Phase 2 contributor provenance labels”.
 - No build, test, workflow dispatch, Actions run, or device validation was performed.
+
+### Phase 2 About copy consistency — 2026-10-12
+
+- Roadmap-first task was recorded in commit `cf42fae978e51d85f62a3c9d753b1f9e0e7628bd`; the execution log is in roadmap commit `1b49114021c48e15cf015fc06fca6fd9948a34ff`.
+- Localized the About section header from “Socials” to “Project links” because its only current item is the MStudio repository. Reworded the contributors summary to reflect both MStudio GitHub contributors and upstream AndroidIDE translators.
+- Updated English and all 12 maintained locale resources; exact commits are listed in `MSTUDIO_ROADMAP.md`. Re-fetched all 13 resource files and verified both strings. No resource build or device UI test was run.
+- No build, tests, workflow dispatch, or Actions run was launched.
