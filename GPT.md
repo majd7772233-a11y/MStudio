@@ -355,3 +355,10 @@ Additional Phase 2 update:
 
 - Roadmap updated first in commit `b9e161a71886f09015a3deb4be6f739c9bde2624`.
 - `ToolsManager.isUsableJava()` currently checks that `java -version` exits zero and writes non-empty output, but does not parse the version. Strengthen it to parse the reported major version and require Java 17+; legacy `1.8.x` must parse as major 8 and fail. Preserve timeout/process cleanup. Do not run build/Actions yet.
+
+
+### Phase 3 managed Java version check implemented — 2026-10-12
+
+- Roadmap updated first in commit `b66fdfb8d82e8333e9f7bf2bc624cef89dd3a5f4`.
+- Commit `48d6c4ea092d93953952a72081ddc3d7a9b75360` changes `isUsableJava()` to parse the version string and require major version >=17; legacy `1.8.x` is interpreted as 8 and rejected. The five-second timeout and cleanup remain.
+- A simple pattern sanity check covered OpenJDK 21, Java 17, and Java 8 output strings. This does not prove Java compilation or actual managed-runtime behavior; no build/tests/Actions were run.
