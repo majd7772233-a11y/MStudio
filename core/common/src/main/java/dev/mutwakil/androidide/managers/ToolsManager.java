@@ -44,7 +44,6 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 
-import kotlin.io.ConstantsKt;
 import kotlin.io.FilesKt;
 
 public class ToolsManager {
@@ -208,14 +207,54 @@ public class ToolsManager {
       final var nativeLibraryDir = context.getApplicationInfo().nativeLibraryDir;
       final var sourceAapt2 = new File(nativeLibraryDir, "libaapt2.so");
       if (sourceAapt2.exists() && sourceAapt2.isFile()) {
-        FilesKt.copyTo(sourceAapt2, Environment.AAPT2, true, ConstantsKt.DEFAULT_BUFFER_SIZE);
+        copyFileAtomically(sourceAapt2, Environment.AAPT2);
       } else {
-        LOG.error("{} file does not exist! This can be problematic.", sourceAapt2);
+        throw new IllegalStateException(
+            "AAPT2 binary is missing from the app's native library directory: " + sourceAapt2);
       }
     }
 
+    if (!Environment.AAPT2.isFile() || Environment.AAPT2.length() == 0) {
+      throw new IllegalStateException("AAPT2 binary is missing or empty: " + Environment.AAPT2);
+    }
     if (!Environment.AAPT2.canExecute() && !Environment.AAPT2.setExecutable(true)) {
-      LOG.error("Cannot set executable permissions to AAPT2 binary");
+      throw new IllegalStateException(
+          "Cannot set executable permissions to AAPT2 binary: " + Environment.AAPT2);
+    }
+  }
+
+  private static void copyFileAtomically(File source, File destination) {
+    final File parent = destination.getParentFile();
+    if (parent == null || (!parent.isDirectory() && !parent.mkdirs() && !parent.isDirectory())) {
+      throw new IllegalStateException("Unable to create AAPT2 destination directory: " + parent);
+    }
+
+    final File temporary = new File(parent, destination.getName() + ".tmp");
+    try {
+      Files.copy(source.toPath(), temporary.toPath(), StandardCopyOption.REPLACE_EXISTING);
+      if (!temporary.isFile() || temporary.length() == 0) {
+        throw new IOException("Copied AAPT2 binary is empty");
+      }
+
+      try {
+        Files.move(
+            temporary.toPath(),
+            destination.toPath(),
+            StandardCopyOption.REPLACE_EXISTING,
+            StandardCopyOption.ATOMIC_MOVE);
+      } catch (AtomicMoveNotSupportedException unsupported) {
+        Files.move(
+            temporary.toPath(),
+            destination.toPath(),
+            StandardCopyOption.REPLACE_EXISTING);
+      }
+    } catch (IOException error) {
+      throw new IllegalStateException(
+          "Failed to extract AAPT2 binary from " + source + " to " + destination, error);
+    } finally {
+      if (temporary.exists() && !temporary.delete()) {
+        LOG.warn("Unable to remove temporary AAPT2 binary: {}", temporary);
+      }
     }
   }
 
