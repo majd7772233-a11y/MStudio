@@ -657,3 +657,10 @@ This section summarizes the latest state after the bundled-JAR readiness change.
 
 - Live `ToolsManager.writeNoMediaFile()` logs an error when it cannot create the projects `.nomedia` marker, but returns normally. The enclosing `runComponent("projects-marker", ...)` therefore adds `projects-marker` to `readyComponents` even after marker creation failed. An existing non-file path at `.nomedia` is also treated as success because only `exists()` is checked.
 - Before source change, make this component fail explicitly when the marker path is not a regular file or cannot be created. Do not delete or replace an unexpected existing path because it could contain user data. This is setup-status accuracy only; no build/tests/Actions are authorized yet.
+
+
+## Execution update — Phase 3 project marker readiness correction (2026-10-12)
+
+- Implemented in `ToolsManager.writeNoMediaFile()` at source commit `e9e97429dd559b6469e290658067f24497e95036` after recording the finding in roadmap commit `765be7e2e715c4c5f9f4885cfa821d2f9abf8f0d`.
+- A pre-existing `.nomedia` path is accepted only when it is a regular file. If the path is a directory or another non-file, initialization reports a component failure and leaves that path untouched. If marker creation fails, the method now throws a diagnostic exception instead of logging and returning success, so `runComponent()` cannot incorrectly add `projects-marker` to the ready set.
+- Re-fetch the exact source and roadmap to verify the committed contents. Source-level review only; no build, tests, Actions, or device validation was performed.
