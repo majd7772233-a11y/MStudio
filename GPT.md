@@ -119,3 +119,8 @@ Before the initial documentation commit:
 - Roadmap execution record committed in 656a2d777d0e1f4f06edc296bd1303a41a5a6031; renamed MSTUDIO_ROADMAP to MSTUDIO_ROADMAP.md in commits 237ceb84319534ea618504c9223313765d8e78de and c1c4c640ba63830ac5cf35740ef4eacbc2f7bc0f. This fixes the mismatch with references in this file.
 - Re-fetch the live workflow/roadmap and inspect the Actions run for parser/runtime feedback. No successful build, Maven publication or device test is claimed.
 - Next roadmap task: Phase 0.3 signing audit (core/app/dev.keystore, core/app/build.gradle.kts, gradle.properties, .nyx.yml, and all signing consumers). Do not expose keystore bytes or secrets in notes.
+
+
+### Source-state correction — submodule declaration mismatch (2026-10-12)
+
+- `.gitmodules` declares `composite-builds/external/logback-android`, but GitHub's contents endpoint returns a normal directory listing for that path rather than a submodule entry. Treat this as a source-tree/declaration inconsistency to resolve in Phase 0.1/0.4. Do not assert that recursive submodule checkout has been proven. No Actions run was returned by the accessible workflow-run query after the guard commit, so CI parser/build validation remains unverified.
