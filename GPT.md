@@ -111,19 +111,19 @@ Before the initial documentation commit:
 - First code task recommended: secure CI publication/signing defaults, then baseline CI and APK smoke test before rebrand or feature port.
 
 
-## Execution log — 2026-10-12 (Phase 0.1 and 0.2)
+## Execution log — 2026-10-12 (Phase 1.1 and 0.2)
 
 - Rechecked latest branch dev and roadmap before acting. Initial HEAD was ccd8b4c9abbcebe8fe72700120af93053e6504da (edit Build.yml); its change removed global Maven credentials but left snapshot publishing ungated.
 - Rechecked root Gradle settings/build files, wrapper, version catalog, daemon JVM properties, .gitmodules, both workflow files, app Gradle config, manifest and .nyx.yml. Confirmed wrapper Gradle 8.14.4, JDK 21 daemon, AGP 8.13.2, Kotlin 2.3.21, Tooling API 9.7.0, and the declared logback-android submodule. Remote inspection does not prove the submodule was initialized in a runner.
-- Phase 0.2 fix committed as 63ae9aa0d9bac985b5efc6869069826b04af7a97: publish and publish_snapshots now require separate opt-in repository variables, strict AndroidIDE-Dev/AndroidIDE allowlisting, intended branches and successful prerequisite jobs. Maven Central credentials exist only in the specific publishing-step environments, not global workflow env. The MStudio fork cannot enter either publish job even if its variables are enabled.
+- Phase 1.2 fix committed as 63ae9aa0d9bac985b5efc6869069826b04af7a97: publish and publish_snapshots now require separate opt-in repository variables, strict AndroidIDE-Dev/AndroidIDE allowlisting, intended branches and successful prerequisite jobs. Maven Central credentials exist only in the specific publishing-step environments, not global workflow env. The MStudio fork cannot enter either publish job even if its variables are enabled.
 - Roadmap execution record committed in 656a2d777d0e1f4f06edc296bd1303a41a5a6031; renamed MSTUDIO_ROADMAP to MSTUDIO_ROADMAP.md in commits 237ceb84319534ea618504c9223313765d8e78de and c1c4c640ba63830ac5cf35740ef4eacbc2f7bc0f. This fixes the mismatch with references in this file.
 - Re-fetch the live workflow/roadmap and inspect the Actions run for parser/runtime feedback. No successful build, Maven publication or device test is claimed.
-- Next roadmap task: Phase 0.3 signing audit (core/app/dev.keystore, core/app/build.gradle.kts, gradle.properties, .nyx.yml, and all signing consumers). Do not expose keystore bytes or secrets in notes.
+- Next roadmap task: Phase 1.3 signing audit (core/app/dev.keystore, core/app/build.gradle.kts, gradle.properties, .nyx.yml, and all signing consumers). Do not expose keystore bytes or secrets in notes.
 
 
 ### Source-state correction — submodule declaration mismatch (2026-10-12)
 
-- `.gitmodules` declares `composite-builds/external/logback-android`, but GitHub's contents endpoint returns a normal directory listing for that path rather than a submodule entry. Treat this as a source-tree/declaration inconsistency to resolve in Phase 0.1/0.4. Do not assert that recursive submodule checkout has been proven. No Actions run was returned by the accessible workflow-run query after the guard commit, so CI parser/build validation remains unverified.
+- `.gitmodules` declares `composite-builds/external/logback-android`, but GitHub's contents endpoint returns a normal directory listing for that path rather than a submodule entry. Treat this as a source-tree/declaration inconsistency to resolve in Phase 1.1/0.4. Do not assert that recursive submodule checkout has been proven. No Actions run was returned by the accessible workflow-run query after the guard commit, so CI parser/build validation remains unverified.
 
 
 ## 2026-10-12 engineering update — signing remediation and MStudio identity kickoff
@@ -135,19 +135,19 @@ Signing findings:
 - `SigningConfigPlugin.kt` uses `IDE_SIGNING_ALIAS`, `IDE_SIGNING_STORE_PASS`, and `IDE_SIGNING_KEY_PASS`; it applies its common signing config only if the keystore and all three values exist.
 - `SigningKeyUtils.kt` can load the key from `IDE_SIGNING_KEY_BIN` or download it using `IDE_SIGNING_URL` plus auth env/properties. Never log or display key bytes.
 - Removed committed placeholder signing defaults and tracked keystores; added ignore rules. Git history remains intact, so the inherited key is treated as compromised and must not be reused. Release signing is not configured or validated yet; do not claim a release artifact is signed.
-- Do not run Actions/build during these source phases. Phase 0.4 remains deferred until after deeper code work.
+- Do not run Actions/build during these source phases. Phase 1.4 remains deferred until after deeper code work.
 
 Identity changes:
 - Launcher label and `BuildConfig.INTERNAL_NAME` now say `MStudio`; Gradle root project name is `MStudio`.
 - Package/namespace/application ID remain unchanged at `dev.mutwakil.androidide`.
 - Nyx release metadata now points at `majd7772233-a11y/MStudio` and uses MStudio asset names.
-- Phase 1 is still in progress: inspect/update remaining About/help/onboarding strings, icon/splash visuals, README/user-visible references, and inherited attribution before calling the rebrand complete.
+- Phase 2 is still in progress: inspect/update remaining About/help/onboarding strings, icon/splash visuals, README/user-visible references, and inherited attribution before calling the rebrand complete.
 
 
-Additional Phase 1 update:
+Additional Phase 2 update:
 - README heading, repo badges, issue links, Actions/artifact/release destinations and contact links now refer to MStudio. It explicitly warns that MStudio is work-in-progress and that inherited AndroidIDE documentation may not match.
 - Original GPL attribution and upstream acknowledgements were preserved.
-- The current app resources directory does not contain a tracked `mipmap/` or `drawable/` root; the manifest references `@mipmap/ic_launcher`, so icon/splash assets likely come from another generated/external resource path. Trace that path before replacing icons. About screen still uses inherited project metadata and must be audited before Phase 1 is complete.
+- The current app resources directory does not contain a tracked `mipmap/` or `drawable/` root; the manifest references `@mipmap/ic_launcher`, so icon/splash assets likely come from another generated/external resource path. Trace that path before replacing icons. About screen still uses inherited project metadata and must be audited before Phase 2 is complete.
 
 
 ## Latest execution update — 2026-10-12
@@ -155,14 +155,29 @@ Additional Phase 1 update:
 - Current app ID is now `com.magd.mstudio` in `core/app/build.gradle.kts`. This is intentionally the only package identity change: keep namespace and implementation packages at `dev.mutwakil.androidide` for now.
 - Signing workflow now uses existing GitHub Secrets `MY_KEYSTORE_JKS`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, and `KEY_PASSWORD`, mapped to the inherited Gradle plugin's expected environment variable names. The keystore secret is expected to be Base64-encoded. Release builds fail early when a required secret is absent or the encoded keystore is invalid; debug build steps do not receive release signing secrets.
 - Automatic push builds on `dev` are paused; explicit workflow dispatch is retained for the later baseline stage. Do not manually run build/Actions yet.
-- Phase 2 source change: `ToolsManager` now extracts the Gradle plugin JAR, Tooling API JAR, Kotlin download script, and missing `android.jar` through a temporary file and replace-after-success move, preserving existing destination files when copying fails.
+- Phase 3 source change: `ToolsManager` now extracts the Gradle plugin JAR, Tooling API JAR, Kotlin download script, and missing `android.jar` through a temporary file and replace-after-success move, preserving existing destination files when copying fails.
 - No build/test/Actions verification has been performed. These changes are committed source work, not verified runtime behavior. Remaining: About/help and icon/splash audit, then AAPT2/color-scheme/readiness/recovery work before baseline verification.
 
 
-### Phase 2 follow-up
+### Phase 3 follow-up
 
 - AAPT2 now uses temporary-file extraction and replace-after-success, validates that the destination is a non-empty file, and reports missing source or failed executable permissions as setup errors.
 - Device/build verification remains intentionally deferred. Existing corrupt AAPT2 files and color-scheme directory updates still need dedicated repair handling.
 
 
 **Important application-ID caveat:** The manifest's documents provider still uses the hard-coded authority `dev.mutwakil.androidide.documents`. Since the current scope changes only `applicationId`, this authority was deliberately not renamed; it may conflict with an installed upstream AndroidIDE. Do not claim side-by-side installation compatibility until the authority is reviewed and both install scenarios are tested.
+
+
+## 2026-10-12 — roadmap numbering and Phase 2/3 source update
+
+- The roadmap is now numbered sequentially from Phase 1 through Phase 12. The former Phase 0 is Phase 1; former Phase 1 is Phase 2; former Phase 2 is Phase 3; later phases move up by one. Substeps are nested under whole-number phases (for example 3.1–3.5). When continuing work, read the live roadmap first and execute the next two whole phases in order; if a requested change is not planned, add it to the roadmap before implementing it.
+- Branch: `dev`. Most recent source changes in this batch:
+  - `878fe9176dafb4e130dc80f3a1ca6e55c1c78113`: About screen no longer points to inherited AndroidIDE email/Telegram channels; website opens the MStudio repository.
+  - `aedc4306896161848518b56059bc4e59ff38443d`: contribution action links to the existing MStudio repository CONTRIBUTING path.
+  - `8e4d4c49e1b50f1149843743e5643c433887430a` and `a4297661e7c9667c6d3291d8f01605e5c01ecc68`: color schemes are staged and swapped after successful extraction; interrupted swaps restore the previous backup.
+  - `6f25e854829c29de71c06741341133adfc12268d`: ToolsManager exposes immutable per-component readiness via `InitResult`/`initWithResult`, reports unsupported ABI as a failure, and validates/repairs an invalid Android API stub JAR.
+- Runtime limitations still open: existing callers still use the legacy Runnable overload, so per-component status is not yet presented in onboarding/retry UI; non-empty but broken AAPT2 needs invocation-level validation; JDK selection/execution and device recovery cases remain unverified.
+- Phase 2 remains in progress because launcher icon/splash resource origin and inherited onboarding/help strings need a full audit. The About links now use verified repository destinations. Preserve GPL/upstream attribution.
+- Phase 3 remains in progress until readiness reaches user-facing setup/retry flows, AAPT2 execution validation is implemented, and setup recovery is tested. Source edits alone are not proof of runtime behavior.
+- Current application ID: `com.magd.mstudio`. Keep `namespace` and implementation package at `dev.mutwakil.androidide` unless a separate planned migration authorizes more. DocumentsProvider authority `dev.mutwakil.androidide.documents` is still a side-by-side installation risk; do not claim compatibility without installation tests.
+- Do not launch builds, tests, workflow dispatches or GitHub Actions during source phases. Phase 1 baseline CI and device smoke testing remain deferred until the planned verification point. Signing secrets remain `MY_KEYSTORE_JKS`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, and `KEY_PASSWORD`; never print their values.
