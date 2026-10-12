@@ -602,3 +602,10 @@ The following entries above record what was discovered at the time; use these li
 
 - Source audit found `android.jar` is checked with `JarFile`, but the extracted Gradle plugin JAR and Tooling API JAR are only checked for non-empty copy success. A truncated or malformed packaged/runtime JAR could therefore be reported as ready and fail later during sync/build.
 - Reuse the existing ZIP/JAR validation helper for these two destinations after atomic extraction, and make the helper's diagnostic generic rather than claiming every invalid archive is the Android API stub. Do not change the Gradle Tooling API architecture or the JAR contents in this task.
+
+## Execution update — Phase 3 bundled JAR readiness checks (2026-10-12)
+
+- Roadmap-first finding was recorded in commit `6f8c802c8394854201a7f7e269c715afe354d77b`.
+- Commit `0e5c63db1aafc16cf5b51b229297a7730453de19` now validates the extracted Gradle plugin JAR and Tooling API JAR with the existing `JarFile`-based helper after their atomic copies. Malformed/empty files are no longer marked ready merely because a non-empty copy completed; component failures will appear in `InitResult`.
+- Generalized the JAR validation warning so it no longer incorrectly describes every invalid JAR as the Android API stub. The actual `android.jar` validation remains in place.
+- Re-fetched the source after the change and confirmed both extraction paths call the shared validator and include component-specific failure messages. Source-level verification only; no build, test, JAR invocation, Actions run, or device validation.
