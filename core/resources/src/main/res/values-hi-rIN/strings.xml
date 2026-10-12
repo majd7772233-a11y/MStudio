@@ -4,16 +4,16 @@
   <string name="copy" tools:override="true">कॉपी</string>
   <string name="terminal_more">अधिक विकल्प…</string>
   <string name="text_to_search">खोजने के लिए पाठ</string>
-  <string name="about_option_email">GitHub पर समस्या रिपोर्ट करें</string>
+   <string name="about_option_email">GitHub पर समस्या रिपोर्ट करें</string>
   <string name="about_option_website">वेबसाइट</string>
   <string name="about_footer">%2$s के लिए MStudio %1$s</string>
   <string name="about_subtitle">बस, एक आईडीई एंड्रॉयड के लिए</string>
   <string name="msg_get_package_failed">पैकेज का नाम निकालने में विफल रहे !</string>
-  <string name="msg_need_help">MStudio का उपयोग करने या Android ऐप बनाने में समस्या हो तो MStudio के GitHub Issues पर रिपोर्ट करें या सुधार का सुझाव दें।</string>
+   <string name="msg_need_help">MStudio का उपयोग करने या Android ऐप बनाने में समस्या हो तो MStudio के GitHub Issues पर रिपोर्ट करें या सुधार का सुझाव दें।</string>
   <string name="need_help">मदद की ज़रूरत है?</string>
   <string name="ide_preferences">IDE प्रेफरेंसेस</string>
-  <string name="discussions_on_telegram">GitHub पर समस्या रिपोर्ट करें</string>
-  <string name="official_tg_channel">MStudio GitHub Repository</string>
+   <string name="discussions_on_telegram">GitHub पर समस्या रिपोर्ट करें</string>
+   <string name="official_tg_channel">MStudio GitHub Repository</string>
   <string name="msg_empty_view">कोई डेटा नहीं</string>
   <string name="title_terminal">टर्मिनल</string>
   <string name="reset">रिसेट</string>
@@ -471,7 +471,7 @@
   <string name="title_unsupported_user">असमर्थित उपयोगकर्ता</string>
   <string name="title_socials">सामाजिक संपर्क</string>
   <string name="title_contributors">योगदानकर्ता</string>
-  <string name="summary_contributors">उस मूल AndroidIDE परियोजना के योगदानकर्ताओं का श्रेय, जिस पर MStudio आधारित है।</string>
+   <string name="summary_contributors">उस मूल AndroidIDE परियोजना के योगदानकर्ताओं का श्रेय, जिस पर MStudio आधारित है।</string>
   <string name="title_github_contributors">GitHub योगदानकर्ता</string>
   <string name="title_crowdin_translators">Crowdin अनुवादक</string>
   <string name="title_misc">विविध लिंक</string>
