@@ -487,3 +487,11 @@ The following entries above record what was discovered at the time; use these li
 ### Phase 2 README feature-claim qualification — 2026-10-12
 
 - The README feature checklist is inherited from the source project and currently uses checked boxes that could be mistaken for verified MStudio runtime behavior. Add a concise note clarifying that the list describes features present in source and that device/build compatibility remains subject to the roadmap's evidence gate. Do not remove useful feature documentation or imply every feature has passed smoke tests.
+
+
+## Execution update — README verification caveat and post-edit source check (2026-10-12)
+
+- README now explicitly distinguishes source feature checkboxes from verified device/runtime behavior; commit `cfdbf2f24c04ff71ec73a22938fde49c5ac224fc`.
+- Post-edit fetch confirmed README no longer contains the old AndroidIDE docs/Telegram/Crowdin/F-Droid/package-ID/site destinations; it references `images/mstudio-icon.svg`, and the feature-verification caveat is present.
+- Post-edit fetch confirmed About's repository action uses `R.drawable.ic_github`, the new SVG exists, and Arabic/Spanish footers plus French unsupported-device and Turkish contribute text now use MStudio.
+- These checks verify file contents only. They are not Android resource compilation, APK installation, runtime, or device evidence.
