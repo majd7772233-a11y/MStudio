@@ -324,7 +324,7 @@ Before wiring readiness into onboarding, inspect the actual application startup 
 - Android API stub extraction now validates that `android.jar` is a readable non-empty JAR and atomically repairs missing/empty/invalid files while refusing to delete an unexpected directory.
 - AAPT2 extraction runs the bundled binary's `version` command with a five-second timeout, replaces missing/empty/non-executable/broken destinations from the packaged native library, and fails setup clearly if the replacement is still unusable.
 - Color-scheme updates now stage a complete directory, validate `scheme.prop`, swap only after successful extraction, and recover a prior backup after an interrupted swap. Version-read errors now schedule repair rather than incorrectly treating the installed scheme as valid.
-- Remaining Phase 3 work: connect per-component readiness to user-visible onboarding/retry UX and a genuine retry action; audit concurrent/repeated initialization and deterministic staging names; complete offline/interruption/low-storage/device tests. JDK and AAPT2 invocation checks are implemented in source but remain unverified on-device.
+- Remaining Phase 3 work: connect per-component readiness to a lifecycle-safe, user-visible runtime status/retry surface (the existing onboarding wizard handles separate SDK/JDK installation); make initialization single-flight and audit deterministic staging names for races; complete offline/interruption/low-storage/device tests. JDK and AAPT2 invocation checks are implemented in source but remain unverified on-device.
 
 Commits for this batch:
 - `878fe9176dafb4e130dc80f3a1ca6e55c1c78113` — About destinations use the MStudio repository.
@@ -361,3 +361,11 @@ No build, test task, workflow dispatch or Actions run was launched. Phase 1 base
 
 - `utilities/build-info/build.gradle.kts` generates runtime `BuildInfo.java` from `ProjectConfig.kt`. The live `ProjectConfig.kt` still hard-codes `REPO_OWNER = AndroidIDE-Dev`, `REPO_NAME = AndroidIDE`, and `PROJECT_SITE = https://m.androidide.com`. This means changelog links and any consumer of generated `BuildInfo.REPO_URL`/`PROJECT_SITE` can still send users to upstream despite the About screen's hard-coded MStudio URL.
 - Phase 2 must update `ProjectConfig.kt` to the verified MStudio repository identity while preserving Maven group IDs and upstream license attribution. Inspect all uses of generated `BuildInfo` fields and distinguish MStudio repository destinations from any upstream attribution links.
+
+
+### Phase 3 implementation plan — runtime readiness surface and single-flight setup (2026-10-12)
+
+- `ToolsManager` should distinguish “not finished yet” from a completed unsupported-ABI or component failure result. Its initial placeholder result must never be shown as a real failure.
+- Keep the existing SDK/JDK onboarding wizard intact. Add a lifecycle-safe observer for `ToolsManager` runtime readiness and show a retryable warning in the main IDE only after runtime initialization completes with failures. Retry must rerun runtime preparation; “Later” must leave the IDE usable without falsely marking tools ready.
+- Serialize runtime initialization so a retry or repeated app entry cannot run two extraction jobs against the same deterministic temporary/backup paths. Publish results to UI observers on the main thread without changing the existing completion callback's thread contract for other callers.
+- This is source implementation only until the planned verification phase; no build, test or Actions run is allowed during this work batch.
