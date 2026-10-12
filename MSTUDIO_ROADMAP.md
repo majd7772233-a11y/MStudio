@@ -61,7 +61,7 @@ Record run URL, job IDs, first causal failure, commit SHA, artifact names/ABI an
 ### 1.5 Device smoke test
 Download artifact for a named device ABI. Test installation, app startup, onboarding, permission-denial path, setup status, main screen, project create/open, editor and terminal entry, crash-free navigation. Record Android API, ABI, artifact SHA if available and logs. APK file existence is not install/run success.
 
-**Gate:** no major rebrand, NIDE merge or UI rewrite before safe CI and baseline artifact evaluation.
+**Gate:** broad visual redesign and NIDE merge remain gated until the safe CI and baseline artifact evaluation in this phase. Limited fork-identity fixes needed to avoid misleading users may proceed, but must not alter the build engine.
 
 ## Phase 2 — MStudio identity and user-facing rebrand
 
@@ -303,3 +303,29 @@ Changing `applicationId` does not change hard-coded manifest authorities. The do
 - Replaced the old Phase 0 + Phase 1–11 scheme with a single sequential Phase 1–12 scheme. Previous Phase 0 is now Phase 1; previous Phase 1 is Phase 2; previous Phase 2 is Phase 3; subsequent phases each move up by one. Substeps are scoped under their parent phase (for example 3.1–3.5), never standalone fractional phases.
 - Historical execution records were renumbered to the same scheme. Completion claims remain evidence-based; a source change alone does not complete an acceptance gate.
 - Active implementation order: Phase 2 (identity/rebrand) and Phase 3 (runtime/setup repair). Baseline build/Actions and device testing remain deferred until the roadmap's later verification gate; no build or workflow was launched for this update.
+
+
+## Execution update — 2026-10-12 — Phases 2 and 3 source work
+
+### Phase 2 — identity and user-facing rebrand (in progress)
+
+- Updated `AboutActivity` to remove inherited AndroidIDE email and Telegram destinations. The website action now opens the verified MStudio repository, and the contribution action opens the repository's existing `CONTRIBUTING.md` path.
+- Kept upstream/GPL source attribution intact. Did not invent MStudio email, website or social channels.
+- The application ID remains `com.magd.mstudio`; namespace and implementation packages remain `dev.mutwakil.androidide`. The hard-coded DocumentsProvider authority remains a known risk until the separately planned authority/installation verification is authorized.
+- Phase 2 is not complete: launcher icon/splash asset location has not yet been established, and onboarding/help/user-facing references still need a full source-grounded audit. Do not infer that an icon was changed from the manifest alone.
+
+### Phase 3 — runtime and setup repair (in progress)
+
+- `ToolsManager` now exposes an immutable per-component `InitResult` through `initWithResult`, records successful components and failure messages, and always reports unsupported ABI instead of silently returning without a completion callback. The original Runnable overload remains for existing callers.
+- Android API stub extraction now validates that `android.jar` is a readable non-empty JAR and atomically repairs missing/empty/invalid files while refusing to delete an unexpected directory.
+- AAPT2 extraction repairs missing or zero-byte destinations from the packaged native library and reports invalid paths/permission failures clearly. A non-empty but executable-corrupt AAPT2 still requires invocation-level validation.
+- Color-scheme updates now stage a complete directory, validate `scheme.prop`, swap only after successful extraction, and recover a prior backup after an interrupted swap. Version-read errors now schedule repair rather than incorrectly treating the installed scheme as valid.
+- Remaining Phase 3 work: connect per-component readiness to user-visible onboarding/retry UX, validate non-empty AAPT2 by invocation/version, verify managed JDK selection/execution, and complete offline/interruption/low-storage/device tests. These are not claimed complete without evidence.
+
+Commits for this batch:
+- `878fe9176dafb4e130dc80f3a1ca6e55c1c78113` — About destinations use the MStudio repository.
+- `aedc4306896161848518b56059bc4e59ff38443d` — verified contribution-guide link.
+- `8e4d4c49e1b50f1149843743e5643c433887430a` and `a4297661e7c9667c6d3291d8f01605e5c01ecc68` — atomic color-scheme replacement and interrupted-swap recovery.
+- `6f25e854829c29de71c06741341133adfc12268d` — per-component runtime readiness and Android JAR validation.
+
+No build, test task, workflow dispatch or Actions run was launched. Phase 1 baseline CI and Phase 1 device smoke test remain deferred as requested.
