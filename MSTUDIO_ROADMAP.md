@@ -664,3 +664,17 @@ This section summarizes the latest state after the bundled-JAR readiness change.
 - Implemented in `ToolsManager.writeNoMediaFile()` at source commit `e9e97429dd559b6469e290658067f24497e95036` after recording the finding in roadmap commit `765be7e2e715c4c5f9f4885cfa821d2f9abf8f0d`.
 - A pre-existing `.nomedia` path is accepted only when it is a regular file. If the path is a directory or another non-file, initialization reports a component failure and leaves that path untouched. If marker creation fails, the method now throws a diagnostic exception instead of logging and returning success, so `runComponent()` cannot incorrectly add `projects-marker` to the ready set.
 - Re-fetch the exact source and roadmap to verify the committed contents. Source-level review only; no build, tests, Actions, or device validation was performed.
+
+
+## Phase 2/3 final source-audit findings — 2026-10-12
+
+### Phase 2 — translated setup/help copy still inconsistent
+
+- The 13 maintained core/resources string sets still have locale-specific msg_install_tools copy that either links to the README twice, uses generic inherited “IDE” wording, or has a malformed/empty second anchor. That second destination must be the verified MStudio GitHub Issues page, not a duplicate documentation link. The Arabic locale also retains several untranslated English messages in the setup/device-warning and contribution copy. Fix the narrowly scoped user-facing copy while preserving each locale's language, resource IDs, placeholders and upstream contributor attribution. Keep the app ID/namespace/provider boundary unchanged.
+
+### Phase 3 — init-script writes can leave partial files
+
+- ToolsManager.writeInitScript() writes init.gradle.bak and, when absent, init.gradle directly via FilesKt.writeText. A process interruption or storage failure can leave a truncated file; because the next initialization checks only exists(), a partial init.gradle can be accepted as ready and never repaired. Existing user init.gradle content must remain untouched. Stage writes to sibling temporary files, sync and replace only after a successful write; reject a non-regular or empty existing init script without overwriting it. The backup remains a packaged-default copy, not a previous-version migration marker.
+- deleteIdeenv() currently logs deletion failure but returns normally, so runtime-cleanup is reported ready even if the stale file remains. Decide/implement explicit best-effort cleanup semantics so a non-critical cleanup failure does not falsely imply runtime readiness or block otherwise usable runtime components.
+
+No build, tests, workflow dispatch, Actions run or device validation is authorized during this source-audit work. Record implementation evidence and remaining verification limits after fixes.
