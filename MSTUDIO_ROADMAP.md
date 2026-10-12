@@ -551,3 +551,9 @@ The following entries above record what was discovered at the time; use these li
 - Phase 2 is substantially rebranded in source and documentation, but remains unverified: finish the remaining user-facing source-reference sweep, then wait for the later build/device gate before claiming the full product flow.
 - Phase 3 now includes per-component `ToolsManager.InitResult`, MainActivity retry UI/lifecycle cleanup, atomic extraction repairs, JAR/AAPT2/managed-Java checks, and Java 17+ parsing that avoids Java 11-only `Files.readString`. Remaining work is source audit of all setup dependencies and recovery semantics plus offline/interruption/low-storage/ABI/device validation at the authorized verification phase.
 - Do not run builds, tests, workflow dispatches or Actions until the roadmap explicitly reaches the verification gate.
+
+### Phase 3 source-audit follow-up — stale init script and AAPT2 identity check (2026-10-12)
+
+- Source inspection found `ToolsManager.writeInitScript()` rewrites `init.gradle.bak` with the packaged contents on every initialization but only writes `init.gradle` when it does not exist. Consequently, a valid but outdated init script can survive an app upgrade indefinitely. Confirm whether this file is user-editable before changing update semantics; preserve a recoverable previous copy and avoid overwriting unrelated custom content blindly.
+- `isUsableAapt2()` currently accepts any executable that exits zero and prints any non-empty output for the `version` argument. Strengthen the check to require recognizable AAPT2 version output, without assuming a specific version string, and preserve timeout/process cleanup.
+- Before implementing, inspect all references to `Environment.INIT_SCRIPT` and any UI or documentation that might promise user edits persist. Do not run build/tests/Actions; these are Phase 3 source corrections, not verification.
