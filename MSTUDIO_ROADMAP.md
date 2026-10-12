@@ -446,3 +446,8 @@ No build, test task, workflow dispatch or Actions run was launched. Phase 1 base
 - Live-source reconciliation: root `settings.gradle.kts` already names the root project `MStudio`; `ProjectConfig.kt` already targets the MStudio repository; `CONTRIBUTING.md` is already fork-adapted; active adaptive launcher/splash resources already use the MStudio vector; `styles.xml` no longer contains the previously reported stray `XZ`; and shared terminal error strings already use MStudio. Earlier discovery notes describing those as still outstanding are historical and superseded by this execution correction.
 - Still preserve AndroidIDE names where required for upstream attribution, GPL notice, implementation package/path identifiers, and genuine third-party references. The README edits do not establish release readiness or device compatibility.
 - No build, test task, workflow dispatch or Actions run was launched.
+
+
+### Phase 2 About icon consistency — 2026-10-12
+
+- The About action now correctly says “GitHub Repository” and opens the MStudio repository, but its icon resource is still `R.drawable.ic_website`. A verified shared `R.drawable.ic_github` exists in `core/resources/src/main/res/drawable/ic_github.xml`; use that icon for the repository action so its visual affordance matches the destination. This is a source-only branding correction; do not change the contributor action or upstream attribution.
