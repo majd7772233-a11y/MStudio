@@ -379,3 +379,9 @@ Additional Phase 2 update:
 
 - Roadmap updated first in commit `663930148f13b5eb5301c02ab0db040ca324fc4a`.
 - README commit `611ac5872b8b873d1edfc54dc1535b768291efbc` records `com.magd.mstudio` applicationId, retained `dev.mutwakil.androidide` implementation namespace and `dev.mutwakil.androidide.documents` authority, without promising side-by-side installation. Device compatibility remains unverified.
+
+
+### Phase 2 localized donation-label mismatch — 2026-10-12
+
+- Roadmap updated first in commit `0e1004d340395877c1f3d4350ea88c828825eeea`.
+- Default English `btn_donate` already reads “Project repository”, but 12 translated resources still say Donate/Support while the inherited destination now opens MStudio's repository. Localize “Project repository” in all maintained locales so users aren't misled into expecting a payment/donation flow.
