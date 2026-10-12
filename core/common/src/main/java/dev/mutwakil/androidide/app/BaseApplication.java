@@ -21,7 +21,6 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import com.blankj.utilcode.util.ThrowableUtils;
-import dev.mutwakil.androidide.buildinfo.BuildInfo;
 import dev.mutwakil.androidide.common.R;
 import dev.mutwakil.androidide.managers.PreferenceManager;
 import dev.mutwakil.androidide.managers.ToolsManager;
@@ -35,13 +34,13 @@ import java.io.File;
 public class BaseApplication extends Application {
 
   public static final String NOTIFICATION_GRADLE_BUILD_SERVICE = "17571";
-  public static final String TELEGRAM_GROUP_URL = "https://t.me/androidide_discussions";
-  public static final String TELEGRAM_CHANNEL_URL = "https://t.me/AndroidIDEOfficial";
-  public static final String SPONSOR_URL = BuildInfo.PROJECT_SITE + "/donate";
-  public static final String DOCS_URL = "https://docs.androidide.com";
+  public static final String TELEGRAM_GROUP_URL = "https://github.com/majd7772233-a11y/MStudio/issues";
+  public static final String TELEGRAM_CHANNEL_URL = "https://github.com/majd7772233-a11y/MStudio";
+  public static final String SPONSOR_URL = "https://github.com/majd7772233-a11y/MStudio";
+  public static final String DOCS_URL = "https://github.com/majd7772233-a11y/MStudio/blob/dev/README.md";
   public static final String CONTRIBUTOR_GUIDE_URL =
-      BuildInfo.REPO_URL + "/blob/dev/CONTRIBUTING.md";
-  public static final String EMAIL = "contact@androidide.com";
+      "https://github.com/majd7772233-a11y/MStudio/blob/dev/CONTRIBUTING.md";
+  public static final String EMAIL = "";
   private static BaseApplication instance;
   private PreferenceManager mPrefsManager;
 
@@ -77,19 +76,19 @@ public class BaseApplication extends Application {
   }
 
   public void openTelegramGroup() {
-    openTelegram(BaseApplication.TELEGRAM_GROUP_URL);
+    openUrl(BaseApplication.TELEGRAM_GROUP_URL);
   }
 
   public void openTelegramChannel() {
-    openTelegram(BaseApplication.TELEGRAM_CHANNEL_URL);
+    openUrl(BaseApplication.TELEGRAM_CHANNEL_URL);
   }
 
   public void openGitHub() {
-    openUrl(BuildInfo.REPO_URL);
+    openUrl("https://github.com/majd7772233-a11y/MStudio");
   }
 
   public void openWebsite() {
-    openUrl(BuildInfo.PROJECT_SITE);
+    openUrl("https://github.com/majd7772233-a11y/MStudio");
   }
 
   public void openDonationsPage() {
@@ -101,7 +100,8 @@ public class BaseApplication extends Application {
   }
 
   public void emailUs() {
-    openUrl("mailto:" + EMAIL);
+    // MStudio has no published support email; use its public issue tracker instead.
+    openUrl("https://github.com/majd7772233-a11y/MStudio/issues");
   }
 
   public void openUrl(String url) {
