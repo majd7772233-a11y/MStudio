@@ -613,7 +613,31 @@ public class ToolsManager {
         process.waitFor();
         return false;
       }
-      return process.exitValue() == 0 && output.isFile() && output.length() > 0;
+      if (process.exitValue() != 0 || !output.isFile() || output.length() == 0) {
+        return false;
+      }
+
+      final String versionOutput = Files.readString(output.toPath(), StandardCharsets.UTF_8);
+      final var versionMatcher = java.util.regex.Pattern
+          .compile("version\\s+\\\"(?:1\\.)?(\\d+)")
+          .matcher(versionOutput);
+      if (!versionMatcher.find()) {
+        LOG.warn("Managed Java did not report a parseable version: {}", java);
+        return false;
+      }
+
+      try {
+        final int majorVersion = Integer.parseInt(versionMatcher.group(1));
+        if (majorVersion < 17) {
+          LOG.warn("Managed Java version {} is below the required Java 17 baseline: {}",
+              majorVersion, java);
+          return false;
+        }
+        return true;
+      } catch (NumberFormatException invalidVersion) {
+        LOG.warn("Managed Java reported an invalid version: {}", java, invalidVersion);
+        return false;
+      }
     } catch (IOException error) {
       LOG.warn("Unable to execute managed Java version check: {}", java, error);
       return false;
