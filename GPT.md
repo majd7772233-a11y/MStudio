@@ -157,3 +157,9 @@ Additional Phase 1 update:
 - Automatic push builds on `dev` are paused; explicit workflow dispatch is retained for the later baseline stage. Do not manually run build/Actions yet.
 - Phase 2 source change: `ToolsManager` now extracts the Gradle plugin JAR, Tooling API JAR, Kotlin download script, and missing `android.jar` through a temporary file and replace-after-success move, preserving existing destination files when copying fails.
 - No build/test/Actions verification has been performed. These changes are committed source work, not verified runtime behavior. Remaining: About/help and icon/splash audit, then AAPT2/color-scheme/readiness/recovery work before baseline verification.
+
+
+### Phase 2 follow-up
+
+- AAPT2 now uses temporary-file extraction and replace-after-success, validates that the destination is a non-empty file, and reports missing source or failed executable permissions as setup errors.
+- Device/build verification remains intentionally deferred. Existing corrupt AAPT2 files and color-scheme directory updates still need dedicated repair handling.
