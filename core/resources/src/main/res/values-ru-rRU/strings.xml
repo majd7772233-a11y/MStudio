@@ -4,16 +4,16 @@
   <string name="copy" tools:override="true">Копировать</string>
   <string name="terminal_more">Ещё…</string>
   <string name="text_to_search">Текст для поиска</string>
-  <string name="about_option_email">Сообщить о проблеме на GitHub</string>
+   <string name="about_option_email">Сообщить о проблеме на GitHub</string>
   <string name="about_option_website">Вебсайт</string>
   <string name="about_footer">MStudio %1$s для %2$s</string>
   <string name="about_subtitle">Просто IDE для Android</string>
   <string name="msg_get_package_failed">Ошибка распаковки имени пакета!</string>
-  <string name="msg_need_help">Если при использовании MStudio или создании Android-приложений возникли проблемы, сообщите о них или предложите улучшения в GitHub Issues проекта MStudio.</string>
+   <string name="msg_need_help">Если при использовании MStudio или создании Android-приложений возникли проблемы, сообщите о них или предложите улучшения в GitHub Issues проекта MStudio.</string>
   <string name="need_help">Нужна помощь?</string>
   <string name="ide_preferences">Настройки IDE</string>
-  <string name="discussions_on_telegram">Сообщить о проблеме на GitHub</string>
-  <string name="official_tg_channel">Репозиторий MStudio на GitHub</string>
+   <string name="discussions_on_telegram">Сообщить о проблеме на GitHub</string>
+   <string name="official_tg_channel">Репозиторий MStudio на GitHub</string>
   <string name="msg_empty_view">Нет данных</string>
   <string name="title_terminal">Терминал</string>
   <string name="reset">Сброс</string>
@@ -472,7 +472,7 @@
   <string name="title_unsupported_user">Недопустимый пользователь</string>
   <string name="title_socials">Свяжитесь с нами</string>
   <string name="title_contributors">Разработчики</string>
-  <string name="summary_contributors">Благодарность участникам исходного проекта AndroidIDE, на котором основан MStudio.</string>
+   <string name="summary_contributors">Благодарность участникам исходного проекта AndroidIDE, на котором основан MStudio.</string>
   <string name="title_github_contributors">Разработчики на GitHub</string>
   <string name="title_crowdin_translators">Переводчики на Crowdin</string>
   <string name="title_misc">Прочее</string>
