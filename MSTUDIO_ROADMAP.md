@@ -578,3 +578,8 @@ The following entries above record what was discovered at the time; use these li
 - Locale commits: English `0966f9ec26398e550ed6853c1ca120b77d847e90`; Arabic `ad5f3534d0da5d42e22e1e37dbc323822d8b84aa`; Bengali `6cabf99ae1531e1210ffebcc5a60db1e279ef33a`; German `709483750f44cabe7260305b416152db631cb26c`; Spanish `16c0d78c8678449bf0bb89bd0ea3f2ae5f8013f5`; French `178ac3ddbac96273e74e198a26512aca2fb41efc`; Hindi `0240c618160e0586931a8e8afb7575632e1f8cfc`; Indonesian `f3de0d3c8b27057a1c02f7bf8c0607bbecc88ecb`; Portuguese `c8b7204e384d2a500f8ffdd27462a3f960ce89b5`; Romanian `b06a3d2f3088ad7e7e1b762ea821fcca4ff47aa5`; Russian `353c3837c682d0737b68bd0348f500e28ea019e1`; Turkish `025442425f0b576eaa002c6ee8e0ddf32bd78681`; Chinese `eda7e141de59d1c7845fe0079ce8821e180db3f5`.
 - Re-fetched all 13 resource files after writing and confirmed both resource keys now contain the new labels. This verifies text content only, not resource compilation or the network-backed contributor screen at runtime.
 - No build, tests, workflow dispatch, Actions run, or device validation was performed.
+
+### Phase 2 About-screen description consistency — 2026-10-12
+
+- After the contributor provenance fix, the About screen's section header still says “Socials” while the only item is the MStudio GitHub repository. Its contributor summary describes only upstream AndroidIDE credits even though the opened screen contains both MStudio GitHub contributors and upstream AndroidIDE translators.
+- Update the section label to a project-links label and update the contributor summary to name both sources, preserving the upstream attribution and localizing the visible strings consistently across maintained locales. Keep the underlying resource keys stable to avoid unrelated code changes.
