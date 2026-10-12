@@ -235,3 +235,9 @@ Additional Phase 2 update:
 - Roadmap amended first in commit `c57f243a66526e02104ee7d68f7e75186b89c2a0`.
 - A recursive Git tree query found 12 locale-specific `values-*/strings.xml` files. They override many of the English resources, and multiple locales still mention AndroidIDE, upstream Telegram/email support, and docs.androidide.com in user-facing help/setup strings. Editing only the default English resource would therefore leave false destinations visible to users in those locales.
 - Update translated product labels and help text, replace upstream docs URLs with the MStudio README/issues, and change Telegram/email UI labels to GitHub issue/repository destinations. Preserve localized language where practical. Keep contributor credit explicit: MStudio is derived from AndroidIDE, and upstream contributors must not be mislabeled as MStudio contributors.
+
+
+### Phase 3 localization acceptance — 2026-10-12
+
+- Roadmap updated first in commit `2aae1d03141ddb4a803add1ea87a11d551f82886`.
+- The new runtime recovery dialog uses four resource keys (`runtime_setup_failed_title`, `runtime_setup_failed_message`, `runtime_setup_retry`, `runtime_setup_later`) currently present in default English. Add translated values to the maintained locale string files, especially Arabic, so this new UI respects the app's existing localization/RTL support.
