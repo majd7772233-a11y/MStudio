@@ -247,3 +247,26 @@ The user requested that Actions execution and actual builds happen only after su
 ### Phase 1 follow-up — README/source-facing identity
 
 Updated `README.md` title and repository badges/issues/download destinations to MStudio, removed misleading instructions to download upstream AndroidIDE releases as MStudio releases, and labeled the upstream docs/community as inherited references. Preserved the original AndroidIDE GPL attribution and upstream acknowledgements. The launcher icon/splash and About screen destinations are intentionally not declared rebranded yet; their actual asset/configuration sources still need tracing before safe edits.
+
+
+## Execution log — 2026-10-12 (Phase 1 application ID + Phase 2 runtime extraction)
+
+### Phase 1 — application identity and signing workflow
+
+- Set the Android **application ID** in `core/app/build.gradle.kts` to `com.magd.mstudio`.
+- Intentionally left `namespace`, `BuildConfig.PACKAGE_NAME`, Java/Kotlin packages, and existing hard-coded AndroidIDE permission/action/provider identifiers unchanged, as requested. This is an application-ID-only change, not a package migration.
+- Updated `.github/workflows/build.yml` to consume the existing owner-managed GitHub Secrets `MY_KEYSTORE_JKS`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, and `KEY_PASSWORD`. These map to the legacy Gradle plugin environment names expected by the inherited signing plugin. `MY_KEYSTORE_JKS` must contain the Base64-encoded keystore bytes because `SigningKeyUtils` Base64-decodes `IDE_SIGNING_KEY_BIN`.
+- Release signing secrets are scoped to the release build step instead of the workflow globally. A release preflight fails if any required secret is missing or the keystore secret is not valid Base64. Debug builds do not receive release credentials.
+- Removed `dev` from automatic push-build branches so further source commits on `dev` do not launch the APK/test matrix before the user-authorized baseline phase. `workflow_dispatch` remains available; do not manually dispatch it yet.
+- Remaining Phase 1: About/help/social destinations and actual icon/splash assets are not yet fully rebranded. Namespace/manifest authority migration remains deliberately out of scope.
+
+### Phase 2 — runtime extraction safety (initial implementation)
+
+- In `core/common/src/main/java/dev/mutwakil/androidide/managers/ToolsManager.java`, replaced delete-then-copy behavior for the embedded Gradle plugin JAR, Tooling API JAR, Kotlin artifact download script, and missing `android.jar` with a temporary-file extraction helper.
+- The helper writes and syncs a temporary file, rejects empty output, then replaces the destination with an atomic move where supported (with a replace-existing fallback). A failed extraction now preserves the previously working destination instead of deleting it first.
+- This is source-level implementation only. No build, tests, or Actions were run, by design. Later verification must exercise failed/interrupted copy, existing destination preservation, low-storage failure, and successful first-run extraction on a supported device.
+- Further Phase 2 work remains: AAPT2 validation/repair, color-scheme directory replacement, explicit per-tool readiness, and actionable setup recovery.
+
+### Sequencing guard
+
+The user requested that build and Actions verification be deferred until substantial code work is complete. Do not manually start Actions or a build during the current source phases. Phase 0.4 remains deferred.
