@@ -145,7 +145,7 @@ class MainActivity : EdgeToEdgeIDEActivity() {
             return
         }
 
-        val details = result.failures.entries.joinToString("\\n") { (component, reason) ->
+        val details = result.failures.entries.joinToString("\n") { (component, reason) ->
             "$component: $reason"
         }
         if (details == lastRuntimeSetupFailure || runtimeSetupDialog?.isShowing == true) {
@@ -156,7 +156,7 @@ class MainActivity : EdgeToEdgeIDEActivity() {
         val message = buildString {
             append(getString(string.runtime_setup_failed_message))
             if (details.isNotBlank()) {
-                append("\\n\\n")
+                append("\n\n")
                 append(details)
             }
         }
