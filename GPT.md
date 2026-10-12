@@ -255,3 +255,9 @@ Additional Phase 2 update:
 
 - Roadmap updated first in commit `0608fc5b8c04f5bef8d4fd99276c436724bff2a0`.
 - `AboutActivity.kt` opens `PROJECT_URL` at the MStudio GitHub repository, but the resource key `about_option_website` still labels it “Website”. MStudio has no separate website configured in source; change the label to “GitHub Repository” and update translated values where present.
+
+
+### Phase 2 follow-up — About footer localization audit (2026-10-12)
+
+- Roadmap updated first in commit pending from this planning change. Live inspection found `core/resources/src/main/res/values-ar-rSA/strings.xml` uses `أندرويد` in `about_footer`, and `values-es-rES/strings.xml` uses `Android IDE`, even though the product identity is MStudio. Correct these visible strings to MStudio without changing the existing format placeholders.
+- Phase 2 is still in progress: generated `BuildInfo` repository metadata and the broader inherited user-facing reference audit remain outstanding. No build/test/Actions until the explicit verification gate.
