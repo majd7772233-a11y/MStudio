@@ -124,3 +124,21 @@ Before the initial documentation commit:
 ### Source-state correction — submodule declaration mismatch (2026-10-12)
 
 - `.gitmodules` declares `composite-builds/external/logback-android`, but GitHub's contents endpoint returns a normal directory listing for that path rather than a submodule entry. Treat this as a source-tree/declaration inconsistency to resolve in Phase 0.1/0.4. Do not assert that recursive submodule checkout has been proven. No Actions run was returned by the accessible workflow-run query after the guard commit, so CI parser/build validation remains unverified.
+
+
+## 2026-10-12 engineering update — signing remediation and MStudio identity kickoff
+
+Latest verified source HEAD before this batch was `def0aae3f60cc037c65e9ae760ad32f11ef099dc` on `dev`. Rechecked the roadmap and live source before editing.
+
+Signing findings:
+- `composite-builds/build-logic/common/.../config.kt` points to `signing/androidide.keystore`.
+- `SigningConfigPlugin.kt` uses `IDE_SIGNING_ALIAS`, `IDE_SIGNING_STORE_PASS`, and `IDE_SIGNING_KEY_PASS`; it applies its common signing config only if the keystore and all three values exist.
+- `SigningKeyUtils.kt` can load the key from `IDE_SIGNING_KEY_BIN` or download it using `IDE_SIGNING_URL` plus auth env/properties. Never log or display key bytes.
+- Removed committed placeholder signing defaults and tracked keystores; added ignore rules. Git history remains intact, so the inherited key is treated as compromised and must not be reused. Release signing is not configured or validated yet; do not claim a release artifact is signed.
+- Do not run Actions/build during these source phases. Phase 0.4 remains deferred until after deeper code work.
+
+Identity changes:
+- Launcher label and `BuildConfig.INTERNAL_NAME` now say `MStudio`; Gradle root project name is `MStudio`.
+- Package/namespace/application ID remain unchanged at `dev.mutwakil.androidide`.
+- Nyx release metadata now points at `majd7772233-a11y/MStudio` and uses MStudio asset names.
+- Phase 1 is still in progress: inspect/update remaining About/help/onboarding strings, icon/splash visuals, README/user-visible references, and inherited attribution before calling the rebrand complete.
