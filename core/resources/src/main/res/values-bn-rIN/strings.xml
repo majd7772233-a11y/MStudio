@@ -470,9 +470,9 @@
   <string name="msg_terminal_new_sessions_disabled">সেশন তৈরি করা যাবে না। নতুন সেশন তৈরি করা নিষ্ক্রিয়!</string>
   <string name="title_install_location_error">ইনস্টল করার অবস্থানে ত্রুটি</string>
   <string name="title_unsupported_user">অসমর্থিত ব্যবহার</string>
-  <string name="title_socials">সামাজিক মাধ্যম গুলি</string>
+  <string name="title_socials">প্রকল্পের লিংক</string>
   <string name="title_contributors">অবদানকারীরা</string>
-   <string name="summary_contributors">MStudio যে মূল AndroidIDE প্রকল্পের ওপর ভিত্তি করে তৈরি, তার অবদানকারীদের স্বীকৃতি।</string>
+   <string name="summary_contributors">MStudio-এর GitHub অবদানকারী এবং মূল AndroidIDE প্রকল্পের অনুবাদকদের কৃতিত্ব।</string>
   <string name="title_github_contributors">MStudio-এর GitHub অবদানকারীরা</string>
   <string name="title_crowdin_translators">মূল AndroidIDE প্রকল্পের অনুবাদক</string>
   <string name="title_misc">বিবিধ</string>
