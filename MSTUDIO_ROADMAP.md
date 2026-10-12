@@ -355,3 +355,9 @@ No build, test task, workflow dispatch or Actions run was launched. Phase 1 base
 - Shared `core/resources/.../values/strings.xml` still contains AndroidIDE-Dev as the common app name, AndroidIDE in About footer/help copy, Telegram labels, and `msg_install_tools` links to docs.androidide.com. The app-specific app_name override is MStudio, but the common definition should be made consistent.
 - `CONTRIBUTING.md` exists, so the About link is not a 404; however, its body still refers to AndroidIDE, upstream developer docs and upstream Telegram. It must be fork-adapted before it is advertised as MStudio's contribution guide.
 - `OnboardingActivity` currently uses the inherited SDK/JDK terminal setup and only gates completion on installed JDK distributions and `Environment.ANDROID_HOME`; do not conflate that with `ToolsManager` component readiness. Icon/splash source remains untraced.
+
+
+### Phase 2 discovery — generated build metadata still targets upstream (2026-10-12)
+
+- `utilities/build-info/build.gradle.kts` generates runtime `BuildInfo.java` from `ProjectConfig.kt`. The live `ProjectConfig.kt` still hard-codes `REPO_OWNER = AndroidIDE-Dev`, `REPO_NAME = AndroidIDE`, and `PROJECT_SITE = https://m.androidide.com`. This means changelog links and any consumer of generated `BuildInfo.REPO_URL`/`PROJECT_SITE` can still send users to upstream despite the About screen's hard-coded MStudio URL.
+- Phase 2 must update `ProjectConfig.kt` to the verified MStudio repository identity while preserving Maven group IDs and upstream license attribution. Inspect all uses of generated `BuildInfo` fields and distinguish MStudio repository destinations from any upstream attribution links.
