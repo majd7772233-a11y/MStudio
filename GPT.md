@@ -276,3 +276,12 @@ Additional Phase 2 update:
 
 - Roadmap updated first in commit `9f1bb2617a24894350a80d829a7283c448336149`.
 - Additional source audit found French unsupported-device copy still says AndroidIDE and Turkish contribution copy still says Android IDE. These are product-facing strings, unlike legitimate upstream attribution. Correct them to MStudio while preserving the upstream contributor credit and all internal package/path references.
+
+
+### Phase 2 localized copy corrections — 2026-10-12
+
+- Roadmap execution record updated first in commit `a647dcba38210e364b2bbb890025e7484f95c85d`.
+- Arabic and Spanish About footers corrected to MStudio in commits `7d0651d489b9750f825b5e977b8201276ae689f4` and `43799c4ca889988a2a53b7363aa7614c26665fe6`.
+- French unsupported-device message corrected in `a4525ca4c5ca216114e343bfe189f11fbfa9c81c`; Turkish contribution prompt corrected in `72e25fff369bf574ae877aa60e7a91a66a8d3174`.
+- Kept AndroidIDE references where they are accurate upstream attribution and left internal package/path identifiers unchanged. Romanian and Bengali About footers already use MStudio.
+- No build, test, workflow dispatch or Actions run. The Phase 2 sweep remains source-level and not exhaustive until the remaining full-source scan and verification gate.
