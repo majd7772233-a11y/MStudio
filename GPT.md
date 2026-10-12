@@ -148,3 +148,12 @@ Additional Phase 1 update:
 - README heading, repo badges, issue links, Actions/artifact/release destinations and contact links now refer to MStudio. It explicitly warns that MStudio is work-in-progress and that inherited AndroidIDE documentation may not match.
 - Original GPL attribution and upstream acknowledgements were preserved.
 - The current app resources directory does not contain a tracked `mipmap/` or `drawable/` root; the manifest references `@mipmap/ic_launcher`, so icon/splash assets likely come from another generated/external resource path. Trace that path before replacing icons. About screen still uses inherited project metadata and must be audited before Phase 1 is complete.
+
+
+## Latest execution update — 2026-10-12
+
+- Current app ID is now `com.magd.mstudio` in `core/app/build.gradle.kts`. This is intentionally the only package identity change: keep namespace and implementation packages at `dev.mutwakil.androidide` for now.
+- Signing workflow now uses existing GitHub Secrets `MY_KEYSTORE_JKS`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, and `KEY_PASSWORD`, mapped to the inherited Gradle plugin's expected environment variable names. The keystore secret is expected to be Base64-encoded. Release builds fail early when a required secret is absent or the encoded keystore is invalid; debug build steps do not receive release signing secrets.
+- Automatic push builds on `dev` are paused; explicit workflow dispatch is retained for the later baseline stage. Do not manually run build/Actions yet.
+- Phase 2 source change: `ToolsManager` now extracts the Gradle plugin JAR, Tooling API JAR, Kotlin download script, and missing `android.jar` through a temporary file and replace-after-success move, preserving existing destination files when copying fails.
+- No build/test/Actions verification has been performed. These changes are committed source work, not verified runtime behavior. Remaining: About/help and icon/splash audit, then AAPT2/color-scheme/readiness/recovery work before baseline verification.
