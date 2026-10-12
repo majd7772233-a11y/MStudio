@@ -367,3 +367,9 @@ Additional Phase 2 update:
 ### Roadmap numbering history clarified — 2026-10-12
 
 - The old migration paragraph that incorrectly described Phase 0→Phase 1 has been marked as superseded rather than left as an active instruction. The canonical phase structure remains main phases 1–12, with decimal substeps nested under whole-number phases.
+
+
+### Phase 2 package identity disclosure — 2026-10-12
+
+- Roadmap updated first in commit `96bf84407d2bea328d9d8825674c04698fd9004b`.
+- Add an accurate README note that applicationId is `com.magd.mstudio`, implementation namespace remains `dev.mutwakil.androidide`, and the DocumentsProvider authority remains `dev.mutwakil.androidide.documents`. Side-by-side install with upstream AndroidIDE remains unverified and must not be promised.
