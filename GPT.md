@@ -341,3 +341,11 @@ Additional Phase 2 update:
 
 - Roadmap updated first in commit `45d26700014658d7826c111d7b0d14650616ce7a`.
 - README feature checkboxes describe source features, not proof every flow works on MStudio devices. Add an explicit qualifier directing readers to the roadmap for verified status, without removing the useful feature list.
+
+
+### Phase 2 post-edit source checks — 2026-10-12
+
+- Roadmap updated first in commit `4149ab3edb9fa7f7e4686c2b12bb1ac8ee9fc71c`.
+- README caveat commit: `cfdbf2f24c04ff71ec73a22938fde49c5ac224fc`. The README now says feature checkboxes describe source features, not proof of runtime verification.
+- Live refetch confirms outdated AndroidIDE docs/Telegram/Crowdin/F-Droid/package-ID/site destinations are gone, README uses `images/mstudio-icon.svg`, About uses the GitHub icon, and the four targeted locale fixes are present.
+- These are source-content checks only, not XML/resource compilation, APK build, installation, or device validation.
