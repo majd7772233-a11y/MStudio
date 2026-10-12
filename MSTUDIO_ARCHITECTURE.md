@@ -83,13 +83,15 @@ Do not resolve a mismatch by changing all layers at once.
 
 ## 5. Initialization/AAPT2 details
 
-ToolsManager.init asynchronously checks ABI, loads JDK distributions and extracts AndroidIDE Gradle plugin, AAPT2, tooling JAR, android.jar, color schemes, init script and Kotlin-artifact download script. Errors are logged; UI must validate each tool instead of treating callback completion as all-success.
+ToolsManager.init asynchronously checks ABI, loads JDK distributions and extracts the Gradle plugin, AAPT2, tooling JAR, android.jar, color schemes, init script and Kotlin-artifact download script. The new `initWithResult` API exposes an immutable per-component `InitResult` with ready component names and failures; the legacy Runnable overload remains for existing callers, so onboarding has not yet been wired to display those results.
+
+Asset JARs/scripts are staged and replaced only after successful non-empty writes. Android API stub extraction validates the JAR container and repairs missing/empty/invalid files. Color schemes are copied into a staging directory, checked for `scheme.prop`, and swapped with backup recovery for interrupted updates. AAPT2 repairs missing/zero-byte files and checks executable permission, but non-empty binary validity still needs an invocation/version check. These are source-level protections; no device validation has been recorded.
 
 SetupAapt2Task downloads and verifies SHA-256 for ARM64/ARMv7 in inspected source; x86_64 is commented. Maven AAPT2 isn't assumed runnable inside Android; the service passes custom override. Require an actual resource compile/link test for every supported ABI.
 
 ## 6. Current unknowns and risk areas
 
-- Clean CI build and actual device install were not proven by initial source review.
+- Clean CI build and actual device install remain unverified; no build or Actions run was launched during the current source phases.
 - ProjectValidation assumes app module for common projects; nonstandard modules need tests.
 - AndroidProjectModelBuilder has product-flavor classes JAR TODO.
 - GradleBuildService result dispatch must be traced; body appears to trigger indexing refresh only.
@@ -97,7 +99,8 @@ SetupAapt2Task downloads and verifies SHA-256 for ARM64/ARMv7 in inspected sourc
 - UI designer and Compose preview need end-to-end tests.
 - Root heap values are high for lower-memory phones.
 - build.yml publishing needs default-off gating before routine CI.
-- Manifest contains hard-coded namespace permissions/authorities; package rename requires full reference audit.
+- Manifest contains hard-coded namespace permissions/authorities; current applicationId is `com.magd.mstudio`, while namespace/packages remain `dev.mutwakil.androidide`. DocumentsProvider authority still uses `dev.mutwakil.androidide.documents`; side-by-side installation is unverified.
+- About screen website/contribution destinations now point to the MStudio repository and its CONTRIBUTING file; inherited AndroidIDE email and Telegram destinations were removed from that screen.
 - README feature boxes and module presence are not proof of function.
 
 Use MSTUDIO_ROADMAP.md for acceptance gates and GPT.md for append-only engineering findings.
