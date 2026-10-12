@@ -328,3 +328,10 @@ Additional Phase 2 update:
 
 - Roadmap updated first in commit `fa4d45ebeae789c0275326524c1236e51a4f4b86`.
 - Visual inspection of `images/icon.png` found the inherited AndroidIDE robot/braces logo. The actual launcher/splash use the MStudio M monogram. Add a repository-owned SVG that mirrors the active MStudio vector and point README at it; leave the old PNG untouched unless all its uses are audited.
+
+
+### Phase 2 README artwork correction — 2026-10-12
+
+- Roadmap updated first in commit `7ad2662913bb5e2842aaaa918c8bb39092c54f97`.
+- Added `images/mstudio-icon.svg` matching the active MStudio monogram/brand colors (commit `d0ff881b1ff1bd76d6e8d5dc67542d62a56f4d1f`) and changed the README image to it (commit `7f0e379bb272506ef9729004b5c8d7518649b049`).
+- The legacy `images/icon.png` remains untouched pending a full reference audit; only the README display is confirmed rebranded.
