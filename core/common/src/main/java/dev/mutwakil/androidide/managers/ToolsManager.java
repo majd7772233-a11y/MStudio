@@ -31,11 +31,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
@@ -82,21 +87,15 @@ public class ToolsManager {
   }
 
   private static void extractAndroidIdeGradlePlugin() {
-    if (Environment.ANDROIDIDE_GRADLE_PLUGIN_JAR.exists()) {
-      FileUtils.delete(Environment.ANDROIDIDE_GRADLE_PLUGIN_JAR);
-    }
-
-    ResourceUtils.copyFileFromAssets(getCommonAsset("androidide-gradle-plugin.jar"),
-            Environment.ANDROIDIDE_GRADLE_PLUGIN_JAR.getAbsolutePath());
+    copyAssetAtomically(
+        getCommonAsset("androidide-gradle-plugin.jar"),
+        Environment.ANDROIDIDE_GRADLE_PLUGIN_JAR);
   }
   
   private static void extractDownloadKtScript() {
-    if (Environment.DOWNLOAD_KT_SCRIPT.exists()) {
-      FileUtils.delete(Environment.DOWNLOAD_KT_SCRIPT);
-    }
-
-    ResourceUtils.copyFileFromAssets(getCommonAsset("download-kotlin-artifacts.sh"),
-            Environment.DOWNLOAD_KT_SCRIPT.getAbsolutePath());
+    copyAssetAtomically(
+        getCommonAsset("download-kotlin-artifacts.sh"),
+        Environment.DOWNLOAD_KT_SCRIPT);
   }
 
   private static void extractColorScheme(final BaseApplication app) {
@@ -181,11 +180,13 @@ public class ToolsManager {
 
   private static void extractAndroidJar() {
     if (Environment.ANDROID_JAR.isDirectory()) {
-      Environment.ANDROID_JAR.delete();
+      if (!Environment.ANDROID_JAR.delete()) {
+        throw new IllegalStateException(
+            "Unable to replace invalid Android API stub directory: " + Environment.ANDROID_JAR);
+      }
     }
     if (!Environment.ANDROID_JAR.exists()) {
-      ResourceUtils.copyFileFromAssets(getCommonAsset("android.jar"),
-          Environment.ANDROID_JAR.getAbsolutePath());
+      copyAssetAtomically(getCommonAsset("android.jar"), Environment.ANDROID_JAR);
     }
   }
 
@@ -220,12 +221,60 @@ public class ToolsManager {
   }
 
   private static void extractToolingApi() {
-    if (Environment.TOOLING_API_JAR.exists()) {
-      FileUtils.delete(Environment.TOOLING_API_JAR);
+    copyAssetAtomically(
+        getCommonAsset("tooling-api-all.jar"),
+        Environment.TOOLING_API_JAR);
+  }
+
+  /**
+   * Replaces an extracted asset only after its complete contents have been written.
+   * A failed copy must not destroy a previously working runtime/tooling file.
+   */
+  private static void copyAssetAtomically(String assetPath, File destination) {
+    final File parent = destination.getParentFile();
+    if (parent == null && !destination.isAbsolute()) {
+      throw new IllegalStateException("No parent directory for asset destination: " + destination);
+    }
+    if (parent != null && !parent.isDirectory() && !parent.mkdirs() && !parent.isDirectory()) {
+      throw new IllegalStateException("Unable to create asset directory: " + parent);
     }
 
-    ResourceUtils.copyFileFromAssets(getCommonAsset("tooling-api-all.jar"),
-        Environment.TOOLING_API_JAR.getAbsolutePath());
+    final File temporary = new File(parent, destination.getName() + ".tmp");
+    try {
+      try (InputStream input = BaseApplication.getBaseInstance().getAssets().open(assetPath);
+           FileOutputStream output = new FileOutputStream(temporary)) {
+        final byte[] buffer = new byte[8192];
+        int count;
+        while ((count = input.read(buffer)) != -1) {
+          output.write(buffer, 0, count);
+        }
+        output.getFD().sync();
+      }
+
+      if (!temporary.isFile() || temporary.length() == 0) {
+        throw new IOException("Extracted asset is empty: " + assetPath);
+      }
+
+      try {
+        Files.move(
+            temporary.toPath(),
+            destination.toPath(),
+            StandardCopyOption.REPLACE_EXISTING,
+            StandardCopyOption.ATOMIC_MOVE);
+      } catch (AtomicMoveNotSupportedException unsupported) {
+        Files.move(
+            temporary.toPath(),
+            destination.toPath(),
+            StandardCopyOption.REPLACE_EXISTING);
+      }
+    } catch (IOException error) {
+      throw new IllegalStateException(
+          "Failed to extract asset '" + assetPath + "' to " + destination, error);
+    } finally {
+      if (temporary.exists() && !temporary.delete()) {
+        LOG.warn("Unable to remove temporary extracted asset: {}", temporary);
+      }
+    }
   }
 
   private static void writeInitScript() {
