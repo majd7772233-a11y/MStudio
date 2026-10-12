@@ -205,3 +205,10 @@ Additional Phase 2 update:
 - `BaseApplication.java` still exposes upstream Telegram group/channel, `docs.androidide.com`, donation and `contact@androidide.com` routes through public methods/constants. Replace misleading user-facing routes with verified MStudio repository/issues or remove unsupported actions; don't invent a MStudio email, website, social account or donation destination. Keep generic Git commit author email preferences untouched.
 - Shared strings still say AndroidIDE-Dev/AndroidIDE and direct users to upstream docs in SDK-install instructions, even though `core/app` overrides the launcher label to MStudio. Fix the shared strings and base app_name too so non-app consumers and About/help UI are consistent.
 - `OnboardingActivity.checkToolsIsInstalled()` checks installed JDK distributions and `Environment.ANDROID_HOME`, while `BaseApplication.onCreate()` separately invokes `ToolsManager.init(this, null)`. These are distinct setup layers; don't use the runtime extraction result as a substitute for the existing SDK/JDK setup wizard.
+
+
+### Phase 2 — generated repository metadata finding (2026-10-12)
+
+- Roadmap was updated first in commit `9c6860e666d235d231a40dc9f6e6668faf6dd682`.
+- `utilities/build-info/build.gradle.kts` generates `BuildInfo.java` using `composite-builds/build-logic/common/src/main/java/dev/mutwakil/androidide/build/config/ProjectConfig.kt`. That live config still says `REPO_OWNER = AndroidIDE-Dev`, `REPO_NAME = AndroidIDE`, and `PROJECT_SITE = https://m.androidide.com`. This can make generated `BuildInfo.REPO_URL` and `PROJECT_SITE` send users to upstream (including the changelog action in `IDEApplication`). It is a concrete Phase 2 bug and must be corrected at its source, while leaving Maven group IDs and GPL/upstream attribution unchanged.
+- `GitHubContributors.kt` uses `GITHUB_API_REPO_URL` from a separate contributor service; audit its actual base URL before deciding whether About contributors should represent upstream or MStudio. Do not change contributor API URLs blindly without tracing the defining constant and current product intent.
