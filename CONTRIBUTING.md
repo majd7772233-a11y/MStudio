@@ -1,66 +1,36 @@
-# Contributing
+# Contributing to MStudio
 
-This document outlines how to propose a change to AndroidIDE. By contributing to this project, you
-agree to abide the terms specified in the [CODE OF CONDUCT](./CODE_OF_CONDUCT.md).
+MStudio is an in-progress Android IDE based on the open-source AndroidIDE project. Contributions are welcome, but please read the current project state before starting work.
 
-## Requirements
+## Before making changes
 
-- Android Studio.
-- JDK 17 (prefer the one bundled with Android Studio).
+1. Read [GPT.md](./GPT.md) for the current engineering handoff and known limitations.
+2. Read [MSTUDIO_ROADMAP.md](./MSTUDIO_ROADMAP.md) and keep work aligned with its current phase. If a useful task is missing, propose it in the roadmap before implementing it.
+3. Check [existing issues](https://github.com/majd7772233-a11y/MStudio/issues) before opening a new one.
+4. Preserve upstream notices, GPL-3.0 requirements, and attribution. Audit any new dependency or bundled tool for its license.
 
-> NOTE:
->
-> At the time of this writing, the stable version of Android Studio (Electric Eel) is bundled with
-> JDK 11. Only Android Studio Flamingo and newer are bundled with JDK 17.
+## Report bugs and suggest improvements
 
-## Build the project
+Use [GitHub Issues](https://github.com/majd7772233-a11y/MStudio/issues). Include the device model, Android version, app build/commit when known, steps to reproduce, expected behavior, actual behavior, and relevant logs. Remove passwords, access tokens, signing material, personal data, and other secrets before attaching logs.
 
-Open the project in Android Studio. No extra steps are needed for this.
+## Code contributions
 
-It is possible to build AndroidIDE in AndroidIDE itself. But, as it might be a too heavy task for an
-Android device to be able to build the project, Android Studio is always recommended.
+- Work on a focused branch and describe the user-visible problem the change solves.
+- Inspect the latest source and relevant callers/tests before editing.
+- Preserve the existing Gradle Tooling API build path; do not introduce a competing APK builder as a shortcut.
+- Keep user-facing strings in Android resources and preserve RTL/localization behavior.
+- Do not claim a fix is verified unless a reproducible test, CI result, or named-device result supports it.
+- Never commit keystores, signing secrets, API tokens, private project data, or generated build artifacts.
+- Follow the existing source formatting conventions: two-space indentation for Java/Kotlin/XML where used by the surrounding file, and match the formatting of the file being edited.
 
-You can refer the [AndroidIDE Developer Guide](https://docs.androidide.com/developer/index.html) to
-get started with the development or to learn more about the various components in the IDE. 
+## Build and verification
 
-## Source code format
+MStudio is under active development, and parts of the inherited AndroidIDE documentation may not describe the fork accurately. Check the live build scripts and roadmap rather than assuming every feature or build variant works. When verification is appropriate, record the exact commit, command or workflow, result, and artifact/device details. Do not trigger release or publishing workflows without explicit authorization.
 
-- Indents : 2-space
-- Java : `GoogleStyle`. Either use `google-java-format` or
-  import [this](https://raw.githubusercontent.com/google/styleguide/gh-pages/intellij-java-google-style.xml)
-  code style.
-- Kotlin: Use [`ktfmt`](https://plugins.jetbrains.com/plugin/14912-ktfmt) IntelliJ Plugin and set
-  the code style to `Google (internal)`
-  . [`Learn more`](https://github.com/facebook/ktfmt#intellij-android-studio-and-other-jetbrains-ides)
-  .
-- XML : Default Android Studio formatter with 2-space indentations.
+## Pull requests
 
-## Propose a change
+Open a pull request against the branch specified by the current repository workflow (currently `dev`, unless the maintainers announce otherwise). Explain the change, the reason for it, any compatibility impact, and the checks actually performed. Small, reviewable changes are preferred.
 
-Before proposing a change, it is always recommended to open an issue and discuss it with the
-maintainers.
+## Upstream attribution
 
-**The `main` branch is protected and requires all the commits to be signed with your GPG key and the
-commit history to be linear.**
-See [protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches)
-.
-
-To contribute to this project,
-
-- Fork the repo.
-- Clone the forked repo to your local machine.
-- Open the project.
-- Make your changes.
-- Create a pull request. Give a proper title and description to your PR.
-
-## Issues & Pull requests
-
-Use the issue/PR templates whenever possible. Provide a proper title and a clear description of the
-issue/PR. For bug reports, provide a step-by-step procedure to reproduce the issue. Always put
-things like crash
-logs, and build outputs in `code blocks`.
-
-## Contact us
-
-If you want to discuss anything about the project, you can discuss it in
-the [Telegram group](https://t.me/androidide_discussions).
+MStudio is derived from [AndroidIDE](https://github.com/AndroidIDE-Dev/AndroidIDE). Preserve the applicable upstream copyright notices and GPL-3.0 license terms. MStudio-specific bug reports and contributions should use this repository's issue tracker and contribution process.
