@@ -210,3 +210,8 @@ Keep all boxes unchecked until evidence is recorded.
 - Snapshot publishing requires `vars.MSTUDIO_ENABLE_UPSTREAM_SNAPSHOT_PUBLISHING == 'true'`, repository `AndroidIDE-Dev/AndroidIDE`, branch `dev` or `indexing`, a non-PR event, and a successful APK job. The MStudio fork is blocked by the repository allowlist.
 - Re-fetched the committed workflow and verified both opt-in checks, both repository allowlists, and that Maven credentials are scoped to the two publishing steps. Check the resulting Actions run for parser/runtime feedback; no build, publication, or device test is claimed yet.
 - Next: Phase 0.3 signing audit, then Phase 0.4 baseline CI.
+
+
+### Source-state correction — submodule path
+
+- Follow-up inspection of the GitHub contents API for `composite-builds/external/logback-android` returned an ordinary directory listing, not a Git submodule entry. The `.gitmodules` file declares this path as a submodule, so the committed tree and submodule declaration appear inconsistent. Resolve this explicitly before treating recursive checkout as proven; do not claim the submodule is initialized or assume its state.
