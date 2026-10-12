@@ -515,14 +515,21 @@ public class ToolsManager {
 
   private static void writeNoMediaFile() {
     final var noMedia = new File(BaseApplication.getBaseInstance().getProjectsDir(), ".nomedia");
-    if (!noMedia.exists()) {
-      try {
-        if (!noMedia.createNewFile()) {
-          LOG.error("Failed to create .nomedia file in projects directory");
-        }
-      } catch (IOException e) {
-        LOG.error("Failed to create .nomedia file in projects directory");
+    if (noMedia.exists()) {
+      if (!noMedia.isFile()) {
+        throw new IllegalStateException(
+            "Projects .nomedia marker exists but is not a regular file: " + noMedia);
       }
+      return;
+    }
+
+    try {
+      if (!noMedia.createNewFile() && !noMedia.isFile()) {
+        throw new IOException("Unable to create projects .nomedia marker: " + noMedia);
+      }
+    } catch (IOException error) {
+      throw new IllegalStateException(
+          "Failed to create .nomedia file in projects directory: " + noMedia, error);
     }
   }
 
