@@ -419,3 +419,11 @@ Additional Phase 2 update:
 - `ToolsManager.isUsableAapt2()` no longer treats any zero-exit executable with arbitrary non-empty output as AAPT2. Commit `f47c90ba6b24aecdbc7ffd28a1dc618a1c3ad828` reads the `version` output and requires an AAPT/AAPT2 or “Android Asset Packaging Tool” marker. Timeout, forced process cleanup and temporary-output cleanup remain in place.
 - Reviewed `writeInitScript()`: it writes packaged defaults to `init.gradle.bak` but only creates `init.gradle` when missing. Do not change this to overwrite existing scripts until the project has a safe versioning/migration contract; an existing script may contain user edits and the current backup is not a reliable prior-version marker.
 - No build, test, workflow dispatch, Actions run or device validation was performed. This is source-level hardening only.
+
+### Phase 2 contributor provenance labels — 2026-10-12
+
+- Roadmap-first finding and scope were recorded in commit `e053c9e0c4c23ab9f0d0934bbcebf443c99099c3`; the completed execution record is in roadmap commit `16dfa85db08ec34c3f3332080e3f99a05b6fa631`.
+- `ContributorsActivity` shows GitHub contributors from the MStudio repository, but Crowdin translators from the inherited `crowdin-contributors.json` that credits the upstream AndroidIDE project. Commit series changed both labels across English and all 12 maintained locales: GitHub contributors are explicitly MStudio contributors; Crowdin translators are explicitly from upstream/original AndroidIDE. This preserves credit and avoids claiming a separate MStudio Crowdin project.
+- All 13 resource files were re-fetched and both labels confirmed after the edits. This is a content-level check only; XML/resource compilation and the online contributors screen remain unverified.
+- Locale commits are recorded in `MSTUDIO_ROADMAP.md` under “Phase 2 contributor provenance labels”.
+- No build, test, workflow dispatch, Actions run, or device validation was performed.
