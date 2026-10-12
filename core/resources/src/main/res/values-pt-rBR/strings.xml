@@ -4,16 +4,16 @@
   <string name="copy" tools:override="true">Copiar</string>
   <string name="terminal_more">Mais…</string>
   <string name="text_to_search">Texto a pesquisar</string>
-  <string name="about_option_email">Relatar problema no GitHub</string>
+   <string name="about_option_email">Relatar problema no GitHub</string>
   <string name="about_option_website">Site</string>
   <string name="about_footer">MStudio %1$s para %2$s</string>
   <string name="about_subtitle">Simplesmente, uma IDE para Android</string>
   <string name="msg_get_package_failed">Falha ao extrair o nome do pacote!</string>
-  <string name="msg_need_help">Se tiver problemas ao usar o MStudio ou criar aplicativos Android, relate-os ou sugira melhorias nas issues do GitHub do MStudio.</string>
+   <string name="msg_need_help">Se tiver problemas ao usar o MStudio ou criar aplicativos Android, relate-os ou sugira melhorias nas issues do GitHub do MStudio.</string>
   <string name="need_help">Precisa de ajuda?</string>
   <string name="ide_preferences">Configurações da IDE</string>
-  <string name="discussions_on_telegram">Relatar problema no GitHub</string>
-  <string name="official_tg_channel">Repositório MStudio no GitHub</string>
+   <string name="discussions_on_telegram">Relatar problema no GitHub</string>
+   <string name="official_tg_channel">Repositório MStudio no GitHub</string>
   <string name="msg_empty_view">Sem dados</string>
   <string name="title_terminal">Terminal</string>
   <string name="reset">Redefinir</string>
@@ -471,7 +471,7 @@
   <string name="title_unsupported_user">Usuário não suportado</string>
   <string name="title_socials">Sociais</string>
   <string name="title_contributors">Contribuidores</string>
-  <string name="summary_contributors">Créditos aos colaboradores do projeto AndroidIDE original no qual o MStudio se baseia.</string>
+   <string name="summary_contributors">Créditos aos colaboradores do projeto AndroidIDE original no qual o MStudio se baseia.</string>
   <string name="title_github_contributors">Contribuidores do Github</string>
   <string name="title_crowdin_translators">Tradutores do Crowdin</string>
   <string name="title_misc">Outros</string>
