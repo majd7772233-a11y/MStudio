@@ -4,16 +4,16 @@
   <string name="copy" tools:override="true">Salin</string>
   <string name="terminal_more">Lagi…</string>
   <string name="text_to_search">Teks untuk mencari</string>
-  <string name="about_option_email">Email</string>
+  <string name="about_option_email">Laporkan masalah di GitHub</string>
   <string name="about_option_website">Situs Web</string>
   <string name="about_footer">MStudio %1$s untuk %2$s</string>
   <string name="about_subtitle">Simpel, sebuah IDE untuk Android</string>
   <string name="msg_get_package_failed">Gagal mengekstrak nama paket!</string>
-  <string name="msg_need_help">Jika anda mengalami masalah ketika menggunakan MStudio atau dengan pembuatan Aplikasi Android, anda dapat bergabung ke Grup Telegram dan bertanya disana.\n\nAnda juga dapat mengirim saran pada Email kami.</string>
+  <string name="msg_need_help">Jika mengalami masalah saat menggunakan MStudio atau membuat aplikasi Android, laporkan atau sarankan perbaikan melalui GitHub Issues MStudio.</string>
   <string name="need_help">Butuh Bantuan?</string>
   <string name="ide_preferences">Preferensi IDE</string>
-  <string name="discussions_on_telegram">Diskusi di Telegram</string>
-  <string name="official_tg_channel">Channel Telegram Resmi</string>
+  <string name="discussions_on_telegram">Laporkan masalah di GitHub</string>
+  <string name="official_tg_channel">Repositori MStudio di GitHub</string>
   <string name="msg_empty_view">Tidak ada data</string>
   <string name="title_terminal">Terminal</string>
   <string name="reset">Setel ulang</string>
@@ -471,7 +471,7 @@
   <string name="title_unsupported_user">Pengguna tidak didukung</string>
   <string name="title_socials">Sosial</string>
   <string name="title_contributors">Kontributor</string>
-  <string name="summary_contributors">Kontributor komunitas teratas.</string>
+  <string name="summary_contributors">Kredit untuk kontributor proyek AndroidIDE asli yang menjadi dasar MStudio.</string>
   <string name="title_github_contributors">Kontributor GitHub</string>
   <string name="title_crowdin_translators">Penerjemah Crowdin</string>
   <string name="title_misc">Lain-lain</string>
