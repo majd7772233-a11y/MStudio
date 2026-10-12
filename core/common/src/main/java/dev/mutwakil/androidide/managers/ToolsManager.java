@@ -129,8 +129,22 @@ public class ToolsManager {
       Set<String> ready = new LinkedHashSet<>();
       Map<String, String> failures = new LinkedHashMap<>();
 
-      runComponent("jdk", ready, failures,
-          () -> IJdkDistributionProvider.getInstance().loadDistributions());
+      runComponent("jdk-distributions", ready, failures, () -> {
+        IJdkDistributionProvider.getInstance().loadDistributions();
+        if (IJdkDistributionProvider.getInstance().getInstalledDistributions().isEmpty()) {
+          throw new IllegalStateException("No installed JDK distributions were discovered.");
+        }
+      });
+      runComponent("managed-java", ready, failures, () -> {
+        if (!Environment.JAVA.canExecute() && !Environment.JAVA.setExecutable(true)) {
+          throw new IllegalStateException(
+              "Managed Java executable permission could not be restored: " + Environment.JAVA);
+        }
+        if (!isUsableJava(Environment.JAVA)) {
+          throw new IllegalStateException(
+              "Managed Java is missing or failed its version check: " + Environment.JAVA);
+        }
+      });
       runComponent("projects-marker", ready, failures, ToolsManager::writeNoMediaFile);
       runComponent("gradle-plugin", ready, failures, ToolsManager::extractAndroidIdeGradlePlugin);
       runComponent("aapt2", ready, failures, ToolsManager::extractAapt2);
@@ -461,6 +475,48 @@ public class ToolsManager {
     if (!isUsableAapt2(Environment.AAPT2)) {
       throw new IllegalStateException(
           "AAPT2 failed its version check after extraction: " + Environment.AAPT2);
+    }
+  }
+
+  /** Confirms that the managed Java executable can actually start. */
+  private static boolean isUsableJava(File java) {
+    if (!java.isFile() || java.length() == 0 || !java.canExecute()) {
+      return false;
+    }
+
+    final File parent = java.getParentFile();
+    final File output = new File(parent, java.getName() + ".version.tmp");
+    Process process = null;
+    try {
+      if (output.exists() && !output.delete()) {
+        LOG.warn("Unable to remove previous Java version output: {}", output);
+        return false;
+      }
+
+      process = new ProcessBuilder(java.getAbsolutePath(), "-version")
+          .redirectErrorStream(true)
+          .redirectOutput(output)
+          .start();
+      if (!process.waitFor(5, TimeUnit.SECONDS)) {
+        process.destroyForcibly();
+        process.waitFor();
+        return false;
+      }
+      return process.exitValue() == 0 && output.isFile() && output.length() > 0;
+    } catch (IOException error) {
+      LOG.warn("Unable to execute managed Java version check: {}", java, error);
+      return false;
+    } catch (InterruptedException error) {
+      Thread.currentThread().interrupt();
+      LOG.warn("Interrupted while checking managed Java: {}", java, error);
+      return false;
+    } finally {
+      if (process != null && process.isAlive()) {
+        process.destroyForcibly();
+      }
+      if (output.exists() && !output.delete()) {
+        LOG.warn("Unable to remove Java version output: {}", output);
+      }
     }
   }
 
