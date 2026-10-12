@@ -47,7 +47,7 @@ android {
 
     defaultConfig {
         // Keep the implementation namespace stable while giving the MStudio app its own ID.
-    applicationId = "com.magd.mstudio"
+        applicationId = "com.magd.mstudio"
         vectorDrawables.useSupportLibrary = true
     }
 
