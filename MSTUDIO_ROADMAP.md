@@ -394,3 +394,8 @@ No build, test task, workflow dispatch or Actions run was launched. Phase 1 base
 - The shared Termux-derived resource files `values/termux_app_strings.xml` and `values/termux_shared_strings.xml` still label runtime/setup errors as AndroidIDE; these are visible to users and must use MStudio wording while preserving upstream license headers and package/path identifiers.
 - `core/app/src/main/res/layout/layout_about_header.xml` uses the old `@mipmap/ic_launcher_foreground` PNG, even though the launcher and onboarding greeting now use the MStudio vector. Change the About header to `@drawable/mstudio_launcher_foreground` so About does not show the old logo.
 - The onboarding greeting references `@drawable/ic_launcher_fg_vector`, which has been updated to the MStudio mark. Preserve the package namespace/authorities; this sweep is branding only.
+
+
+### Phase 2 destination-label consistency — 2026-10-12
+
+- The About screen's `about_option_website` label still says “Website” while its verified destination is the MStudio GitHub repository (there is no separate MStudio website configured). Rename that label to “GitHub Repository” and translate it in maintained locales where the key exists, so the action does not imply an unpublished website.
