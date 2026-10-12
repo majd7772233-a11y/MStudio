@@ -8,27 +8,26 @@
 <p><br>
 
 <p align="center">
-<!-- Latest release -->
-<img src="https://img.shields.io/github/v/release/majd7772233-a11y/MStudio?include_prereleases&amp;label=latest%20release" alt="Latest release">
 <!-- Build and test -->
-<img src="https://github.com/majd7772233-a11y/MStudio/actions/workflows/build.yml/badge.svg" alt="Builds and tests">
-<!--Downloads -->
-<img src="https://img.shields.io/github/downloads/majd7772233-a11y/MStudio/total" alt="Downloads">
+<img src="https://github.com/majd7772233-a11y/MStudio/actions/workflows/build.yml/badge.svg" alt="Build and test workflow">
 <!-- CodeFactor -->
 <img src="https://www.codefactor.io/repository/github/majd7772233-a11y/mstudio/badge/dev" alt="CodeFactor">
-<!-- Crowdin -->
-<a href="https://crowdin.com/project/androidide"><img src="https://badges.crowdin.net/androidide/localized.svg" alt="Crowdin"></a>
 <!-- License -->
-<img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="License"></p>
+<img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="License">
+
+</p>
 
 <p align="center">
-  <a href="https://docs.androidide.com/">Explore the docs »</a> &nbsp; &nbsp;
+  <a href="./MSTUDIO_ROADMAP.md">Project roadmap</a> &nbsp; &#8226; &nbsp;
+  <a href="./CONTRIBUTING.md">Contributing guide</a>
+</p>
+
 </p>
 
 <p align="center">
   <a href="https://github.com/majd7772233-a11y/MStudio/issues/new?labels=bug&title=%5BBug%5D%3A+">Report a bug</a> &nbsp; &#8226; &nbsp;
   <a href="https://github.com/majd7772233-a11y/MStudio/issues/new?labels=enhancement&title=%5BFeature%5D%3A+">Request a feature</a> &nbsp; &#8226; &nbsp;
-  <a href="https://t.me/androidide_discussions">Join us on Telegram</a>
+  <a href="https://github.com/majd7772233-a11y/MStudio/issues">MStudio support and discussion via GitHub Issues</a>
 </p>
 
 ## Features
@@ -58,29 +57,16 @@
 
 ## Installation
 
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.svg"
-    alt="Get it on F-Droid"
-    height="80">](https://f-droid.org/packages/dev.mutwakil.androidide)
-[<img src="https://github.com/Kunzisoft/Github-badge/raw/main/get-it-on-github.svg"
-    alt="Get it on F-Droid"
-    height="80">](https://github.com/majd7772233-a11y/MStudio/releases)
+MStudio is under active development. **No APK should be treated as a verified production release until its signing identity, installation, startup, and device smoke tests have been recorded.**
 
-> _Please install AndroidIDE from trusted sources only i.e._
-> - [_The AndroidIDE website_](https://androidide.com)
-> - [_GitHub Releases_](https://github.com/majd7772233-a11y/MStudio/releases)
-> - [_GitHub Actions_](https://github.com/majd7772233-a11y/MStudio/actions?query=branch%3Adev+event%3Apush)
-> - [_F-Droid_](https://f-droid.org/packages/dev.mutwakil.androidide/)
-
-- MStudio is under active rebranding and source-level hardening. Do not treat an APK as a production release until its signing identity and device smoke tests have been verified.
-- Follow the
-  instructions [here](https://docs.androidide.com/tutorials/get-started.html) to
-  install the build tools.
+- Check the [project roadmap](./MSTUDIO_ROADMAP.md) for current implementation and verification status.
+- The [GitHub Actions page](https://github.com/majd7772233-a11y/MStudio/actions) shows automation runs; workflow artifacts are CI outputs, not a promise that an APK has passed installation or runtime testing.
+- When a release is deliberately published, the repository's [Releases page](https://github.com/majd7772233-a11y/MStudio/releases) is the canonical destination. No F-Droid package or separate MStudio website is claimed here.
 
 ## Limitations
 
-- For working with projects in AndroidIDE, your project must use Android Gradle Plugin v7.2.0 or
-  newer. Projects with older AGP must be migrated to newer versions.
-- SDK Manager is already included in Android SDK and is accessible in AndroidIDE via its Terminal.
+- MStudio's inherited Gradle integration requires Android Gradle Plugin v7.2.0 or newer according to the current source documentation; compatibility still needs verification across supported projects.
+- The Android SDK Manager can be used from the included terminal, but tool availability depends on the Android-compatible packages available to the runtime.
   But, you cannot use it to install some tools (like NDK) because those tools are not built for
   Android.
 - No official NDK support because we haven't built the NDK for Android.
@@ -92,7 +78,7 @@ issues using the app, please let us know.
 
 See the [contributing guide](./CONTRIBUTING.md).
 
-For translations, visit the [Crowdin project page](https://crowdin.com/project/androidide).
+Translations currently live in the Android resources under [core/resources/src/main/res](./core/resources/src/main/res). MStudio does not claim a separate Crowdin translation project.
 
 ## Thanks to
 
@@ -107,19 +93,18 @@ For translations, visit the [Crowdin project page](https://crowdin.com/project/a
   awesome [CodeOnTheGo](https://github.com/appdevforall/CodeOnTheGo)
 Thanks to all the developers who have contributed to this project.
 
-<p>This project is supported by:</p>
-<p>
-  <a href="https://m.do.co/c/54add371d1d7">
-    <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/SVG/DO_Logo_horizontal_blue.svg" width="201px">
-  </a>
+
+
 </p>
 
 ## Contact Us
 
 - [MStudio source repository](https://github.com/majd7772233-a11y/MStudio)
-- [Upstream AndroidIDE community (inherited project)](https://t.me/androidide_discussions)
+- [Upstream AndroidIDE project](https://github.com/AndroidIDE-Dev/AndroidIDE) — for upstream source history and attribution only; use MStudio's GitHub Issues for MStudio-specific support.
 
 ## License
+
+MStudio is derived from the upstream AndroidIDE project and retains its GPL-3.0 licensing obligations and applicable source notices. The following inherited notice is preserved from AndroidIDE:
 
 ```
 AndroidIDE is free software: you can redistribute it and/or modify
@@ -136,5 +121,4 @@ You should have received a copy of the GNU General Public License
 along with AndroidIDE.  If not, see <https://www.gnu.org/licenses/>.
 ```
 
-Any violations to the license can be reported either by opening an issue or writing a mail to us
-directly.
+For MStudio-specific licensing questions, open an issue in the [MStudio repository](https://github.com/majd7772233-a11y/MStudio/issues).
