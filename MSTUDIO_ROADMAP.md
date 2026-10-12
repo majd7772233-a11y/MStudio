@@ -347,3 +347,11 @@ No build, test task, workflow dispatch or Actions run was launched. Phase 1 base
 - Corrected the earlier blanket “former Phase 0 → Phase 1” statement; it was inaccurate because the original roadmap already used Phase 1–12 for its main work and the product-definition section was not a phase. Historical execution entries now preserve their actual context rather than imply a fabricated global renumbering.
 - Kept the user's sequencing constraint explicit: no build, test task, workflow dispatch or Actions until the source-level Phase 2/3 work is substantially complete and the verification gate is deliberately reached.
 - Expanded Phase 2 scope to audit BaseApplication URLs and shared help/About strings, and to trace the real icon/splash source before visual asset edits. Expanded Phase 3 scope to inspect startup callers, UI-thread/lifecycle handling, real retry behavior and initialization races before connecting readiness to UI.
+
+
+### Phase 2 discovery — inherited destinations still reachable (2026-10-12)
+
+- `BaseApplication.java` still exposes AndroidIDE Telegram group/channel, AndroidIDE docs, sponsor and email destinations; audit all callers and route user help to the verified MStudio repository/issues instead of inventing contact channels.
+- Shared `core/resources/.../values/strings.xml` still contains AndroidIDE-Dev as the common app name, AndroidIDE in About footer/help copy, Telegram labels, and `msg_install_tools` links to docs.androidide.com. The app-specific app_name override is MStudio, but the common definition should be made consistent.
+- `CONTRIBUTING.md` exists, so the About link is not a 404; however, its body still refers to AndroidIDE, upstream developer docs and upstream Telegram. It must be fork-adapted before it is advertised as MStudio's contribution guide.
+- `OnboardingActivity` currently uses the inherited SDK/JDK terminal setup and only gates completion on installed JDK distributions and `Environment.ANDROID_HOME`; do not conflate that with `ToolsManager` component readiness. Icon/splash source remains untraced.
