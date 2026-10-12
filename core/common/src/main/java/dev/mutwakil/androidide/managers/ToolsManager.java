@@ -139,8 +139,18 @@ public class ToolsManager {
 
     final File temporary = new File(parent, destination.getName() + ".tmp");
     final File backup = new File(parent, destination.getName() + ".bak");
-    deleteRecursively(temporary);
-    deleteRecursively(backup);
+
+    // Recover a previous interrupted swap before cleaning any staging files.
+    if (backup.exists()) {
+      if (!destination.exists()) {
+        movePath(backup, destination);
+      } else if (!deleteRecursively(backup)) {
+        throw new IOException("Unable to remove stale color-scheme backup: " + backup);
+      }
+    }
+    if (!deleteRecursively(temporary)) {
+      throw new IOException("Unable to remove stale color-scheme staging directory: " + temporary);
+    }
 
     try {
       copyAssetTree(app, assetPath, temporary);
