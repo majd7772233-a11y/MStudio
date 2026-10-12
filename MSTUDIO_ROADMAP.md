@@ -501,3 +501,9 @@ The following entries above record what was discovered at the time; use these li
 
 - Static inspection found `isUsableJava()` currently runs `java -version` and checks only exit code plus non-empty output; it does not parse the reported version. That can falsely accept an incompatible or wrong executable that prints arbitrary text and exits zero.
 - Update the check to require a parseable Java version with major version 17 or newer (including modern `21.x` and legacy `1.8.x` notation, where legacy 8 must fail). Keep the five-second timeout and cleanup behavior. This is source-level validation only; actual managed-runtime compatibility remains for the later verification phase.
+
+
+## Execution update — managed Java version validation (2026-10-12)
+
+- `ToolsManager.isUsableJava()` now parses the `java -version` output and requires a parseable major version of at least 17, while preserving the five-second timeout and process/temp-file cleanup. Commit: `48d6c4ea092d93953952a72081ddc3d7a9b75360`.
+- Source-level pattern sanity checks covered OpenJDK 21, Java 17, and legacy Java 8 notation; 21/17 pass the version threshold and 1.8 is interpreted as major 8 and rejected. This was a local logic check, not a Java compile or runtime invocation.
