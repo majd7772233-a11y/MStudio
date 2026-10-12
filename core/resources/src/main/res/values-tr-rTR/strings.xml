@@ -482,4 +482,9 @@
   <string name="summary_open_source_licenses">Açık kaynak lisanları görüntüleyin.</string>
   <string name="idepref_jdkVersion_title">JDK sürümü</string>
   <string name="idepref_jdkVersion_summary">Seçili olan: %1$s (değiştirildiğinde uygulamayı yeniden başlatmalısınız)</string>
+
+    <string name="runtime_setup_failed_title">Çalışma zamanı kurulumu ilgi gerektiriyor</string>
+    <string name="runtime_setup_failed_message">Bazı yerleşik çalışma zamanı bileşenleri hazırlanamadı. Kurulum düzeltilene kadar proje derlemeleri başarısız olabilir. Şimdi yeniden deneyin veya MStudio kullanmaya devam edip daha sonra tekrar deneyin.</string>
+    <string name="runtime_setup_retry">Kurulumu yeniden dene</string>
+    <string name="runtime_setup_later">Daha sonra</string>
 </resources>
