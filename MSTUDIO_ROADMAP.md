@@ -554,6 +554,14 @@ The following entries above record what was discovered at the time; use these li
 
 ### Phase 3 source-audit follow-up — stale init script and AAPT2 identity check (2026-10-12)
 
-- Source inspection found `ToolsManager.writeInitScript()` rewrites `init.gradle.bak` with the packaged contents on every initialization but only writes `init.gradle` when it does not exist. Consequently, a valid but outdated init script can survive an app upgrade indefinitely. Confirm whether this file is user-editable before changing update semantics; preserve a recoverable previous copy and avoid overwriting unrelated custom content blindly.
+- Source inspection found `ToolsManager.writeInitScript()` rewrites `init.gradle.bak` with packaged defaults on every initialization but only creates `init.gradle` when missing. This may intentionally preserve local/custom init-script edits. Do not auto-replace an existing init script until the project defines a migration/versioning contract that can distinguish stale defaults from user customizations.
 - `isUsableAapt2()` currently accepts any executable that exits zero and prints any non-empty output for the `version` argument. Strengthen the check to require recognizable AAPT2 version output, without assuming a specific version string, and preserve timeout/process cleanup.
 - Before implementing, inspect all references to `Environment.INIT_SCRIPT` and any UI or documentation that might promise user edits persist. Do not run build/tests/Actions; these are Phase 3 source corrections, not verification.
+
+
+## Execution update — Phase 3 AAPT2 validation hardening (2026-10-12)
+
+- Roadmap-first task was recorded in commit `493e49c4b462f81256fa9851d0b507148f8dd9f2`.
+- `ToolsManager.isUsableAapt2()` previously accepted any executable that exited zero and wrote non-empty output for `version`. Commit `f47c90ba6b24aecdbc7ffd28a1dc618a1c3ad828` now reads that output and requires a recognizable AAPT/AAPT2 or “Android Asset Packaging Tool” marker, while retaining the existing five-second timeout, forced process cleanup, and temporary-output cleanup.
+- The init-script behavior was reviewed but intentionally left unchanged: existing `init.gradle` may contain local customizations, and the current backup is overwritten with packaged defaults each initialization, so it is not a trustworthy “previous version” marker for safe automatic migration. A version-aware migration policy remains a roadmap item if the product needs automatic updates.
+- Static source inspection only. No build, tests, workflow dispatch, Actions run, AAPT2 invocation, or device verification was performed.
