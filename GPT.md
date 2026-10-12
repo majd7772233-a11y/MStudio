@@ -362,3 +362,8 @@ Additional Phase 2 update:
 - Roadmap updated first in commit `b66fdfb8d82e8333e9f7bf2bc624cef89dd3a5f4`.
 - Commit `48d6c4ea092d93953952a72081ddc3d7a9b75360` changes `isUsableJava()` to parse the version string and require major version >=17; legacy `1.8.x` is interpreted as 8 and rejected. The five-second timeout and cleanup remain.
 - A simple pattern sanity check covered OpenJDK 21, Java 17, and Java 8 output strings. This does not prove Java compilation or actual managed-runtime behavior; no build/tests/Actions were run.
+
+
+### Roadmap numbering history clarified — 2026-10-12
+
+- The old migration paragraph that incorrectly described Phase 0→Phase 1 has been marked as superseded rather than left as an active instruction. The canonical phase structure remains main phases 1–12, with decimal substeps nested under whole-number phases.
