@@ -399,3 +399,9 @@ No build, test task, workflow dispatch or Actions run was launched. Phase 1 base
 ### Phase 2 destination-label consistency — 2026-10-12
 
 - The About screen's `about_option_website` label still says “Website” while its verified destination is the MStudio GitHub repository (there is no separate MStudio website configured). Rename that label to “GitHub Repository” and translate it in maintained locales where the key exists, so the action does not imply an unpublished website.
+
+
+### Phase 2 review follow-up — translated About footer consistency (2026-10-12)
+
+- Latest locale sweep confirms the About link label is now translated as a GitHub repository in several locales, but at least Arabic (`values-ar-rSA/strings.xml`) labels the product as “Android” in `about_footer`, and Spanish (`values-es-rES/strings.xml`) still says “Android IDE”. Align these visible product-name strings to `MStudio` while preserving each locale’s existing `%1$s` / `%2$s` format arguments.
+- Keep this a narrow branding correction; do not change package namespace, upstream license notices, or attribution. Re-fetch and verify every edited file after its commit. Continue Phase 2’s remaining generated `BuildInfo` repository metadata and complete source/locale audit before declaring the phase complete.
