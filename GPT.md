@@ -322,3 +322,9 @@ Additional Phase 2 update:
 
 - Current roadmap wording now distinguishes historical findings from live state. Root name and generated repository metadata already target MStudio; active launcher/splash/About branding and README/support destinations have been corrected; the stray splash XML text is absent; and runtime retry UI is already wired into MainActivity.
 - Remaining work is source audit and verification, not repeating completed fixes. Do not mark Phase 2 or Phase 3 fully complete until the remaining audit and later verification gate are satisfied.
+
+
+### Phase 2 README icon mismatch — 2026-10-12
+
+- Roadmap updated first in commit `fa4d45ebeae789c0275326524c1236e51a4f4b86`.
+- Visual inspection of `images/icon.png` found the inherited AndroidIDE robot/braces logo. The actual launcher/splash use the MStudio M monogram. Add a repository-owned SVG that mirrors the active MStudio vector and point README at it; leave the old PNG untouched unless all its uses are audited.
