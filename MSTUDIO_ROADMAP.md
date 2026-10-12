@@ -678,3 +678,8 @@ This section summarizes the latest state after the bundled-JAR readiness change.
 - deleteIdeenv() currently logs deletion failure but returns normally, so runtime-cleanup is reported ready even if the stale file remains. Decide/implement explicit best-effort cleanup semantics so a non-critical cleanup failure does not falsely imply runtime readiness or block otherwise usable runtime components.
 
 No build, tests, workflow dispatch, Actions run or device validation is authorized during this source-audit work. Record implementation evidence and remaining verification limits after fixes.
+
+
+### Phase 2 — remaining raster identity assets found (2026-10-12)
+
+- The active vector/adaptive launcher and README use the MStudio monogram, but the tracked raster assets `images/icon.png`, `fastlane/metadata/android/en-US/images/icon.png`, and `core/app/src/main/ic_launcher-playstore.png` still contain the inherited AndroidIDE curly-brace/Android glyph. The legacy density PNGs under `core/resources/src/main/res/mipmap-*` also need to match the MStudio vector identity, including round and foreground variants. Update these assets from the same MStudio monogram so README/store/legacy launcher assets do not contradict the active icon. This is an asset identity change only; keep GPL attribution in source notices and do not imply store publication.
