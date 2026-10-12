@@ -19,7 +19,6 @@ package dev.mutwakil.androidide.managers;
 
 import androidx.annotation.NonNull;
 
-import com.blankj.utilcode.util.FileUtils;
 import com.blankj.utilcode.util.ResourceUtils;
 import dev.mutwakil.androidide.app.BaseApplication;
 import dev.mutwakil.androidide.app.configuration.IDEBuildConfigProvider;
