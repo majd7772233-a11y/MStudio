@@ -482,4 +482,9 @@
   <string name="summary_open_source_licenses">View open source licenses.</string>
   <string name="idepref_jdkVersion_title">JDK version</string>
   <string name="idepref_jdkVersion_summary">Currently selected: %1$s (requires restart if changed)</string>
+
+    <string name="runtime_setup_failed_title">Configurarea mediului de execuție necesită atenție</string>
+    <string name="runtime_setup_failed_message">Unele componente integrate ale mediului nu au putut fi pregătite. Construirea proiectelor poate eșua până când configurarea este reparată. Încercați din nou acum sau continuați să utilizați MStudio și încercați mai târziu.</string>
+    <string name="runtime_setup_retry">Reîncearcă configurarea</string>
+    <string name="runtime_setup_later">Mai târziu</string>
 </resources>
