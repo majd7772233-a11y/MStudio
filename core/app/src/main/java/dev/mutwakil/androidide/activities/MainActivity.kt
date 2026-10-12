@@ -21,6 +21,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.View
+import androidx.lifecycle.Lifecycle
 import androidx.activity.OnBackPressedCallback
 import androidx.core.graphics.Insets
 import androidx.core.view.isVisible
@@ -29,8 +30,10 @@ import androidx.transition.TransitionManager
 import androidx.transition.doOnEnd
 import com.google.android.material.transition.MaterialSharedAxis
 import dev.mutwakil.androidide.activities.editor.EditorActivityKt
+import dev.mutwakil.androidide.app.BaseApplication
 import dev.mutwakil.androidide.app.EdgeToEdgeIDEActivity
 import dev.mutwakil.androidide.databinding.ActivityMainBinding
+import dev.mutwakil.androidide.managers.ToolsManager
 import dev.mutwakil.androidide.preferences.internal.GeneralPreferences
 import dev.mutwakil.androidide.projects.ProjectManagerImpl
 import dev.mutwakil.androidide.resources.R.string
@@ -52,11 +55,25 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.File
+import java.util.function.Consumer
 
 class MainActivity : EdgeToEdgeIDEActivity() {
 
     private val viewModel by viewModel<MainViewModel>()
     private var _binding: ActivityMainBinding? = null
+    private var runtimeSetupDialog: androidx.appcompat.app.AlertDialog? = null
+    private var lastRuntimeSetupFailure: String? = null
+    private var pendingRuntimeSetupResult: ToolsManager.InitResult? = null
+
+    private val runtimeSetupResultListener = Consumer<ToolsManager.InitResult> { result ->
+        runOnUiThread {
+            if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                showRuntimeSetupResult(result)
+            } else {
+                pendingRuntimeSetupResult = result
+            }
+        }
+    }
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
@@ -85,6 +102,7 @@ class MainActivity : EdgeToEdgeIDEActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ToolsManager.addInitResultListener(runtimeSetupResultListener)
         openLastProject()
 
         viewModel.currentScreen.observe(this) { screen ->
@@ -106,6 +124,54 @@ class MainActivity : EdgeToEdgeIDEActivity() {
         }
 
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        pendingRuntimeSetupResult?.let { result ->
+            pendingRuntimeSetupResult = null
+            showRuntimeSetupResult(result)
+        }
+    }
+
+    private fun showRuntimeSetupResult(result: ToolsManager.InitResult) {
+        if (!result.isCompleted || result.isReady) {
+            lastRuntimeSetupFailure = null
+            runtimeSetupDialog?.dismiss()
+            runtimeSetupDialog = null
+            return
+        }
+        if (isFinishing || isDestroyed) {
+            return
+        }
+
+        val details = result.failures.entries.joinToString("\\n") { (component, reason) ->
+            "$component: $reason"
+        }
+        if (details == lastRuntimeSetupFailure || runtimeSetupDialog?.isShowing == true) {
+            return
+        }
+        lastRuntimeSetupFailure = details
+
+        val message = buildString {
+            append(getString(string.runtime_setup_failed_message))
+            if (details.isNotBlank()) {
+                append("\\n\\n")
+                append(details)
+            }
+        }
+        val builder = DialogUtils.newMaterialDialogBuilder(this)
+            .setTitle(string.runtime_setup_failed_title)
+            .setMessage(message)
+            .setCancelable(true)
+        if (result.isSupportedAbi) {
+            builder.setPositiveButton(string.runtime_setup_retry) { _, _ ->
+                lastRuntimeSetupFailure = null
+                ToolsManager.initWithResult(BaseApplication.getBaseInstance(), null)
+            }
+        }
+        builder.setNegativeButton(string.runtime_setup_later, null)
+        runtimeSetupDialog = builder.show()
     }
 
     override fun onApplySystemBarInsets(insets: Insets) {
@@ -252,6 +318,10 @@ class MainActivity : EdgeToEdgeIDEActivity() {
     }
 
     override fun onDestroy() {
+        ToolsManager.removeInitResultListener(runtimeSetupResultListener)
+        runtimeSetupDialog?.dismiss()
+        runtimeSetupDialog = null
+        pendingRuntimeSetupResult = null
         ITemplateProvider.getInstance().release()
         super.onDestroy()
         _binding = null
