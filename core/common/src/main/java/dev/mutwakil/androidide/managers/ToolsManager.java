@@ -41,8 +41,15 @@ import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+import java.util.jar.JarFile;
 
 import kotlin.io.FilesKt;
 
@@ -52,36 +59,120 @@ public class ToolsManager {
 
   public static String COMMON_ASSET_DATA_DIR = "data/common";
 
-  public static void init(@NonNull BaseApplication app, Runnable onFinish) {
+  private static volatile InitResult lastInitResult =
+      new InitResult(false, Collections.emptySet(),
+          Collections.singletonMap("setup", "Runtime setup has not completed yet."));
 
-    if (!IDEBuildConfigProvider.getInstance().supportsCpuAbi()) {
-      LOG.error("Device not supported");
-      return;
+  /** Immutable per-component setup status for onboarding and retry UI. */
+  public static final class InitResult {
+    private final boolean supportedAbi;
+    private final Set<String> readyComponents;
+    private final Map<String, String> failures;
+
+    private InitResult(
+        boolean supportedAbi, Set<String> readyComponents, Map<String, String> failures) {
+      this.supportedAbi = supportedAbi;
+      this.readyComponents = Collections.unmodifiableSet(new LinkedHashSet<>(readyComponents));
+      this.failures = Collections.unmodifiableMap(new LinkedHashMap<>(failures));
     }
 
-    CompletableFuture.runAsync(() -> {
-      // Load installed JDK distributions
-      IJdkDistributionProvider.getInstance().loadDistributions();
+    public boolean isReady() {
+      return supportedAbi && failures.isEmpty();
+    }
 
-      writeNoMediaFile();
-      extractAndroidIdeGradlePlugin();
-      extractAapt2();
-      extractToolingApi();
-      extractAndroidJar();
-      extractColorScheme(app);
-      writeInitScript();
-      extractDownloadKtScript();
+    public boolean isSupportedAbi() {
+      return supportedAbi;
+    }
 
-      deleteIdeenv();
-    }).whenComplete((__, error) -> {
-      if (error != null) {
-        LOG.error("Error extracting tools", error);
-      }
+    public Set<String> getReadyComponents() {
+      return readyComponents;
+    }
 
+    public Map<String, String> getFailures() {
+      return failures;
+    }
+  }
+
+  public static InitResult getLastInitResult() {
+    return lastInitResult;
+  }
+
+  /** Keeps the original callback contract for existing callers. */
+  public static void init(@NonNull BaseApplication app, Runnable onFinish) {
+    initWithResult(app, result -> {
       if (onFinish != null) {
         onFinish.run();
       }
     });
+  }
+
+  /**
+   * Initializes each runtime component independently and reports which parts are ready.
+   * One failed extraction no longer hides the status of every later component.
+   */
+  public static void initWithResult(
+      @NonNull BaseApplication app, Consumer<InitResult> onComplete) {
+    if (!IDEBuildConfigProvider.getInstance().supportsCpuAbi()) {
+      Map<String, String> failures = new LinkedHashMap<>();
+      failures.put("abi", "This device ABI is not supported by the bundled runtime.");
+      InitResult result = new InitResult(false, Collections.emptySet(), failures);
+      lastInitResult = result;
+      LOG.error("Device not supported by the bundled runtime");
+      if (onComplete != null) {
+        onComplete.accept(result);
+      }
+      return;
+    }
+
+    CompletableFuture.supplyAsync(() -> {
+      Set<String> ready = new LinkedHashSet<>();
+      Map<String, String> failures = new LinkedHashMap<>();
+
+      runComponent("jdk", ready, failures,
+          () -> IJdkDistributionProvider.getInstance().loadDistributions());
+      runComponent("projects-marker", ready, failures, ToolsManager::writeNoMediaFile);
+      runComponent("gradle-plugin", ready, failures, ToolsManager::extractAndroidIdeGradlePlugin);
+      runComponent("aapt2", ready, failures, ToolsManager::extractAapt2);
+      runComponent("tooling-api", ready, failures, ToolsManager::extractToolingApi);
+      runComponent("android-jar", ready, failures, ToolsManager::extractAndroidJar);
+      runComponent("color-schemes", ready, failures, () -> extractColorScheme(app));
+      runComponent("gradle-init-script", ready, failures, ToolsManager::writeInitScript);
+      runComponent("kotlin-artifact-script", ready, failures, ToolsManager::extractDownloadKtScript);
+      runComponent("runtime-cleanup", ready, failures, ToolsManager::deleteIdeenv);
+
+      return new InitResult(true, ready, failures);
+    }).whenComplete((result, error) -> {
+      InitResult completed = result;
+      if (error != null) {
+        LOG.error("Unexpected error initializing runtime tools", error);
+        Map<String, String> failures = new LinkedHashMap<>();
+        failures.put("setup", error.getMessage() == null
+            ? error.getClass().getSimpleName() : error.getMessage());
+        completed = new InitResult(true, Collections.emptySet(), failures);
+      }
+
+      lastInitResult = completed;
+      if (onComplete != null) {
+        try {
+          onComplete.accept(completed);
+        } catch (Throwable callbackError) {
+          LOG.error("Runtime setup completion callback failed", callbackError);
+        }
+      }
+    });
+  }
+
+  private static void runComponent(
+      String name, Set<String> ready, Map<String, String> failures, Runnable action) {
+    try {
+      action.run();
+      ready.add(name);
+    } catch (Throwable error) {
+      final String message = error.getMessage() == null
+          ? error.getClass().getSimpleName() : error.getMessage();
+      failures.put(name, message);
+      LOG.error("Runtime component '{}' failed to initialize: {}", name, message, error);
+    }
   }
 
   private static void extractAndroidIdeGradlePlugin() {
@@ -310,12 +401,24 @@ public class ToolsManager {
           "Android API stub path is a directory and cannot be repaired safely: "
               + Environment.ANDROID_JAR);
     }
-    if (!Environment.ANDROID_JAR.isFile() || Environment.ANDROID_JAR.length() == 0) {
+    if (!isValidJar(Environment.ANDROID_JAR)) {
       copyAssetAtomically(getCommonAsset("android.jar"), Environment.ANDROID_JAR);
     }
-    if (!Environment.ANDROID_JAR.isFile() || Environment.ANDROID_JAR.length() == 0) {
+    if (!isValidJar(Environment.ANDROID_JAR)) {
       throw new IllegalStateException(
-          "Android API stub is missing or empty after extraction: " + Environment.ANDROID_JAR);
+          "Android API stub is missing or invalid after extraction: " + Environment.ANDROID_JAR);
+    }
+  }
+
+  private static boolean isValidJar(File file) {
+    if (!file.isFile() || file.length() == 0) {
+      return false;
+    }
+    try (JarFile jar = new JarFile(file)) {
+      return jar.entries().hasMoreElements();
+    } catch (IOException error) {
+      LOG.warn("Android API stub is not a valid JAR and will be repaired: {}", file, error);
+      return false;
     }
   }
 
