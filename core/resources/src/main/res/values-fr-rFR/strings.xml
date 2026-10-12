@@ -37,7 +37,7 @@
   <string name="please_wait">Veuillez patientez un moment&#8230;</string>
   <!-- Project Builder -->
   <string name="title_unsupported_device">Appareil non supporté</string>
-  <string name="msg_unsupported_device">Vous utilisez la variante %1$s d\'AndroidIde sur un appareil %2$s seulement. Cette configuration n\'est pas prise en charge. Veuillez installer la variante %2$s d\'AndroidIde.</string>
+  <string name="msg_unsupported_device">Vous utilisez la variante %1$s de MStudio sur un appareil %2$s seulement. Cette configuration n\'est pas prise en charge. Veuillez installer la variante %2$s de MStudio.</string>
   <string name="title_clear_output">Nettoyer la console</string>
   <string name="build_output">Console</string>
   <string name="quick_run_debug">Compilation rapide</string>
