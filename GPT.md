@@ -373,3 +373,9 @@ Additional Phase 2 update:
 
 - Roadmap updated first in commit `96bf84407d2bea328d9d8825674c04698fd9004b`.
 - Add an accurate README note that applicationId is `com.magd.mstudio`, implementation namespace remains `dev.mutwakil.androidide`, and the DocumentsProvider authority remains `dev.mutwakil.androidide.documents`. Side-by-side install with upstream AndroidIDE remains unverified and must not be promised.
+
+
+### Phase 2 package identity caveat documented — 2026-10-12
+
+- Roadmap updated first in commit `663930148f13b5eb5301c02ab0db040ca324fc4a`.
+- README commit `611ac5872b8b873d1edfc54dc1535b768291efbc` records `com.magd.mstudio` applicationId, retained `dev.mutwakil.androidide` implementation namespace and `dev.mutwakil.androidide.documents` authority, without promising side-by-side installation. Device compatibility remains unverified.
