@@ -1,8 +1,10 @@
 name: Build and test
 
 on:
+  # Keep dev-branch source work build-free until the planned baseline verification.
+  # Run explicitly with workflow_dispatch when the user authorizes the build phase.
   push:
-    branches: [ "dev", "main", "indexing", "release/**" ]
+    branches: [ "main", "indexing", "release/**" ]
     paths-ignore:
       - '**.md'
       - 'fastlane/**'
