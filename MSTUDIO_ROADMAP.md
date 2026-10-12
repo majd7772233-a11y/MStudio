@@ -507,3 +507,8 @@ The following entries above record what was discovered at the time; use these li
 
 - `ToolsManager.isUsableJava()` now parses the `java -version` output and requires a parseable major version of at least 17, while preserving the five-second timeout and process/temp-file cleanup. Commit: `48d6c4ea092d93953952a72081ddc3d7a9b75360`.
 - Source-level pattern sanity checks covered OpenJDK 21, Java 17, and legacy Java 8 notation; 21/17 pass the version threshold and 1.8 is interpreted as major 8 and rejected. This was a local logic check, not a Java compile or runtime invocation.
+
+
+### Phase 2 package identity disclosure — 2026-10-12
+
+- README should disclose the verified identity boundary: applicationId is `com.magd.mstudio`, while namespace/implementation packages remain `dev.mutwakil.androidide`; the DocumentsProvider authority still uses `dev.mutwakil.androidide.documents`. Until a named-device install test proves otherwise, do not claim side-by-side installation compatibility with upstream AndroidIDE.
