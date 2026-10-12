@@ -22,8 +22,6 @@
   <a href="./CONTRIBUTING.md">Contributing guide</a>
 </p>
 
-</p>
-
 <p align="center">
   <a href="https://github.com/majd7772233-a11y/MStudio/issues/new?labels=bug&title=%5BBug%5D%3A+">Report a bug</a> &nbsp; &#8226; &nbsp;
   <a href="https://github.com/majd7772233-a11y/MStudio/issues/new?labels=enhancement&title=%5BFeature%5D%3A+">Request a feature</a> &nbsp; &#8226; &nbsp;
@@ -67,9 +65,7 @@ MStudio is under active development. **No APK should be treated as a verified pr
 
 - MStudio's inherited Gradle integration requires Android Gradle Plugin v7.2.0 or newer according to the current source documentation; compatibility still needs verification across supported projects.
 - The Android SDK Manager can be used from the included terminal, but tool availability depends on the Android-compatible packages available to the runtime.
-  But, you cannot use it to install some tools (like NDK) because those tools are not built for
-  Android.
-- No official NDK support because we haven't built the NDK for Android.
+- Official NDK support is not available because the required NDK tools have not been built for Android.
 
 The app is still being developed actively. It's in beta stage and may not be stable. if you have any
 issues using the app, please let us know.
@@ -91,11 +87,8 @@ Translations currently live in the Android resources under [core/resources/src/m
   the [Java Language Server](https://github.com/georgewfraser/java-language-server)
 - [Appdevforall](https://github.com/appdevforall) for the
   awesome [CodeOnTheGo](https://github.com/appdevforall/CodeOnTheGo)
-Thanks to all the developers who have contributed to this project.
 
-
-
-</p>
+Thanks to all developers and upstream contributors whose work makes MStudio possible.
 
 ## Contact Us
 
