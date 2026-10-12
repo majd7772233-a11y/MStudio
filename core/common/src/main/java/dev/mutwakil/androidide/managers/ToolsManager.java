@@ -48,6 +48,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.jar.JarFile;
 
@@ -441,7 +442,7 @@ public class ToolsManager {
           "AAPT2 destination is a directory and cannot be repaired safely: " + Environment.AAPT2);
     }
 
-    if (!Environment.AAPT2.isFile() || Environment.AAPT2.length() == 0) {
+    if (!isUsableAapt2(Environment.AAPT2)) {
       final var context = BaseApplication.getBaseInstance();
       final var nativeLibraryDir = context.getApplicationInfo().nativeLibraryDir;
       final var sourceAapt2 = new File(nativeLibraryDir, "libaapt2.so");
@@ -453,12 +454,55 @@ public class ToolsManager {
       copyFileAtomically(sourceAapt2, Environment.AAPT2);
     }
 
-    if (!Environment.AAPT2.isFile() || Environment.AAPT2.length() == 0) {
-      throw new IllegalStateException("AAPT2 binary is missing or empty: " + Environment.AAPT2);
-    }
     if (!Environment.AAPT2.canExecute() && !Environment.AAPT2.setExecutable(true)) {
       throw new IllegalStateException(
           "Cannot set executable permissions to AAPT2 binary: " + Environment.AAPT2);
+    }
+    if (!isUsableAapt2(Environment.AAPT2)) {
+      throw new IllegalStateException(
+          "AAPT2 failed its version check after extraction: " + Environment.AAPT2);
+    }
+  }
+
+  /** Runs the lightweight AAPT2 version command so non-empty corrupt binaries are repaired. */
+  private static boolean isUsableAapt2(File binary) {
+    if (!binary.isFile() || binary.length() == 0 || !binary.canExecute()) {
+      return false;
+    }
+
+    final File parent = binary.getParentFile();
+    final File output = new File(parent, binary.getName() + ".version.tmp");
+    Process process = null;
+    try {
+      if (output.exists() && !output.delete()) {
+        LOG.warn("Unable to remove previous AAPT2 version output: {}", output);
+        return false;
+      }
+
+      process = new ProcessBuilder(binary.getAbsolutePath(), "version")
+          .redirectErrorStream(true)
+          .redirectOutput(output)
+          .start();
+      if (!process.waitFor(5, TimeUnit.SECONDS)) {
+        process.destroyForcibly();
+        process.waitFor();
+        return false;
+      }
+      return process.exitValue() == 0 && output.isFile() && output.length() > 0;
+    } catch (IOException error) {
+      LOG.warn("Unable to execute AAPT2 version check: {}", binary, error);
+      return false;
+    } catch (InterruptedException error) {
+      Thread.currentThread().interrupt();
+      LOG.warn("Interrupted while checking AAPT2: {}", binary, error);
+      return false;
+    } finally {
+      if (process != null && process.isAlive()) {
+        process.destroyForcibly();
+      }
+      if (output.exists() && !output.delete()) {
+        LOG.warn("Unable to remove AAPT2 version output: {}", output);
+      }
     }
   }
 
