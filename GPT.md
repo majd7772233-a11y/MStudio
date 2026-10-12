@@ -316,3 +316,9 @@ Additional Phase 2 update:
 - README branding/destination updates: `1aac325cef97d2ab0911f84660e246f947879606`, `b09dfc089daeff9fcbae70c5f2448c100b15e520`, `ded14a43e57c65631e79dfc4715b08229c6051e0`.
 - Locale corrections: Arabic `7d0651d489b9750f825b5e977b8201276ae689f4`; Spanish `43799c4ca889988a2a53b7363aa7614c26665fe6`; French `a4525ca4c5ca216114e343bfe189f11fbfa9c81c`; Turkish `72e25fff369bf574ae877aa60e7a91a66a8d3174`.
 - No builds/tests/Actions. Phase 2 remains source-level until full audit and later verification.
+
+
+### Roadmap stale-finding reconciliation — 2026-10-12
+
+- Current roadmap wording now distinguishes historical findings from live state. Root name and generated repository metadata already target MStudio; active launcher/splash/About branding and README/support destinations have been corrected; the stray splash XML text is absent; and runtime retry UI is already wired into MainActivity.
+- Remaining work is source audit and verification, not repeating completed fixes. Do not mark Phase 2 or Phase 3 fully complete until the remaining audit and later verification gate are satisfied.
