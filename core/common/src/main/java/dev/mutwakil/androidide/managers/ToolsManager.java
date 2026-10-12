@@ -161,6 +161,11 @@ public class ToolsManager {
   }
 
   private static void notifyOneListener(Consumer<InitResult> listener, InitResult result) {
+    synchronized (INIT_LOCK) {
+      if (!resultListeners.contains(listener)) {
+        return;
+      }
+    }
     try {
       listener.accept(result);
     } catch (Throwable error) {
