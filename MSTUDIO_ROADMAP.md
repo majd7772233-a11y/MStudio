@@ -316,11 +316,11 @@ Changing `applicationId` does not change hard-coded manifest authorities. The do
 
 ### Phase 3 — runtime and setup repair (in progress)
 
-- `ToolsManager` now exposes an immutable per-component `InitResult` through `initWithResult`, records successful components and failure messages, and always reports unsupported ABI instead of silently returning without a completion callback. The original Runnable overload remains for existing callers.
+- `ToolsManager` now exposes an immutable per-component `InitResult` through `initWithResult`, records successful components and failure messages, and always reports unsupported ABI instead of silently returning without a completion callback. It separately checks that JDK distributions were discovered and that managed `java -version` and AAPT2 `version` commands exit successfully within five seconds. The original Runnable overload remains for existing callers.
 - Android API stub extraction now validates that `android.jar` is a readable non-empty JAR and atomically repairs missing/empty/invalid files while refusing to delete an unexpected directory.
 - AAPT2 extraction runs the bundled binary's `version` command with a five-second timeout, replaces missing/empty/non-executable/broken destinations from the packaged native library, and fails setup clearly if the replacement is still unusable.
 - Color-scheme updates now stage a complete directory, validate `scheme.prop`, swap only after successful extraction, and recover a prior backup after an interrupted swap. Version-read errors now schedule repair rather than incorrectly treating the installed scheme as valid.
-- Remaining Phase 3 work: connect per-component readiness to user-visible onboarding/retry UX, verify managed JDK selection/execution, and complete offline/interruption/low-storage/device tests. The AAPT2 version check is implemented in source but remains unverified on-device.
+- Remaining Phase 3 work: connect per-component readiness to user-visible onboarding/retry UX and complete offline/interruption/low-storage/device tests. JDK and AAPT2 invocation checks are implemented in source but remain unverified on-device.
 
 Commits for this batch:
 - `878fe9176dafb4e130dc80f3a1ca6e55c1c78113` — About destinations use the MStudio repository.
@@ -329,3 +329,9 @@ Commits for this batch:
 - `6f25e854829c29de71c06741341133adfc12268d` — per-component runtime readiness and Android JAR validation.
 
 No build, test task, workflow dispatch or Actions run was launched. Phase 1 baseline CI and Phase 1 device smoke test remain deferred as requested.
+
+
+### Phase 3 follow-up — managed Java validation
+
+- Commit `4618270d1497c711d95dcf3f845ebe5478711af2` splits JDK distribution discovery from managed Java execution readiness. It reports an empty distribution list and validates the managed `java -version` process with a five-second timeout.
+- This is still source-level validation only; actual runtime installation, version output and retry behavior must be verified on a supported device in the planned test phase.
