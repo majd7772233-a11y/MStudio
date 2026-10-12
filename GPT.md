@@ -447,3 +447,34 @@ Additional Phase 2 update:
 - `ToolsManager` now runs the shared `JarFile` validation against the extracted Gradle plugin JAR and Tooling API JAR after atomic copy, and reports component-specific errors if either is malformed. Commit: `0e5c63db1aafc16cf5b51b229297a7730453de19`.
 - The generic validator log no longer incorrectly says all invalid JARs are Android API stubs. The existing `android.jar` checks remain.
 - Re-fetch/source inspection only; no build, test, JAR execution, Actions, or device validation.
+
+
+## New-conversation handoff — 2026-10-12 19:16 +03:00
+
+Read `MSTUDIO_ROADMAP.md` first; its latest handoff checkpoint was committed in roadmap commit `b4c9e48cfc84ae946e3c92be0ca49a1bd4eaab34`. Re-fetch both documents and live source from branch `dev` before doing further work.
+
+### Exact latest source change
+- Finding recorded roadmap-first in `6f8c802c8394854201a7f7e269c715afe354d77b`.
+- `ToolsManager` bundled-JAR validation implementation: `0e5c63db1aafc16cf5b51b229297a7730453de19`.
+- Execution note recorded in roadmap commit `0889cb5d44338a00d6891d3af098dcc6e602d7cb`.
+- Extracted Gradle plugin JAR and Tooling API JAR now pass through the shared `JarFile` container validator after atomic copy. Component-specific errors are returned through `InitResult`; validator logging no longer incorrectly calls every malformed JAR an Android API stub.
+- This is source-level inspection only. **No build, tests, JAR execution, workflow dispatch, GitHub Actions run, or device validation occurred.**
+
+### Current state and unfinished work
+- Canonical phase plan is Phase 1–12 with decimal substeps; the earlier Phase 0 renumbering statement was explicitly marked superseded because it was inaccurate. Do not repeat or reapply a global renumber.
+- Phase 2 MStudio identity is substantially updated but still in progress. A complete source/string/link/resource sweep and later verification remain; preserve upstream AndroidIDE/GPL credit. `applicationId=com.magd.mstudio`, implementation namespace `dev.mutwakil.androidide`, and DocumentsProvider authority `dev.mutwakil.androidide.documents`; do not promise side-by-side install.
+- Phase 3 runtime/setup is in progress. `ToolsManager.initWithResult` has per-component outcomes; retry/init is single-flight; observers use the main thread and Activity teardown removes its listener. Extraction safety covers atomic/staged writes, color-scheme backup recovery, JAR validation, AAPT2 version invocation/marker/timeout, and managed Java version parsing (Java 17+). The managed Java output reader avoids Java 11-only `Files.readString` for min SDK 26 compatibility.
+- Existing `init.gradle` is intentionally not overwritten because it may contain user customizations; `init.gradle.bak` is regenerated from packaged defaults and is not a safe previous-version migration marker.
+- None of the above has been proven by a successful Android build, lint, device execution, offline setup, interrupted setup, low-storage test, or ABI matrix.
+- Phase 1 baseline build/device verification is also not done. Do not launch any build, tests, workflow dispatch or Actions until the roadmap explicitly reaches the verification gate.
+
+### Next steps
+1. Fetch live `dev` state, `MSTUDIO_ROADMAP.md`, `GPT.md`, and relevant source files again before edits.
+2. Continue Phase 3 source audit: shared JAR validator behavior, all `ToolsManager` callers and result consumers, managed Java/AAPT2 failure recovery, and init-script consumers. Record each newly discovered task in roadmap first, then implement, then update both Markdown continuity files with exact commit IDs and evidence limits.
+3. Continue Phase 2 repository-wide branding and user-facing string/link audit without blindly renaming package/authority identifiers or removing GPL/upstream attribution.
+4. Keep cloud build deferred until local MVP is verified. Preserve real Gradle Tooling API as the build engine; NIDE is a selective feature source only.
+
+### Non-negotiable constraints
+- Do not record secret values. Signing variable names: `MY_KEYSTORE_JKS`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`; `MY_KEYSTORE_JKS` must be Base64-encoded JKS bytes for the inherited decoder. Cloudflare variable names: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `MY_JWT_SECRET`.
+- Never recommend `npx wrangler` for the user's Android/Termux architecture.
+- User's roadmap-first rule: if a task is not represented in the roadmap, add and prioritize it there before implementing. Update `GPT.md` after meaningful changes. Do not claim verification without actual evidence.
