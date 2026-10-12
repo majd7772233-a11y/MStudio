@@ -704,3 +704,8 @@ No build, tests, workflow dispatch, Actions run or device validation is authoriz
 
 - No Build, test task, workflow dispatch, GitHub Actions run or device smoke test was performed in this source batch. The primary workflow is manual-dispatch for this branch, and the available GitHub connection has no workflow-dispatch write operation. Phase 1.4 baseline CI and Phase 1.5 device smoke test remain the required acceptance evidence before Phase 3 can be called fully verified or Phase 4 can be treated as unblocked. Do not infer runtime success from these source checks.
 - Source commits: atomic init-script writer `5e75a5e527fc97b7ec261402af6233fca460a58b`; cleanup path semantics `12a654bf218c7c0a1260fb1bddd7e27dc29524a0`; localized setup guidance `20102a96c037639b1cc6e31966f613256b89882a`.
+
+
+### Correction to raster icon scope — 2026-10-12
+
+- This correction supersedes the preceding Phase 2 raster-asset finding only as to phase assignment. The live adaptive launcher XML uses the MStudio vector foreground/background, and the configured minimum SDK is 26; density PNGs are pre-adaptive fallback resources outside the supported API floor. The Fastlane and Play Store PNGs are release metadata, not the active in-app launcher. These inherited raster files remain unchanged and must be updated in Phase 12 before publishing. Do not claim that all release artwork has already been rebranded.
