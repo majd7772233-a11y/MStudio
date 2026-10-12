@@ -124,7 +124,7 @@ class AboutActivity : EdgeToEdgeIDEActivity() {
       createSimpleIconTextItem(
         this@AboutActivity,
         ACTION_WEBSITE,
-        R.drawable.ic_website,
+        R.drawable.ic_github,
         R.string.about_option_website,
         PROJECT_URL
       )
