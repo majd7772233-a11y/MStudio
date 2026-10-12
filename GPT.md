@@ -434,3 +434,9 @@ Additional Phase 2 update:
 - Localized the About section header from “Socials” to “Project links” because its only current item is the MStudio repository. Reworded the contributors summary to reflect both MStudio GitHub contributors and upstream AndroidIDE translators.
 - Updated English and all 12 maintained locale resources; exact commits are listed in `MSTUDIO_ROADMAP.md`. Re-fetched all 13 resource files and verified both strings. No resource build or device UI test was run.
 - No build, tests, workflow dispatch, or Actions run was launched.
+
+### Phase 2 core identity spot-check — 2026-10-12
+
+- Roadmap spot-check was recorded in commit `8b88f390c78738ccc9e60a359caf92adb52bad8c`.
+- Re-fetched current `BuildConfig.kt`, app manifest and default user-facing resources: app label and internal product name are MStudio; onboarding help links target MStudio's README/issues; About labels now distinguish MStudio repository/contributors from upstream AndroidIDE translation credit.
+- Do not rename remaining “AndroidIDE” strings blindly: in inspected core files they are mainly GPL/copyright notices, namespace/provider identifiers, internal resource/style names, or explicit upstream attribution. This is a targeted spot-check, not a complete repository-wide audit or runtime proof. Phase 2 remains in progress.
