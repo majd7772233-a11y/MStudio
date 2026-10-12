@@ -469,9 +469,9 @@
   <string name="msg_terminal_new_sessions_disabled">Não foi possível criar a sessão. Novas sessões estão desativadas!</string>
   <string name="title_install_location_error">Erro no local de instalação</string>
   <string name="title_unsupported_user">Usuário não suportado</string>
-  <string name="title_socials">Sociais</string>
+  <string name="title_socials">Links do projeto</string>
   <string name="title_contributors">Contribuidores</string>
-   <string name="summary_contributors">Créditos aos colaboradores do projeto AndroidIDE original no qual o MStudio se baseia.</string>
+   <string name="summary_contributors">Créditos dos contribuidores do MStudio no GitHub e dos tradutores do projeto AndroidIDE original.</string>
   <string name="title_github_contributors">Contribuidores do MStudio no GitHub</string>
   <string name="title_crowdin_translators">Tradutores do projeto AndroidIDE original</string>
   <string name="title_misc">Outros</string>
