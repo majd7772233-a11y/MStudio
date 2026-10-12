@@ -109,3 +109,13 @@ Before the initial documentation commit:
 - Inspected wrapper/catalog/settings/CI/manifest/BuildConfig, Environment/ToolsManager/JdkUtils, AAPT2 setup, GradleBuildService/ToolingServerRunner/ToolingApiLauncher, project models/validation, onboarding/main/recent project screens, templates/installer and NIDE templates/builder/tasks/parser/compiler/formatter/cache/README.
 - Source review only; no application code changed and successful device build/install was not proven.
 - First code task recommended: secure CI publication/signing defaults, then baseline CI and APK smoke test before rebrand or feature port.
+
+
+## Execution log — 2026-10-12 (Phase 0.1 and 0.2)
+
+- Rechecked latest branch dev and roadmap before acting. Initial HEAD was ccd8b4c9abbcebe8fe72700120af93053e6504da (edit Build.yml); its change removed global Maven credentials but left snapshot publishing ungated.
+- Rechecked root Gradle settings/build files, wrapper, version catalog, daemon JVM properties, .gitmodules, both workflow files, app Gradle config, manifest and .nyx.yml. Confirmed wrapper Gradle 8.14.4, JDK 21 daemon, AGP 8.13.2, Kotlin 2.3.21, Tooling API 9.7.0, and the declared logback-android submodule. Remote inspection does not prove the submodule was initialized in a runner.
+- Phase 0.2 fix committed as 63ae9aa0d9bac985b5efc6869069826b04af7a97: publish and publish_snapshots now require separate opt-in repository variables, strict AndroidIDE-Dev/AndroidIDE allowlisting, intended branches and successful prerequisite jobs. Maven Central credentials exist only in the specific publishing-step environments, not global workflow env. The MStudio fork cannot enter either publish job even if its variables are enabled.
+- Roadmap execution record committed in 656a2d777d0e1f4f06edc296bd1303a41a5a6031; renamed MSTUDIO_ROADMAP to MSTUDIO_ROADMAP.md in commits 237ceb84319534ea618504c9223313765d8e78de and c1c4c640ba63830ac5cf35740ef4eacbc2f7bc0f. This fixes the mismatch with references in this file.
+- Re-fetch the live workflow/roadmap and inspect the Actions run for parser/runtime feedback. No successful build, Maven publication or device test is claimed.
+- Next roadmap task: Phase 0.3 signing audit (core/app/dev.keystore, core/app/build.gradle.kts, gradle.properties, .nyx.yml, and all signing consumers). Do not expose keystore bytes or secrets in notes.
