@@ -19,8 +19,8 @@
   <item>
     <shape android:shape="oval">
       <size android:width="24dp" android:height="24dp"/>
-      <solid android:color="@color/primaryColor"/>
+      <solid android:color="@color/mstudio_brand_background"/>
     </shape>
   </item>
-  <item android:drawable="@mipmap/ic_launcher_foreground"/>
+  <item android:drawable="@drawable/mstudio_launcher_foreground"/>
 </layer-list>
