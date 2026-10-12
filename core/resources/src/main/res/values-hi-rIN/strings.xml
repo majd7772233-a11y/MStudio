@@ -469,9 +469,9 @@
   <string name="msg_terminal_new_sessions_disabled">सेशन नहीं बनाया जा सकता. नए सेशन अक्षम हैं!</string>
   <string name="title_install_location_error">इनस्टॉल करने में विफल</string>
   <string name="title_unsupported_user">असमर्थित उपयोगकर्ता</string>
-  <string name="title_socials">सामाजिक संपर्क</string>
+  <string name="title_socials">परियोजना के लिंक</string>
   <string name="title_contributors">योगदानकर्ता</string>
-   <string name="summary_contributors">उस मूल AndroidIDE परियोजना के योगदानकर्ताओं का श्रेय, जिस पर MStudio आधारित है।</string>
+   <string name="summary_contributors">MStudio के GitHub योगदानकर्ताओं और मूल AndroidIDE परियोजना के अनुवादकों को श्रेय।</string>
   <string name="title_github_contributors">MStudio के GitHub योगदानकर्ता</string>
   <string name="title_crowdin_translators">मूल AndroidIDE परियोजना के अनुवादक</string>
   <string name="title_misc">विविध लिंक</string>
