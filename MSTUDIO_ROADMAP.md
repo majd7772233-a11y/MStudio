@@ -537,3 +537,9 @@ The following entries above record what was discovered at the time; use these li
 
 - The new version parser currently uses `Files.readString(Path, Charset)`, a Java 11 API whose Android platform availability must not be assumed for MStudio's min SDK 26. Avoid introducing a runtime API gap in the repair path: read the short `java -version` output through Java 8-compatible `FileReader`/reader APIs (the output is ASCII), then keep the same version parsing and timeout logic.
 - No build or device test yet; source-level API compatibility review only.
+
+
+## Execution update — Java output reader kept min-SDK compatible (2026-10-12)
+
+- Replaced the Java 11 `Files.readString` call in the managed Java version check with `FileReader`/buffered character reading, preserving the parseable Java 17+ requirement and timeout. Commit: `1c05b4a6f8f30b4e1e4858a2cebbb8bc67f87e0e`.
+- Re-fetched the file and verified the Java check no longer calls `Files.readString`, still uses the version threshold, and uses the already-imported Java 8-compatible reader classes. This is source inspection, not API lint/build/device proof.
