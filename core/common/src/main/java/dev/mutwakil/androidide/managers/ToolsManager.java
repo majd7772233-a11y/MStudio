@@ -617,7 +617,15 @@ public class ToolsManager {
         return false;
       }
 
-      final String versionOutput = Files.readString(output.toPath(), StandardCharsets.UTF_8);
+      final StringBuilder versionText = new StringBuilder();
+      try (Reader reader = new FileReader(output)) {
+        final char[] buffer = new char[512];
+        int count;
+        while ((count = reader.read(buffer)) != -1) {
+          versionText.append(buffer, 0, count);
+        }
+      }
+      final String versionOutput = versionText.toString();
       final var versionMatcher = java.util.regex.Pattern
           .compile("version\\s+\\\"(?:1\\.)?(\\d+)")
           .matcher(versionOutput);
