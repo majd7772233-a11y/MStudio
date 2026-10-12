@@ -482,3 +482,8 @@ The following entries above record what was discovered at the time; use these li
 - Added `images/mstudio-icon.svg` using the same MStudio monogram and brand colors as the active launcher vector. Commit: `d0ff881b1ff1bd76d6e8d5dc67542d62a56f4d1f`.
 - Updated README to use the new SVG rather than inherited `images/icon.png`. Commit: `7f0e379bb272506ef9729004b5c8d7518649b049`.
 - The inherited PNG remains in the repository, and no claim is made that all references to it have been removed; this correction covers the README's visible logo only.
+
+
+### Phase 2 README feature-claim qualification — 2026-10-12
+
+- The README feature checklist is inherited from the source project and currently uses checked boxes that could be mistaken for verified MStudio runtime behavior. Add a concise note clarifying that the list describes features present in source and that device/build compatibility remains subject to the roadmap's evidence gate. Do not remove useful feature documentation or imply every feature has passed smoke tests.
