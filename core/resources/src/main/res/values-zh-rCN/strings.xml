@@ -482,4 +482,9 @@
   <string name="summary_open_source_licenses">查看开放源代码许可。</string>
   <string name="idepref_jdkVersion_title">JDK 版本</string>
   <string name="idepref_jdkVersion_summary">当前选择：%1$s（更改需重启）</string>
+
+    <string name="runtime_setup_failed_title">运行环境设置需要处理</string>
+    <string name="runtime_setup_failed_message">无法准备某些内置运行环境组件。修复设置之前，项目构建可能会失败。您可以立即重试，也可以继续使用 MStudio 并稍后重试。</string>
+    <string name="runtime_setup_retry">重试设置</string>
+    <string name="runtime_setup_later">稍后</string>
 </resources>
