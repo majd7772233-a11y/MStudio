@@ -469,9 +469,9 @@
   <string name="msg_terminal_new_sessions_disabled">无法创建会话，新会话被禁用！</string>
   <string name="title_install_location_error">安装位置错误</string>
   <string name="title_unsupported_user">不支持的用户</string>
-  <string name="title_socials">社交</string>
+  <string name="title_socials">项目链接</string>
   <string name="title_contributors">贡献者</string>
-   <string name="summary_contributors">致谢 MStudio 所基于的上游 AndroidIDE 项目的贡献者。</string>
+   <string name="summary_contributors">致谢 MStudio 的 GitHub 贡献者及上游 AndroidIDE 项目的翻译者。</string>
   <string name="title_github_contributors">MStudio 的 GitHub 贡献者</string>
   <string name="title_crowdin_translators">上游 AndroidIDE 项目翻译者</string>
   <string name="title_misc">杂项</string>
