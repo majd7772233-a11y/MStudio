@@ -398,3 +398,10 @@ Additional Phase 2 update:
 
 - Roadmap updated first in commit `e9b8f14c51680238ecdd42f80de83fd026f0df76`.
 - The Java version parser introduced `Files.readString(Path, Charset)`, a Java 11 API that may not be available across min SDK 26 devices. Replace it with Java 8-compatible `FileReader`/reader logic before any build, preserving the parser and timeout.
+
+
+### Phase 3 min-SDK reader fix — 2026-10-12
+
+- Roadmap updated first in commit `54ce9c9a1d2ed7009d2286d2b2a0f6b20cc35afd`.
+- Commit `1c05b4a6f8f30b4e1e4858a2cebbb8bc67f87e0e` replaces `Files.readString` with `FileReader` plus a character buffer, avoiding a Java 11 API assumption on min SDK 26. The Java 17+ version parsing and timeout remain intact.
+- Re-fetched the source to confirm the change. No build/API lint/device verification was run.
