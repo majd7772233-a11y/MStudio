@@ -5,7 +5,7 @@
 <h2 align="center"><b>MStudio</b></h2>
 <p align="center">
   An IDE to develop real, Gradle-based Android applications on Android devices.
-<p><br>
+</p>
 
 <p align="center">
 <!-- Build and test -->
