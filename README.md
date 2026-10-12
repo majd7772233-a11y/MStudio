@@ -1,21 +1,21 @@
 <p align="center">
-  <img src="./images/icon.png" alt="AndroidIDE Dev" width="80" height="80"/>
+  <img src="./images/icon.png" alt="MStudio" width="80" height="80"/>
 </p>
 
-<h2 align="center"><b>AndroidIDE Dev</b></h2>
+<h2 align="center"><b>MStudio</b></h2>
 <p align="center">
   An IDE to develop real, Gradle-based Android applications on Android devices.
 <p><br>
 
 <p align="center">
 <!-- Latest release -->
-<img src="https://img.shields.io/github/v/release/Wadamzmail/AndroidIDE?include_prereleases&amp;label=latest%20release" alt="Latest release">
+<img src="https://img.shields.io/github/v/release/majd7772233-a11y/MStudio?include_prereleases&amp;label=latest%20release" alt="Latest release">
 <!-- Build and test -->
-<img src="https://github.com/Wadamzmail/AndroidIDE/actions/workflows/build.yml/badge.svg" alt="Builds and tests">
+<img src="https://github.com/majd7772233-a11y/MStudio/actions/workflows/build.yml/badge.svg" alt="Builds and tests">
 <!--Downloads -->
-<img src="https://img.shields.io/github/downloads/Wadamzmail/AndroidIDE/total" alt="Downloads">
+<img src="https://img.shields.io/github/downloads/majd7772233-a11y/MStudio/total" alt="Downloads">
 <!-- CodeFactor -->
-<img src="https://www.codefactor.io/repository/github/Wadamzmail/androidide/badge/main" alt="CodeFactor">
+<img src="https://www.codefactor.io/repository/github/majd7772233-a11y/mstudio/badge/dev" alt="CodeFactor">
 <!-- Crowdin -->
 <a href="https://crowdin.com/project/androidide"><img src="https://badges.crowdin.net/androidide/localized.svg" alt="Crowdin"></a>
 <!-- License -->
@@ -26,8 +26,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Wadamzmail/AndroidIDE/issues/new?labels=bug&template=BUG.yml&title=%5BBug%5D%3A+">Report a bug</a> &nbsp; &#8226; &nbsp;
-  <a href="https://github.com/Wadamzmail/AndroidIDE/issues/new?labels=feature&template=FEATURE.yml&title=%5BFeature%5D%3A+">Request a feature</a> &nbsp; &#8226; &nbsp;
+  <a href="https://github.com/majd7772233-a11y/MStudio/issues/new?labels=bug&title=%5BBug%5D%3A+">Report a bug</a> &nbsp; &#8226; &nbsp;
+  <a href="https://github.com/majd7772233-a11y/MStudio/issues/new?labels=enhancement&title=%5BFeature%5D%3A+">Request a feature</a> &nbsp; &#8226; &nbsp;
   <a href="https://t.me/androidide_discussions">Join us on Telegram</a>
 </p>
 
@@ -63,15 +63,15 @@
     height="80">](https://f-droid.org/packages/dev.mutwakil.androidide)
 [<img src="https://github.com/Kunzisoft/Github-badge/raw/main/get-it-on-github.svg"
     alt="Get it on F-Droid"
-    height="80">](https://github.com/AndroidIDE-Pro/AndroidIDE/releases)
+    height="80">](https://github.com/majd7772233-a11y/MStudio/releases)
 
 > _Please install AndroidIDE from trusted sources only i.e._
 > - [_The AndroidIDE website_](https://androidide.com)
 > - [_GitHub Releases_](https://github.com/AndroidIDE-Pro/AndroidIDE/releases)
-> - [_GitHub Actions_](https://github.com/AndroidIDE-Pro/AndroidIDE/actions?query=branch%3Adev+event%3Apush)
+> - [_GitHub Actions_](https://github.com/majd7772233-a11y/MStudio/actions?query=branch%3Adev+event%3Apush)
 > - [_F-Droid_](https://f-droid.org/packages/dev.mutwakil.androidide/)
 
-- Download the AndroidIDE APK from the mentioned trusted sources.
+- MStudio is under active rebranding and source-level hardening. Do not treat an APK as a production release until its signing identity and device smoke tests have been verified.
 - Follow the
   instructions [here](https://docs.androidide.com/tutorials/get-started.html) to
   install the build tools.
