@@ -67,7 +67,7 @@
 
 > _Please install AndroidIDE from trusted sources only i.e._
 > - [_The AndroidIDE website_](https://androidide.com)
-> - [_GitHub Releases_](https://github.com/AndroidIDE-Pro/AndroidIDE/releases)
+> - [_GitHub Releases_](https://github.com/majd7772233-a11y/MStudio/releases)
 > - [_GitHub Actions_](https://github.com/majd7772233-a11y/MStudio/actions?query=branch%3Adev+event%3Apush)
 > - [_F-Droid_](https://f-droid.org/packages/dev.mutwakil.androidide/)
 
@@ -116,8 +116,8 @@ Thanks to all the developers who have contributed to this project.
 
 ## Contact Us
 
-- [Website](https://m.androidide.com)
-- [Telegram](https://t.me/androidide_discussions)
+- [MStudio source repository](https://github.com/majd7772233-a11y/MStudio)
+- [Upstream AndroidIDE community (inherited project)](https://t.me/androidide_discussions)
 
 ## License
 
