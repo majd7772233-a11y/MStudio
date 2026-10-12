@@ -250,7 +250,7 @@ public class ToolsManager {
       runComponent("color-schemes", ready, failures, () -> extractColorScheme(app));
       runComponent("gradle-init-script", ready, failures, ToolsManager::writeInitScript);
       runComponent("kotlin-artifact-script", ready, failures, ToolsManager::extractDownloadKtScript);
-      runComponent("runtime-cleanup", ready, failures, ToolsManager::deleteIdeenv);
+      runOptionalComponent("runtime-cleanup", ready, ToolsManager::deleteIdeenv);
 
       return new InitResult(true, true, ready, failures);
     }).whenComplete((result, error) -> {
@@ -298,6 +298,16 @@ public class ToolsManager {
           ? error.getClass().getSimpleName() : error.getMessage();
       failures.put(name, message);
       LOG.error("Runtime component '{}' failed to initialize: {}", name, message, error);
+    }
+  }
+
+  /** Optional cleanup must be reported accurately without blocking an otherwise usable runtime. */
+  private static void runOptionalComponent(String name, Set<String> ready, Runnable action) {
+    try {
+      action.run();
+      ready.add(name);
+    } catch (Throwable error) {
+      LOG.warn("Optional runtime cleanup '{}' did not complete; continuing setup", name, error);
     }
   }
 
@@ -563,7 +573,7 @@ public class ToolsManager {
   private static void deleteIdeenv() {
     final var file = new File(Environment.BIN_DIR, "ideenv");
     if (file.exists() && !file.delete()) {
-      LOG.warn("Unable to delete file: {}", file);
+      throw new IllegalStateException("Unable to remove stale runtime file: " + file);
     }
   }
 
@@ -836,13 +846,76 @@ public class ToolsManager {
   }
 
   private static void writeInitScript() {
-    final var initScript = Environment.INIT_SCRIPT;
-    final var initScriptBak = new File(initScript.getParentFile(), initScript.getName() + ".bak");
-    final var contents = readInitScript();
+    final File initScript = Environment.INIT_SCRIPT;
+    final File parent = initScript.getParentFile();
+    if (parent == null || (!parent.isDirectory() && !parent.mkdirs() && !parent.isDirectory())) {
+      throw new IllegalStateException("Unable to create Gradle init-script directory: " + parent);
+    }
 
-    FilesKt.writeText(initScriptBak, contents, StandardCharsets.UTF_8);
-    if (!initScript.exists()) {
-      FilesKt.writeText(initScript, contents, StandardCharsets.UTF_8);
+    final String contents = readInitScript();
+    if (initScript.exists()) {
+      if (!initScript.isFile() || initScript.length() == 0) {
+        throw new IllegalStateException(
+            "Existing Gradle init script is not a non-empty regular file; it was left untouched: "
+                + initScript);
+      }
+    } else {
+      writeTextAtomically(initScript, contents);
+    }
+
+    // This is a copy of packaged defaults, not a previous-version backup. It is optional:
+    // failure to refresh it must not make a valid active init script appear unusable.
+    final File initScriptBak = new File(parent, initScript.getName() + ".bak");
+    try {
+      writeTextAtomically(initScriptBak, contents);
+    } catch (RuntimeException error) {
+      LOG.warn("Unable to refresh optional packaged-default init-script copy: {}", initScriptBak,
+          error);
+    }
+  }
+
+  /** Writes a sibling temporary file and replaces the destination only after the write is synced. */
+  private static void writeTextAtomically(File destination, String contents) {
+    final File parent = destination.getParentFile();
+    if (parent == null || (!parent.isDirectory() && !parent.mkdirs() && !parent.isDirectory())) {
+      throw new IllegalStateException("Unable to create text destination directory: " + parent);
+    }
+
+    final File temporary = new File(parent, destination.getName() + ".tmp");
+    try {
+      if (temporary.exists() && !temporary.isFile()) {
+        throw new IOException("Temporary text path is not a regular file: " + temporary);
+      }
+
+      try (FileOutputStream stream = new FileOutputStream(temporary);
+           java.io.OutputStreamWriter writer =
+               new java.io.OutputStreamWriter(stream, StandardCharsets.UTF_8)) {
+        writer.write(contents);
+        writer.flush();
+        stream.getFD().sync();
+      }
+
+      if (!temporary.isFile() || temporary.length() == 0) {
+        throw new IOException("Written text file is empty: " + temporary);
+      }
+
+      try {
+        Files.move(
+            temporary.toPath(),
+            destination.toPath(),
+            StandardCopyOption.REPLACE_EXISTING,
+            StandardCopyOption.ATOMIC_MOVE);
+      } catch (AtomicMoveNotSupportedException unsupported) {
+        Files.move(
+            temporary.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
+      }
+    } catch (IOException error) {
+      throw new IllegalStateException(
+          "Failed to write text file atomically: " + destination, error);
+    } finally {
+      if (temporary.exists() && temporary.isFile() && !temporary.delete()) {
+        LOG.warn("Unable to remove temporary text file: {}", temporary);
+      }
     }
   }
 
