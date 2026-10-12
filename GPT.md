@@ -142,3 +142,9 @@ Identity changes:
 - Package/namespace/application ID remain unchanged at `dev.mutwakil.androidide`.
 - Nyx release metadata now points at `majd7772233-a11y/MStudio` and uses MStudio asset names.
 - Phase 1 is still in progress: inspect/update remaining About/help/onboarding strings, icon/splash visuals, README/user-visible references, and inherited attribution before calling the rebrand complete.
+
+
+Additional Phase 1 update:
+- README heading, repo badges, issue links, Actions/artifact/release destinations and contact links now refer to MStudio. It explicitly warns that MStudio is work-in-progress and that inherited AndroidIDE documentation may not match.
+- Original GPL attribution and upstream acknowledgements were preserved.
+- The current app resources directory does not contain a tracked `mipmap/` or `drawable/` root; the manifest references `@mipmap/ic_launcher`, so icon/splash assets likely come from another generated/external resource path. Trace that path before replacing icons. About screen still uses inherited project metadata and must be audited before Phase 1 is complete.
