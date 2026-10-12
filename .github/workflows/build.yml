@@ -19,15 +19,7 @@ env:
   # Misc
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Signing info
-  IDE_SIGNING_ALIAS: ${{ secrets.IDE_SIGNING_ALIAS }}
-  IDE_SIGNING_AUTH_PASS: ${{ secrets.IDE_SIGNING_AUTH_PASS }}
-  IDE_SIGNING_AUTH_USER: ${{ secrets.IDE_SIGNING_AUTH_USER }}
-  IDE_SIGNING_KEY_PASS: ${{ secrets.IDE_SIGNING_KEY_PASS }}
-  IDE_SIGNING_STORE_PASS: ${{ secrets.IDE_SIGNING_STORE_PASS }}
-  IDE_SIGNING_URL: ${{ secrets.IDE_SIGNING_URL }}
-  IDE_SIGNING_KEY_BIN: ${{ secrets.IDE_SIGNING_KEY_BIN }}
-  
+
   # Build configuration
   BUILD_JAVA_VERSION: '21'
   BUILD_JAVA_DIST: 'adopt'
@@ -67,7 +59,29 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+      - name: Validate release signing secrets
+        if: ${{ matrix.build_type == 'release' }}
+        env:
+          IDE_SIGNING_ALIAS: ${{ secrets.KEY_ALIAS }}
+          IDE_SIGNING_KEY_PASS: ${{ secrets.KEY_PASSWORD }}
+          IDE_SIGNING_STORE_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
+          IDE_SIGNING_KEY_BIN: ${{ secrets.MY_KEYSTORE_JKS }}
+        run: |
+          set -euo pipefail
+          for name in IDE_SIGNING_ALIAS IDE_SIGNING_KEY_PASS IDE_SIGNING_STORE_PASS IDE_SIGNING_KEY_BIN; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Required GitHub Secret for ${name} is missing."
+              exit 1
+            fi
+          done
+          printf '%s' "$IDE_SIGNING_KEY_BIN" | base64 --decode >/dev/null
+
       - name: Assemble ${{ matrix.build_type }} APK
+        env:
+          IDE_SIGNING_ALIAS: ${{ matrix.build_type == 'release' && secrets.KEY_ALIAS || '' }}
+          IDE_SIGNING_KEY_PASS: ${{ matrix.build_type == 'release' && secrets.KEY_PASSWORD || '' }}
+          IDE_SIGNING_STORE_PASS: ${{ matrix.build_type == 'release' && secrets.KEYSTORE_PASSWORD || '' }}
+          IDE_SIGNING_KEY_BIN: ${{ matrix.build_type == 'release' && secrets.MY_KEYSTORE_JKS || '' }}
         run: |
           build_type=${{ matrix.build_type }}
           ./gradlew :core:app:assemble${build_type^}
