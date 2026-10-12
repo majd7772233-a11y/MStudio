@@ -335,3 +335,9 @@ Additional Phase 2 update:
 - Roadmap updated first in commit `7ad2662913bb5e2842aaaa918c8bb39092c54f97`.
 - Added `images/mstudio-icon.svg` matching the active MStudio monogram/brand colors (commit `d0ff881b1ff1bd76d6e8d5dc67542d62a56f4d1f`) and changed the README image to it (commit `7f0e379bb272506ef9729004b5c8d7518649b049`).
 - The legacy `images/icon.png` remains untouched pending a full reference audit; only the README display is confirmed rebranded.
+
+
+### Phase 2 README feature-claim qualification — 2026-10-12
+
+- Roadmap updated first in commit `45d26700014658d7826c111d7b0d14650616ce7a`.
+- README feature checkboxes describe source features, not proof every flow works on MStudio devices. Add an explicit qualifier directing readers to the roadmap for verified status, without removing the useful feature list.
