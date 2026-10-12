@@ -470,9 +470,9 @@
   <string name="msg_terminal_new_sessions_disabled">Невозможно создать сессию. Новые сессии отключены!</string>
   <string name="title_install_location_error">Недопустимая локация для установки</string>
   <string name="title_unsupported_user">Недопустимый пользователь</string>
-  <string name="title_socials">Свяжитесь с нами</string>
+  <string name="title_socials">Ссылки проекта</string>
   <string name="title_contributors">Разработчики</string>
-   <string name="summary_contributors">Благодарность участникам исходного проекта AndroidIDE, на котором основан MStudio.</string>
+   <string name="summary_contributors">Благодарность участникам MStudio на GitHub и переводчикам исходного проекта AndroidIDE.</string>
   <string name="title_github_contributors">Участники MStudio на GitHub</string>
   <string name="title_crowdin_translators">Переводчики исходного проекта AndroidIDE</string>
   <string name="title_misc">Прочее</string>
