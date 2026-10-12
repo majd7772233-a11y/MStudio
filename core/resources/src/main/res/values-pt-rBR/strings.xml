@@ -482,4 +482,9 @@
   <string name="summary_open_source_licenses">Ver licenças de código aberto.</string>
   <string name="idepref_jdkVersion_title">JDK version</string>
   <string name="idepref_jdkVersion_summary">Currently selected: %1$s (requires restart if changed)</string>
+
+    <string name="runtime_setup_failed_title">A configuração do ambiente precisa de atenção</string>
+    <string name="runtime_setup_failed_message">Não foi possível preparar alguns componentes integrados do ambiente. As compilações podem falhar até que a configuração seja corrigida. Tente novamente agora ou continue usando o MStudio e tente mais tarde.</string>
+    <string name="runtime_setup_retry">Tentar configurar novamente</string>
+    <string name="runtime_setup_later">Mais tarde</string>
 </resources>
