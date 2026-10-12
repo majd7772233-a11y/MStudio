@@ -30,6 +30,8 @@
 
 ## Features
 
+This checklist describes features present in the source. It is not a claim that every feature has passed device/runtime verification; see the [roadmap](./MSTUDIO_ROADMAP.md) for current evidence and known limitations.
+
 - [x] Gradle support.
 - [x] `JDK 21` available for use.
 - [x] Terminal with necessary packages.
