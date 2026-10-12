@@ -65,6 +65,8 @@ MStudio is under active development. **No APK should be treated as a verified pr
 
 ## Limitations
 
+- Package identity: the installed application ID is `com.magd.mstudio`, while the implementation namespace remains `dev.mutwakil.androidide`. The DocumentsProvider authority still uses `dev.mutwakil.androidide.documents`; side-by-side installation with upstream AndroidIDE is not claimed or verified.
+
 - MStudio's inherited Gradle integration requires Android Gradle Plugin v7.2.0 or newer according to the current source documentation; compatibility still needs verification across supported projects.
 - The Android SDK Manager can be used from the included terminal, but tool availability depends on the Android-compatible packages available to the runtime.
 - Official NDK support is not available because the required NDK tools have not been built for Android.
