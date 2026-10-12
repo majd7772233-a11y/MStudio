@@ -53,6 +53,10 @@
     <string name="error_quick_run_failed">Quick Run failed.</string>
     <string name="status_building">Building…</string>
     <string name="init_failed_with_reason">%1$s: %2$s</string>
+    <string name="runtime_setup_failed_title">Runtime setup needs attention</string>
+    <string name="runtime_setup_failed_message">Some built-in runtime components could not be prepared. Building projects may fail until setup is repaired. You can retry now or continue using MStudio and retry later.</string>
+    <string name="runtime_setup_retry">Retry setup</string>
+    <string name="runtime_setup_later">Later</string>
 
     <string name="file_name_too_long">File name cannot exceed 40 characters</string>
 
@@ -731,7 +735,7 @@
     <string name="title_unsupported_user">Unsupported user</string>
     <string name="title_socials">Socials</string>
     <string name="title_contributors">Contributors</string>
-    <string name="summary_contributors">Top community contributors.</string>
+    <string name="summary_contributors">Contributor credits for the upstream AndroidIDE project that MStudio is based on.</string>
     <string name="title_github_contributors">GitHub Contributors</string>
     <string name="title_crowdin_translators">Crowdin Translators</string>
     <string name="title_misc">Misc</string>
