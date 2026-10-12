@@ -482,4 +482,9 @@
   <string name="summary_open_source_licenses">View open source licenses.</string>
   <string name="idepref_jdkVersion_title">JDK version</string>
   <string name="idepref_jdkVersion_summary">Currently selected: %1$s (requires restart if changed)</string>
+
+    <string name="runtime_setup_failed_title">تحتاج تهيئة مكونات التشغيل إلى إصلاح</string>
+    <string name="runtime_setup_failed_message">تعذر تجهيز بعض مكونات التشغيل المضمنة. قد يفشل بناء المشاريع حتى يتم إصلاح الإعداد. يمكنك إعادة المحاولة الآن أو متابعة استخدام MStudio والمحاولة لاحقًا.</string>
+    <string name="runtime_setup_retry">إعادة المحاولة</string>
+    <string name="runtime_setup_later">لاحقًا</string>
 </resources>
