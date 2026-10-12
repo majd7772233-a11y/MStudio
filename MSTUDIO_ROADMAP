@@ -192,3 +192,21 @@ Build from known commit; verify APK checksum/signature/ABI; test clean install/u
 - [ ] Local build works without GitHub login and can reuse dependencies offline.
 
 Keep all boxes unchecked until evidence is recorded.
+
+
+## Execution record — 2026-10-12
+
+### Phase 0.1 — source state reconfirmed
+
+- Rechecked `dev` at starting HEAD `ccd8b4c9abbcebe8fe72700120af93053e6504da` (`edit Build.yml`). That commit removed workflow-wide Maven credentials but left snapshot publishing insufficiently gated.
+- Rechecked root settings/build scripts, Gradle wrapper, version catalog, daemon JVM settings, `.gitmodules`, workflow YAML, app Gradle configuration, manifest, `.nyx.yml`, and project architecture/cloud-build notes.
+- Confirmed wrapper Gradle 8.14.4, daemon JDK 21, AGP 8.13.2, Kotlin 2.3.21, Gradle Tooling API 9.7.0, and declared submodule `composite-builds/external/logback-android`. Remote source inspection confirms the declaration, not runner checkout status.
+- Phase 0.1 source recheck is complete; this is not proof of a successful build or device test.
+
+### Phase 0.2 — publishing guard committed
+
+- Commit `63ae9aa0d9bac985b5efc6869069826b04af7a97` (`ci: guard Maven publishing behind upstream-only opt-in`) removes Maven Central credentials from workflow-wide `env` and scopes them to the publishing steps only.
+- Release publishing requires `vars.MSTUDIO_ENABLE_UPSTREAM_RELEASE_PUBLISHING == 'true'`, repository `AndroidIDE-Dev/AndroidIDE`, `main`, a non-PR event, and successful APK + Tooling API jobs.
+- Snapshot publishing requires `vars.MSTUDIO_ENABLE_UPSTREAM_SNAPSHOT_PUBLISHING == 'true'`, repository `AndroidIDE-Dev/AndroidIDE`, branch `dev` or `indexing`, a non-PR event, and a successful APK job. The MStudio fork is blocked by the repository allowlist.
+- Re-fetched the committed workflow and verified both opt-in checks, both repository allowlists, and that Maven credentials are scoped to the two publishing steps. Check the resulting Actions run for parser/runtime feedback; no build, publication, or device test is claimed yet.
+- Next: Phase 0.3 signing audit, then Phase 0.4 baseline CI.
