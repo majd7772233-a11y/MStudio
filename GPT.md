@@ -241,3 +241,11 @@ Additional Phase 2 update:
 
 - Roadmap updated first in commit `2aae1d03141ddb4a803add1ea87a11d551f82886`.
 - The new runtime recovery dialog uses four resource keys (`runtime_setup_failed_title`, `runtime_setup_failed_message`, `runtime_setup_retry`, `runtime_setup_later`) currently present in default English. Add translated values to the maintained locale string files, especially Arabic, so this new UI respects the app's existing localization/RTL support.
+
+
+### Phase 2 final UI sweep — 2026-10-12
+
+- Roadmap amended before this final sweep in commit `dcbe2beb017473f6764f78f1ce01d6ee0765a8f3`.
+- `core/resources/src/main/res/values/termux_app_strings.xml` and `termux_shared_strings.xml` contain visible AndroidIDE error/setup copy. Update only the string values to MStudio; retain upstream license comments and all internal package/path strings such as `dev.mutwakil.androidide` and `.androidide`.
+- `core/app/src/main/res/layout/layout_about_header.xml` directly referenced the inherited raster `@mipmap/ic_launcher_foreground`. Switch it to `@drawable/mstudio_launcher_foreground`; `fragment_onboarding_greeting.xml` already uses `@drawable/ic_launcher_fg_vector`, which was rebranded.
+- `androidide_header.xml` and `androidide_header_compact.xml` are legacy wide vector resources; no use has yet been located in the inspected onboarding/About layouts. Do not rewrite/remove them without checking all references; the active manifest icon, onboarding greeting, About header and splash have known MStudio vector paths.
