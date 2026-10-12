@@ -285,3 +285,10 @@ Additional Phase 2 update:
 - French unsupported-device message corrected in `a4525ca4c5ca216114e343bfe189f11fbfa9c81c`; Turkish contribution prompt corrected in `72e25fff369bf574ae877aa60e7a91a66a8d3174`.
 - Kept AndroidIDE references where they are accurate upstream attribution and left internal package/path identifiers unchanged. Romanian and Bengali About footers already use MStudio.
 - No build, test, workflow dispatch or Actions run. The Phase 2 sweep remains source-level and not exhaustive until the remaining full-source scan and verification gate.
+
+
+### Phase 2 README audit — stale upstream destinations (2026-10-12)
+
+- Roadmap updated first in commit `49e674e70d110e9049eebe8a3b9251f211882860`.
+- The live README still links AndroidIDE docs and Telegram for MStudio support, uses the inherited F-Droid app ID `dev.mutwakil.androidide` despite the MStudio applicationId `com.magd.mstudio`, calls installation sources AndroidIDE, and points at the upstream AndroidIDE Crowdin project.
+- Correct README destinations and product names without claiming any release artifact or F-Droid package is verified. Keep AndroidIDE clearly credited as upstream foundation; only link to upstream resources in that context. No builds/Actions before the verification gate.
