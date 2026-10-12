@@ -430,3 +430,10 @@ No build, test task, workflow dispatch or Actions run was launched. Phase 1 base
 - Corrected Turkish contribution copy to name MStudio rather than “Android IDE” in commit `72e25fff369bf574ae877aa60e7a91a66a8d3174`.
 - Preserved explicit AndroidIDE upstream attribution, GPL notices, internal package names and resource format placeholders. Live scan of the maintained locale files also confirmed the Romanian and Bengali About footers already use MStudio. This is a targeted sweep, not proof that every user-facing string in every source file has been audited.
 - No build, test task, workflow dispatch or Actions run was launched.
+
+
+### Phase 2 README correction plan — outdated distribution and help destinations (2026-10-12)
+
+- Live `README.md` still presents the inherited AndroidIDE docs site and Telegram group as MStudio support, links the inherited F-Droid package `dev.mutwakil.androidide` even though MStudio's applicationId is `com.magd.mstudio`, and labels installation sources as AndroidIDE. It also advertises an AndroidIDE Crowdin project as if it were MStudio translations.
+- Before editing README, keep the claims evidence-based: MStudio's own GitHub repository, issue tracker, CONTRIBUTING guide and source roadmap are verified. Do not advertise GitHub Releases/Actions or F-Droid as a tested installation source because no verified release/device smoke test has been recorded. Preserve an explicit upstream AndroidIDE attribution section and links only where they genuinely explain the code base or upstream project.
+- This work remains within Phase 2 and must be completed before declaring the user-facing identity sweep done. No builds or Actions are authorized yet.
