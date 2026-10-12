@@ -61,11 +61,9 @@ class AboutActivity : EdgeToEdgeIDEActivity() {
 
     private var id = 0
     private val ACTION_WEBSITE = id++
-    private val ACTION_EMAIL = id++
-    private val ACTION_TG_CHANNEL = id++
-    private val ACTION_TG_GROUP = id++
     private val ACTION_CONTRIBUTE = id++
     private val ACTION_CONTRIBUTORS = id++
+    private const val PROJECT_URL = "https://github.com/majd7772233-a11y/MStudio"
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -114,54 +112,22 @@ class AboutActivity : EdgeToEdgeIDEActivity() {
 
   private fun handleActionClick(action: SimpleIconTitleDescriptionItem) {
     when (action.id) {
-      ACTION_WEBSITE -> app.openWebsite()
-      ACTION_EMAIL -> app.emailUs()
-      ACTION_TG_GROUP -> app.openTelegramGroup()
-      ACTION_TG_CHANNEL -> app.openTelegramChannel()
-      ACTION_CONTRIBUTE -> app.openUrl(BaseApplication.CONTRIBUTOR_GUIDE_URL)
+      ACTION_WEBSITE -> app.openUrl(PROJECT_URL)
+      ACTION_CONTRIBUTE -> app.openUrl(PROJECT_URL)
       ACTION_CONTRIBUTORS -> startActivity(Intent(this, ContributorsActivity::class.java))
     }
   }
 
   private fun createSocialItems(): List<IconTitleDescriptionItem> {
-    return mutableListOf<IconTitleDescriptionItem>().apply {
-      add(
-        createSimpleIconTextItem(
-          this@AboutActivity,
-          ACTION_WEBSITE,
-          R.drawable.ic_website,
-          R.string.about_option_website,
-          BuildInfo.PROJECT_SITE
-        )
+    return listOf(
+      createSimpleIconTextItem(
+        this@AboutActivity,
+        ACTION_WEBSITE,
+        R.drawable.ic_website,
+        R.string.about_option_website,
+        PROJECT_URL
       )
-      add(
-        createSimpleIconTextItem(
-          this@AboutActivity,
-          ACTION_EMAIL,
-          R.drawable.ic_email,
-          R.string.about_option_email,
-          BaseApplication.EMAIL
-        )
-      )
-      add(
-        createSimpleIconTextItem(
-          this@AboutActivity,
-          ACTION_TG_GROUP,
-          R.drawable.ic_telegram,
-          R.string.discussions_on_telegram,
-          BaseApplication.TELEGRAM_GROUP_URL
-        )
-      )
-      add(
-        createSimpleIconTextItem(
-          this@AboutActivity,
-          ACTION_TG_CHANNEL,
-          R.drawable.ic_telegram,
-          R.string.official_tg_channel,
-          BaseApplication.TELEGRAM_CHANNEL_URL
-        )
-      )
-    }
+    )
   }
 
   private fun createMiscItems(): List<IconTitleDescriptionItem> {
