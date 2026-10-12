@@ -270,3 +270,9 @@ Additional Phase 2 update:
 - `MainActivity.kt` already observes runtime setup results with lifecycle-safe cleanup and a retry dialog. `ToolsManager` already returns per-component results and guards supported-ABI initialization against duplicate concurrent runs. These are source implementations, not device-tested behavior.
 - Arabic and Spanish About-footer branding fixed in commits `7d0651d489b9750f825b5e977b8201276ae689f4` and `43799c4ca889988a2a53b7363aa7614c26665fe6`, retaining format placeholders.
 - No builds/tests/Actions until the roadmap verification gate. Continue auditing remaining locales and Phase 3 semantics before marking either phase complete.
+
+
+### Phase 2 locale audit — device warning and contribute copy (2026-10-12)
+
+- Roadmap updated first in commit `9f1bb2617a24894350a80d829a7283c448336149`.
+- Additional source audit found French unsupported-device copy still says AndroidIDE and Turkish contribution copy still says Android IDE. These are product-facing strings, unlike legitimate upstream attribution. Correct them to MStudio while preserving the upstream contributor credit and all internal package/path references.
