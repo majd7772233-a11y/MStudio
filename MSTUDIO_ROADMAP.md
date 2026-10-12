@@ -215,3 +215,30 @@ Keep all boxes unchecked until evidence is recorded.
 ### Source-state correction — submodule path
 
 - Follow-up inspection of the GitHub contents API for `composite-builds/external/logback-android` returned an ordinary directory listing, not a Git submodule entry. The `.gitmodules` file declares this path as a submodule, so the committed tree and submodule declaration appear inconsistent. Resolve this explicitly before treating recursive checkout as proven; do not claim the submodule is initialized or assume its state.
+
+
+## Execution log — 2026-10-12 (Phase 0.3 security audit + Phase 1 identity kickoff)
+
+### Phase 0.3 — signing material audit/remediation
+
+Inspected `core/app/build.gradle.kts`, root `gradle.properties`, `.nyx.yml`, `.gitignore`, `SigningConfigPlugin.kt`, `SigningKeyUtils.kt`, `config.kt`, the main manifest, and the tracked signing paths. The actual build-logic signing path is `signing/androidide.keystore`; `SigningConfigPlugin` only attaches its shared signing configuration when the key and all three alias/store/key credentials are available. The plugin attempts to obtain a missing key from environment/property-configured sources, and otherwise leaves the build without that common signing config.
+
+Changes committed:
+- Removed hardcoded `androidide` alias/password defaults from tracked `gradle.properties`.
+- Added ignore rules for local signing material under `signing/` and `core/app/`.
+- Removed tracked `signing/androidide.keystore`, the empty `signing/signing-key.jks` placeholder, and `core/app/dev.keystore`. No key bytes or secrets were displayed.
+- Existing Git history is not rewritten. Treat the inherited keystore as public/compromised; do not reuse it as MStudio's release identity. A new release identity must be created privately and supplied through owner-controlled secrets or an untracked local Gradle properties file.
+- Do not distribute a release APK until its signing identity is explicitly configured and verified. The build itself has intentionally not been run at this stage.
+
+**Status:** source/config remediation committed; signing lifecycle still needs an explicit, testable release-task guard and a new private release identity before release distribution. This is not evidence of a successful build.
+
+### Phase 1 — identity kickoff (not yet complete)
+
+- Changed the app launcher label from `AndroidIDE-Dev` to `MStudio`.
+- Changed `BuildConfig.INTERNAL_NAME` and Gradle `rootProject.name` to `MStudio`; Android namespace/application ID remain `dev.mutwakil.androidide` to avoid an unsafe package migration.
+- Updated Nyx issue URLs, release asset names/descriptions and repository owner/name to this MStudio fork.
+- Remaining before Phase 1 can be marked complete: audit and update About/help/onboarding copy, splash/icon assets and remaining user-visible inherited branding; inspect package-specific manifest permissions/actions/providers without renaming them; review release metadata and license/attribution consistency.
+
+### Explicit sequencing decision
+
+The user requested that Actions execution and actual builds happen only after substantial source-level work. Therefore Phase 0.4 (baseline Actions/build) is deferred until after the planned code review and implementation phases; Markdown-only commits are not considered build evidence.
