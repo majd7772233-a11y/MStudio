@@ -32,38 +32,52 @@ Only mark an item complete when a commit and reproducible evidence exists: autom
 | `SetupAapt2Task.kt` | Custom ARM64/ARMv7 AAPT2 hashes; x86_64 commented | Test resource build on each supported ABI. |
 | NIDE Gradle templates | Explicitly say NIDE itself does not support Gradle-based builds | NIDE is not a replacement build engine. |
 
-## 2. Phase 0 — lock baseline, disable publication, prove APK
+## Phase 1 — lock baseline, disable publication, prove APK
 
-### 0.1 Reconfirm source state
+### 1.1 Reconfirm source state
 Fetch live `dev` HEAD and record SHA, date, subject, wrapper, version catalog and submodule state. Inspect complete current `settings.gradle.kts`, root `build.gradle.kts`, `gradle.properties`, wrapper properties, version catalog, daemon JVM config, `.gitmodules`, all workflow YAML, `core/app/build.gradle.kts` and main manifest. Check recursive submodule checkout; `.gitmodules` includes `composite-builds/external/logback-android`.
 
 **Acceptance:** findings cite current SHA, not the old baseline.
 
-### 0.2 Gate publishing before any routine CI
+### 1.2 Gate publishing before any routine CI
 The inspected `build.yml` has `build_apk` and Tooling API tests, but also `publish` and `publish_snapshots`. The snapshot condition allows successful non-main/non-PR runs, potentially including a dev push. Review all publish/release job conditions, Nyx tasks and Maven credential references. Add a deliberate opt-in false by default for publishing, or separate normal build/test from release. Confirm default push/dispatch can build and upload artifacts only. Preserve upstream publishing capability behind intentional owner-controlled settings; don't delete it without documentation.
 
 Markdown paths are ignored by main `build.yml`, so after the guard is committed deliberately dispatch or run the workflow safely. Never test by accidentally publishing to Maven Central.
 
 **Acceptance:** default CI cannot release/publish, even if publishing credentials exist.
 
-### 0.3 Audit signing material
+### 1.3 Audit signing material
 Inspect tracked `core/app/dev.keystore`, `core/app/build.gradle.kts`, `gradle.properties`, `.nyx.yml` and all signing consumers. Determine what is dev-only. Debug builds must work without public release credentials. Release signing must use owner-controlled secrets, not values committed into source. Fail closed when deliberate release keys are missing; do not ship the inherited keystore as MStudio release identity.
 
 **Acceptance:** safe debug path and a separate, deliberate release identity.
 
-### 0.4 Baseline CI
+### 1.4 Baseline CI
 After publish gating, run the existing primary workflow: recursive checkout, JDK 21, chmod gradlew, restore cache, build `core/app` debug and release, upload ARM64/ARMv7 artifacts and run Tooling API tests with `ANDROIDIDE_TEST=true` and `TEST_TOOLING_API_IMPL=true`. The separate tooling-api workflow only builds `tooling:impl:jar` on JDK 17; don't count it as full APK evidence.
 
 Record run URL, job IDs, first causal failure, commit SHA, artifact names/ABI and submodule status. Fix earliest causal failure before unrelated updates.
 
 **Acceptance:** exact branch build result understood; APK artifacts and Tooling API tests separately recorded.
 
-### 0.5 Device smoke test
+### 1.5 Device smoke test
 Download artifact for a named device ABI. Test installation, app startup, onboarding, permission-denial path, setup status, main screen, project create/open, editor and terminal entry, crash-free navigation. Record Android API, ABI, artifact SHA if available and logs. APK file existence is not install/run success.
 
 **Gate:** no major rebrand, NIDE merge or UI rewrite before safe CI and baseline artifact evaluation.
 
-## 3. Phase 1 — rebrand without breaking package identity
+## Phase 2 — MStudio identity and user-facing rebrand
+
+### 2.1 Visible identity
+Audit launcher label, root project name, build constants, About screen, onboarding/help copy, README and user-facing strings. Use MStudio branding while preserving GPL and upstream attribution. Do not claim assets were replaced unless tracked icon/splash resources are found and changed.
+
+### 2.2 About links and project destinations
+Remove inherited AndroidIDE social/contact destinations from the MStudio About screen when they do not belong to this fork. Prefer verified MStudio repository destinations; do not invent an email, website, Telegram channel or contributor URL.
+
+### 2.3 Package identity boundary
+The current applicationId is `com.magd.mstudio`, while namespace and implementation packages intentionally remain `dev.mutwakil.androidide`. Keep this boundary until a separate planned migration. Review hard-coded authorities/actions/permissions, especially the DocumentsProvider authority `dev.mutwakil.androidide.documents`. Do not claim side-by-side installation compatibility until tested.
+
+### 2.4 Compatibility and attribution
+Keep upstream/GPL notices. Verify README and UI claims against evidence; do not advertise unsupported x86_64/NDK or device compatibility.
+
+**Acceptance:** visible MStudio identity is coherent, About links point only to verified project destinations, and package/provider caveats remain explicit.
 
 Build constants are in `composite-builds/build-logic/common/.../BuildConfig.kt`. Root name remains AndroidIDE and README/visual resources use inherited branding. The manifest includes hard-coded old namespace permission/action/provider values and an applicationId-based FileProvider.
 
@@ -75,51 +89,51 @@ Decide minimum Android and ABI policy based on actual Android APIs, dependencies
 
 **Acceptance:** consistent MStudio branding and verified compatibility claims.
 
-## 4. Phase 2 — self-contained runtime and setup repair
+## Phase 3 — self-contained runtime and setup repair
 
-### 2.1 Lock down runtime paths
+### 3.1 Lock down runtime paths
 Read `core/common/.../Environment.java` and every caller. Source paths include app-private `usr`, `home`, `.androidide`, `.gradle`, `home/android-sdk`, managed Java under `usr/lib/jvm/java-21-openjdk`, tooling JAR under `home/.androidide/tooling-api`, AAPT2 under `home/.androidide/aapt2` and init script under `home/.androidide/init`. Projects currently use external `AndroidIDEProjects` through a storage helper.
 
 Keep path definitions centralized. Before moving paths, search callers and define migration of existing projects/caches. Never delete project data during runtime cleanup.
 
-### 2.2 Make ToolsManager failures visible
+### 3.2 Make ToolsManager failures visible
 `ToolsManager.init` asynchronously checks ABI, loads JDK distributions and extracts plugin, AAPT2, tooling JAR, android.jar, color schemes, init script and Kotlin download script. An extraction error can be logged while callback still runs. Add per-component result/readiness and repair rather than treating callback completion as full success.
 
 Verify downloaded source/version/hash, archive paths, executable permissions and successful invocation. Make setup idempotent. Test offline first run, interrupted download, corrupt archive/hash, disk full, missing JVM/AAPT2, app killed during setup, permission failure, upgrade and repeated taps.
 
-### 2.3 JDK selection
+### 3.3 JDK selection
 `JdkUtils.kt` currently scans `$PREFIX/lib/jvm` and has a TODO about outside installations. Test managed runtime presence/version, corrupted install and execute permission. Distinguish MStudio source build JDK 21, Java source compatibility 17, managed runtime Java and each user's wrapper/AGP/JDK. Avoid changing all version numbers to fix one compatibility error.
 
-### 2.4 Custom AAPT2
+### 3.4 Custom AAPT2
 `SetupAapt2Task.kt` downloads custom AAPT2/checks SHA-256 for ARM64/ARMv7; x86_64 commented. `GradleBuildService` provides `android.aapt2FromMavenOverride`. For each supported ABI verify download, checksum, executable bit, binary version, resource compile/link and Gradle integration. Retain custom override until an alternative passes actual resource build.
 
-### 2.5 First-run UX/storage
+### 3.5 First-run UX/storage
 Reuse `OnboardingActivity` and onboarding fragments. Show ABI/storage/network checks, per-tool progress, setup readiness and a retryable error. Download tool packages as needed instead of bloating base APK with every SDK/JDK version. Preserve space for dependency caches and APK outputs; safely handle interrupted downloads. Terminal remains optional for advanced users.
 
 **Acceptance:** clean/interrupted tool setup is recoverable entirely inside MStudio without separate Termux app.
 
-## 5. Phase 3 — actual Gradle build lifecycle
+## Phase 4 — actual Gradle build lifecycle
 
-### 3.1 Trace and test call chain
+### 4.1 Trace and test call chain
 Project selection → project sync/model → foreground `GradleBuildService` → internal Termux-derived environment → `ToolingServerRunner` process (managed Java + tooling JAR) → `ToolingApiLauncher` RPC → `tooling/impl` invokes Gradle Tooling API → results/events return → project indexing refresh → APK output/install.
 
 Test each boundary. Process launched does not mean sync completed or APK built.
 
-### 3.2 Wrapper detection/repair
+### 4.2 Wrapper detection/repair
 Service checks `gradlew`, `gradle/wrapper/gradle-wrapper.jar` and `gradle-wrapper.properties` and can extract `gradle-wrapper.zip` from assets. Test each missing file, broken zip, read-only project, repeated repair, invalid wrapper and distribution download failure. Never overwrite a valid wrapper silently; explain proposed repair.
 
-### 3.3 Arguments/flags
+### 4.3 Arguments/flags
 Service adds init script and AAPT2 override. Preferences include stacktrace/info/debug, scan, warning mode, cache and offline. Verify flags are passed once, output remains actionable and offline failures separate missing cached dependencies from compile issues. Build Scan can upload data and must require explicit user consent.
 
-### 3.4 Lifecycle/cancel/output
+### 4.4 Lifecycle/cancel/output
 Review `GradleBuildService`, `ToolingServerRunner`, `GradleServiceBinder`, `GradleBuildServiceConnnection` (source spelling) and callbacks. Test concurrent/double-tap requests, notifications, stderr/stdout drains, start failure/nonzero process, failure during sync/task, cancellation actually stopping work, Activity recreation, navigation, repeated build after cancel and correct status/artifact path. `dispatchBuildResult` appears to refresh indexing only; trace all callers before changing it.
 
-### 3.5 Fixtures and tests
+### 4.5 Fixtures and tests
 Inspect existing `testing/resources/sample-project`, `testing/resources/test-project` and Tooling API tests before adding fixtures. Cover Java/XML app, Maven dependency, Android/Java library dependency, Kotlin DSL, nested/multi-module, flavors/variants, missing SDK, resource/manifest failure, incompatible JDK/AGP, offline cached success and cancellation. Run tests, safe CI and device install/build.
 
 **Acceptance:** actual Gradle produces a valid installable APK with understandable output, cancellation and retry.
 
-## 6. Phase 4 — import, modules, variants and dependencies
+## Phase 5 — import, modules, variants and dependencies
 
 `ProjectValidation` currently expects an `app` child with Gradle script for common Android projects. Test roots, parent containers, application module not named app, root Java plugin, library-only projects, Kotlin DSL, nested/included/composite modules, hidden/incomplete folders, Unicode/spaces and SAF/document-provider access. Don't accept arbitrary folders; use safe selection and Gradle sync as authoritative.
 
@@ -129,7 +143,7 @@ Initial import/sync must not silently rewrite build files, move/delete data or e
 
 **Acceptance:** valid projects import safely, modules/tasks/variants are accurate and sync issues actionable.
 
-## 7. Phase 5 — editor, LSP and diagnostics
+## Phase 6 — editor, LSP and diagnostics
 
 Audit `editor/api`, `editor/impl`, `editor/lexers`, `editor/treesitter`, core LSP APIs/models, `java/lsp`, `javac-services`, `lsp/kotlin`, `xml/lsp` and indexing before porting other editors. Test highlighting, Java completion, compile diagnostics, import assist, navigation, references, symbol search, formatting/code actions, XML completion, Kotlin features and recovery when classpath/sync fails.
 
@@ -139,7 +153,7 @@ MStudio already builds google-java-format source. Trace current editor wiring be
 
 **Acceptance:** errors are understandable/navigable and editor stays responsive during builds.
 
-## 8. Phase 6 — XML designer/resources/previews
+## Phase 7 — XML designer/resources/previews
 
 Relevant modules include `utilities/uidesigner`, `utilities/xml-inflater`, `xml/aaptcompiler`, `xml/dom`, `xml/utils`, `xml/lsp` and `subprojects/compose-preview`. README marks designer incomplete, so source presence is not acceptance.
 
@@ -147,7 +161,7 @@ Test layout open/parse errors, string/color/drawable/dimen/style resolution, XML
 
 **Acceptance:** XML and visual edits safely round-trip; missing resources and preview failures are clear.
 
-## 9. Phase 7 — templates and beginner UX
+## Phase 8 — templates and beginner UX
 
 Inspect `MainActivity`, template ViewModels/fragments, `utilities/templates-api`, `utilities/templates-impl`, `TemplateRecipeExecutor` and onboarding. For every advertised template: generate project, sync, build through actual local Tooling API, install and launch. Validate package/activity/namespace, manifest, resources, wrapper/settings, AGP and SDK agree. Test duplicate/invalid names, Unicode/spaces, low storage, cancellation, partial cleanup and reopening after restart.
 
@@ -155,13 +169,13 @@ Then redesign UI based on verified flows. Use string resources; preserve RTL, ke
 
 **Acceptance:** every advertised template yields runnable APK and failures offer recovery.
 
-## 10. Phase 8 — select NIDE ports
+## Phase 9 — select NIDE ports
 
 Use `NIDE_FEATURE_MATRIX.md`. Each candidate needs exact source, MStudio counterpart, reproducible gap, minimal port boundary, dependency/license audit, tests, CI/device evidence and commit. Candidates may include decompiler, independent Java/JAR workflow, formatter options if genuinely absent, samples and an autocomplete behavior. Do not port full NIDE builder, old dx/JDK1.7 compiler or FastGradleParser to the Gradle pipeline.
 
 **Acceptance:** each port adds tested unique value and no competing Android build engine.
 
-## 11. Phase 9 — performance, security, compatibility
+## Phase 10 — performance, security, compatibility
 
 Profile managed JVM, Gradle daemons/workers, LSP/indexer/previews separately. Do not assume 5096 MB heap suits phones. Test cache size, low storage, corrupt cache, interrupted downloads, app update and active build; never clean active caches or projects.
 
@@ -169,11 +183,11 @@ Treat Gradle scripts as executable/untrusted. Verify downloaded binaries; review
 
 **Acceptance:** tested compatibility, recovery paths and measured resource use.
 
-## 12. Phase 10 — cloud build (deferred)
+## Phase 11 — cloud build (deferred)
 
 See `CLOUD_BUILD_PLAN.md`. Only begin after local MVP. Later flow: GitHub authorization, selected repository/branch, workflow diff/approval, dispatch, run/status/log and APK download. Use least privilege and verify API log semantics; never expose user token to build scripts. Cloud login must remain optional.
 
-## 13. Phase 11 — release
+## Phase 12 — release
 
 Build from known commit; verify APK checksum/signature/ABI; test clean install/upgrade; create/import/build Java/XML project; resolve Maven dependency; test resources, failure/cancel, tool repair, cached offline build and install. Verify signing ownership, publication opt-in, GPL/third-party notices and limitations. README claims must match tested behavior.
 
@@ -196,20 +210,20 @@ Keep all boxes unchecked until evidence is recorded.
 
 ## Execution record — 2026-10-12
 
-### Phase 0.1 — source state reconfirmed
+### Phase 1.1 — source state reconfirmed
 
 - Rechecked `dev` at starting HEAD `ccd8b4c9abbcebe8fe72700120af93053e6504da` (`edit Build.yml`). That commit removed workflow-wide Maven credentials but left snapshot publishing insufficiently gated.
 - Rechecked root settings/build scripts, Gradle wrapper, version catalog, daemon JVM settings, `.gitmodules`, workflow YAML, app Gradle configuration, manifest, `.nyx.yml`, and project architecture/cloud-build notes.
 - Confirmed wrapper Gradle 8.14.4, daemon JDK 21, AGP 8.13.2, Kotlin 2.3.21, Gradle Tooling API 9.7.0, and declared submodule `composite-builds/external/logback-android`. Remote source inspection confirms the declaration, not runner checkout status.
-- Phase 0.1 source recheck is complete; this is not proof of a successful build or device test.
+- Phase 1.1 source recheck is complete; this is not proof of a successful build or device test.
 
-### Phase 0.2 — publishing guard committed
+### Phase 1.2 — publishing guard committed
 
 - Commit `63ae9aa0d9bac985b5efc6869069826b04af7a97` (`ci: guard Maven publishing behind upstream-only opt-in`) removes Maven Central credentials from workflow-wide `env` and scopes them to the publishing steps only.
 - Release publishing requires `vars.MSTUDIO_ENABLE_UPSTREAM_RELEASE_PUBLISHING == 'true'`, repository `AndroidIDE-Dev/AndroidIDE`, `main`, a non-PR event, and successful APK + Tooling API jobs.
 - Snapshot publishing requires `vars.MSTUDIO_ENABLE_UPSTREAM_SNAPSHOT_PUBLISHING == 'true'`, repository `AndroidIDE-Dev/AndroidIDE`, branch `dev` or `indexing`, a non-PR event, and a successful APK job. The MStudio fork is blocked by the repository allowlist.
 - Re-fetched the committed workflow and verified both opt-in checks, both repository allowlists, and that Maven credentials are scoped to the two publishing steps. Check the resulting Actions run for parser/runtime feedback; no build, publication, or device test is claimed yet.
-- Next: Phase 0.3 signing audit, then Phase 0.4 baseline CI.
+- Next: Phase 1.3 signing audit, then Phase 1.4 baseline CI.
 
 
 ### Source-state correction — submodule path
@@ -217,9 +231,9 @@ Keep all boxes unchecked until evidence is recorded.
 - Follow-up inspection of the GitHub contents API for `composite-builds/external/logback-android` returned an ordinary directory listing, not a Git submodule entry. The `.gitmodules` file declares this path as a submodule, so the committed tree and submodule declaration appear inconsistent. Resolve this explicitly before treating recursive checkout as proven; do not claim the submodule is initialized or assume its state.
 
 
-## Execution log — 2026-10-12 (Phase 0.3 security audit + Phase 1 identity kickoff)
+## Execution log — 2026-10-12 (Phase 1.3 security audit + Phase 2 identity kickoff)
 
-### Phase 0.3 — signing material audit/remediation
+### Phase 1.3 — signing material audit/remediation
 
 Inspected `core/app/build.gradle.kts`, root `gradle.properties`, `.nyx.yml`, `.gitignore`, `SigningConfigPlugin.kt`, `SigningKeyUtils.kt`, `config.kt`, the main manifest, and the tracked signing paths. The actual build-logic signing path is `signing/androidide.keystore`; `SigningConfigPlugin` only attaches its shared signing configuration when the key and all three alias/store/key credentials are available. The plugin attempts to obtain a missing key from environment/property-configured sources, and otherwise leaves the build without that common signing config.
 
@@ -232,47 +246,47 @@ Changes committed:
 
 **Status:** source/config remediation committed; signing lifecycle still needs an explicit, testable release-task guard and a new private release identity before release distribution. This is not evidence of a successful build.
 
-### Phase 1 — identity kickoff (not yet complete)
+### Phase 2 — identity kickoff (not yet complete)
 
 - Changed the app launcher label from `AndroidIDE-Dev` to `MStudio`.
 - Changed `BuildConfig.INTERNAL_NAME` and Gradle `rootProject.name` to `MStudio`; Android namespace/application ID remain `dev.mutwakil.androidide` to avoid an unsafe package migration.
 - Updated Nyx issue URLs, release asset names/descriptions and repository owner/name to this MStudio fork.
-- Remaining before Phase 1 can be marked complete: audit and update About/help/onboarding copy, splash/icon assets and remaining user-visible inherited branding; inspect package-specific manifest permissions/actions/providers without renaming them; review release metadata and license/attribution consistency.
+- Remaining before Phase 2 can be marked complete: audit and update About/help/onboarding copy, splash/icon assets and remaining user-visible inherited branding; inspect package-specific manifest permissions/actions/providers without renaming them; review release metadata and license/attribution consistency.
 
 ### Explicit sequencing decision
 
-The user requested that Actions execution and actual builds happen only after substantial source-level work. Therefore Phase 0.4 (baseline Actions/build) is deferred until after the planned code review and implementation phases; Markdown-only commits are not considered build evidence.
+The user requested that Actions execution and actual builds happen only after substantial source-level work. Therefore Phase 1.4 (baseline Actions/build) is deferred until after the planned code review and implementation phases; Markdown-only commits are not considered build evidence.
 
 
-### Phase 1 follow-up — README/source-facing identity
+### Phase 2 follow-up — README/source-facing identity
 
 Updated `README.md` title and repository badges/issues/download destinations to MStudio, removed misleading instructions to download upstream AndroidIDE releases as MStudio releases, and labeled the upstream docs/community as inherited references. Preserved the original AndroidIDE GPL attribution and upstream acknowledgements. The launcher icon/splash and About screen destinations are intentionally not declared rebranded yet; their actual asset/configuration sources still need tracing before safe edits.
 
 
-## Execution log — 2026-10-12 (Phase 1 application ID + Phase 2 runtime extraction)
+## Execution log — 2026-10-12 (Phase 2 application ID + Phase 3 runtime extraction)
 
-### Phase 1 — application identity and signing workflow
+### Phase 2 — application identity and signing workflow
 
 - Set the Android **application ID** in `core/app/build.gradle.kts` to `com.magd.mstudio`.
 - Intentionally left `namespace`, `BuildConfig.PACKAGE_NAME`, Java/Kotlin packages, and existing hard-coded AndroidIDE permission/action/provider identifiers unchanged, as requested. This is an application-ID-only change, not a package migration.
 - Updated `.github/workflows/build.yml` to consume the existing owner-managed GitHub Secrets `MY_KEYSTORE_JKS`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, and `KEY_PASSWORD`. These map to the legacy Gradle plugin environment names expected by the inherited signing plugin. `MY_KEYSTORE_JKS` must contain the Base64-encoded keystore bytes because `SigningKeyUtils` Base64-decodes `IDE_SIGNING_KEY_BIN`.
 - Release signing secrets are scoped to the release build step instead of the workflow globally. A release preflight fails if any required secret is missing or the keystore secret is not valid Base64. Debug builds do not receive release credentials.
 - Removed `dev` from automatic push-build branches so further source commits on `dev` do not launch the APK/test matrix before the user-authorized baseline phase. `workflow_dispatch` remains available; do not manually dispatch it yet.
-- Remaining Phase 1: About/help/social destinations and actual icon/splash assets are not yet fully rebranded. Namespace/manifest authority migration remains deliberately out of scope.
+- Remaining Phase 2: About/help/social destinations and actual icon/splash assets are not yet fully rebranded. Namespace/manifest authority migration remains deliberately out of scope.
 
-### Phase 2 — runtime extraction safety (initial implementation)
+### Phase 3 — runtime extraction safety (initial implementation)
 
 - In `core/common/src/main/java/dev/mutwakil/androidide/managers/ToolsManager.java`, replaced delete-then-copy behavior for the embedded Gradle plugin JAR, Tooling API JAR, Kotlin artifact download script, and missing `android.jar` with a temporary-file extraction helper.
 - The helper writes and syncs a temporary file, rejects empty output, then replaces the destination with an atomic move where supported (with a replace-existing fallback). A failed extraction now preserves the previously working destination instead of deleting it first.
 - This is source-level implementation only. No build, tests, or Actions were run, by design. Later verification must exercise failed/interrupted copy, existing destination preservation, low-storage failure, and successful first-run extraction on a supported device.
-- Further Phase 2 work remains: AAPT2 validation/repair, color-scheme directory replacement, explicit per-tool readiness, and actionable setup recovery.
+- Further Phase 3 work remains: AAPT2 validation/repair, color-scheme directory replacement, explicit per-tool readiness, and actionable setup recovery.
 
 ### Sequencing guard
 
-The user requested that build and Actions verification be deferred until substantial code work is complete. Do not manually start Actions or a build during the current source phases. Phase 0.4 remains deferred.
+The user requested that build and Actions verification be deferred until substantial code work is complete. Do not manually start Actions or a build during the current source phases. Phase 1.4 remains deferred.
 
 
-### Phase 2 follow-up — AAPT2 extraction
+### Phase 3 follow-up — AAPT2 extraction
 
 - Changed AAPT2 extraction to copy the packaged native binary to a temporary file and replace the destination only after a non-empty copy succeeds.
 - Missing source binary, empty output, and inability to set executable permission now produce explicit setup failures rather than a silent log-only condition.
@@ -282,3 +296,10 @@ The user requested that build and Actions verification be deferred until substan
 ### Application-ID-only compatibility caveat
 
 Changing `applicationId` does not change hard-coded manifest authorities. The documents provider still declares `dev.mutwakil.androidide.documents`; this may conflict with the upstream AndroidIDE package if both apps are installed. It was intentionally left untouched under the current application-ID-only scope. Before claiming side-by-side installation compatibility, revisit provider authorities and test installation on a clean device and with upstream AndroidIDE already installed.
+
+
+## Roadmap numbering migration — 2026-10-12
+
+- Replaced the old Phase 0 + Phase 1–11 scheme with a single sequential Phase 1–12 scheme. Previous Phase 0 is now Phase 1; previous Phase 1 is Phase 2; previous Phase 2 is Phase 3; subsequent phases each move up by one. Substeps are scoped under their parent phase (for example 3.1–3.5), never standalone fractional phases.
+- Historical execution records were renumbered to the same scheme. Completion claims remain evidence-based; a source change alone does not complete an acceptance gate.
+- Active implementation order: Phase 2 (identity/rebrand) and Phase 3 (runtime/setup repair). Baseline build/Actions and device testing remain deferred until the roadmap's later verification gate; no build or workflow was launched for this update.
