@@ -583,3 +583,11 @@ The following entries above record what was discovered at the time; use these li
 
 - After the contributor provenance fix, the About screen's section header still says “Socials” while the only item is the MStudio GitHub repository. Its contributor summary describes only upstream AndroidIDE credits even though the opened screen contains both MStudio GitHub contributors and upstream AndroidIDE translators.
 - Update the section label to a project-links label and update the contributor summary to name both sources, preserving the upstream attribution and localizing the visible strings consistently across maintained locales. Keep the underlying resource keys stable to avoid unrelated code changes.
+
+## Execution update — Phase 2 About copy consistency (2026-10-12)
+
+- Updated the About screen's “Socials” section title to “Project links” (localized) because it currently contains the repository link rather than a set of social channels.
+- Updated the contributor description to accurately cover both MStudio's GitHub contributors and translators credited by the upstream AndroidIDE project. This keeps the upstream attribution explicit.
+- Localized resource commits: English `feb5babc0fb1ca742e8058120e5be994f67837ff`; Arabic `c04b6f209b891a56b87d4998f56c89292bc1f8d4`; Bengali `2af65a7238f11f7f54d292b9c6cccbf742ad70bc`; German `76ceec1d94be6a7a57ba7af4ce1ae47c23c25ffa`; Spanish `c7a3452fa988d1aae9318c05dfed6fbce421f082`; French `b691940f70afad237b7b8108d2bc52651d46c89e`; Hindi `e75193d7e46607d47237c294cfb57f0ffae2827f`; Indonesian `a78b03a964bd85135cb7a0d0ac812d0f0d4796eb`; Portuguese `a4ac5015720b25d0e9a5e29b21710c1e8128318a`; Romanian `9d23f6de5160ebfb39ab5a385f1e467a6be7d388`; Russian `fdd17e8b2fa4fb11d98fb8cc628a35b8af32e85d`; Turkish `d8bd3d5ae9a1d2e17712dfff54bca5d0013127df`; Chinese `52c24fbea559089dbdb508caa119ed74801b3030`.
+- Re-fetched all 13 default/maintained locale resource files and confirmed both strings were updated. This is source-content verification only; no resource compilation or device UI check was run.
+- No build, tests, workflow dispatch, Actions run, or device validation was performed.
