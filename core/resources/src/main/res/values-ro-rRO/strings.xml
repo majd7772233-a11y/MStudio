@@ -4,16 +4,16 @@
   <string name="copy" tools:override="true">Copiere</string>
   <string name="terminal_more">More…</string>
   <string name="text_to_search">Text to search</string>
-  <string name="about_option_email">Raportează o problemă pe GitHub</string>
+   <string name="about_option_email">Raportează o problemă pe GitHub</string>
   <string name="about_option_website">Website</string>
   <string name="about_footer">MStudio %1$s for %2$s</string>
   <string name="about_subtitle">Simplu, un IDE pentru Android</string>
   <string name="msg_get_package_failed">Nu s-a putut extrage numele pachetului!</string>
-  <string name="msg_need_help">Dacă întâmpinați probleme când utilizați MStudio sau creați aplicații Android, raportați-le ori sugerați îmbunătățiri în GitHub Issues pentru MStudio.</string>
+   <string name="msg_need_help">Dacă întâmpinați probleme când utilizați MStudio sau creați aplicații Android, raportați-le ori sugerați îmbunătățiri în GitHub Issues pentru MStudio.</string>
   <string name="need_help">Ai nevoie de ajutor?</string>
   <string name="ide_preferences">Preferințte IDE</string>
-  <string name="discussions_on_telegram">Raportează o problemă pe GitHub</string>
-  <string name="official_tg_channel">Depozitul MStudio pe GitHub</string>
+   <string name="discussions_on_telegram">Raportează o problemă pe GitHub</string>
+   <string name="official_tg_channel">Depozitul MStudio pe GitHub</string>
   <string name="msg_empty_view">Nu există date</string>
   <string name="title_terminal">Terminal</string>
   <string name="reset">Resetare</string>
@@ -471,7 +471,7 @@
   <string name="title_unsupported_user">Unsupported user</string>
   <string name="title_socials">Socials</string>
   <string name="title_contributors">Contributors</string>
-  <string name="summary_contributors">Credite pentru contribuitorii proiectului AndroidIDE original pe care se bazează MStudio.</string>
+   <string name="summary_contributors">Credite pentru contribuitorii proiectului AndroidIDE original pe care se bazează MStudio.</string>
   <string name="title_github_contributors">GitHub Contributors</string>
   <string name="title_crowdin_translators">Crowdin Translators</string>
   <string name="title_misc">Misc</string>
