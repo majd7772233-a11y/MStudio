@@ -687,7 +687,28 @@ public class ToolsManager {
         process.waitFor();
         return false;
       }
-      return process.exitValue() == 0 && output.isFile() && output.length() > 0;
+      if (process.exitValue() != 0 || !output.isFile() || output.length() == 0) {
+        return false;
+      }
+
+      final StringBuilder versionText = new StringBuilder();
+      try (Reader reader = new FileReader(output)) {
+        final char[] buffer = new char[512];
+        int count;
+        while ((count = reader.read(buffer)) != -1) {
+          versionText.append(buffer, 0, count);
+        }
+      }
+
+      // A zero exit code and arbitrary output are not enough to identify an AAPT2 binary.
+      final boolean reportsAapt = java.util.regex.Pattern
+          .compile("(?i)(?:aapt2?|Android Asset Packaging Tool)")
+          .matcher(versionText)
+          .find();
+      if (!reportsAapt) {
+        LOG.warn("Executable did not report recognizable AAPT2 version output: {}", binary);
+      }
+      return reportsAapt;
     } catch (IOException error) {
       LOG.warn("Unable to execute AAPT2 version check: {}", binary, error);
       return false;
