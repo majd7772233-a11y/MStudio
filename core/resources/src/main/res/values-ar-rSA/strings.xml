@@ -4,16 +4,16 @@
   <string name="copy" tools:override="true">نسخ</string>
   <string name="terminal_more">المزيد…</string>
   <string name="text_to_search">البحث عن نص</string>
-  <string name="about_option_email">البريد الإلكتروني</string>
+   <string name="about_option_email">مشكلات GitHub</string>
   <string name="about_option_website">الموقع الإلكتروني</string>
   <string name="about_footer">أندرويد %1$s لـ %2$s</string>
   <string name="about_subtitle">ببساطة، منصة بناء تطبيقات للاندرويد</string>
   <string name="msg_get_package_failed">فشل في استخراج اسم الحزمة!</string>
-  <string name="msg_need_help">إذا كنت تواجه مشكلات أثناء استخدام MStudio أو مع بناء التطبيقات ، يمكنك الانضمام إلى مجموعة التيليغرام وطلب المساعدة هناك.\n\nيمكنك أيضًا إرسال ملاحظات متضمنة على بريدنا الإلكتروني.</string>
+   <string name="msg_need_help">إذا واجهت مشكلة أثناء استخدام MStudio أو بناء تطبيقات Android، فأبلغ عنها أو اقترح تحسينًا عبر مشكلات GitHub الخاصة بـ MStudio.</string>
   <string name="need_help">تحتاج للمساعدة؟</string>
   <string name="ide_preferences">إعدادات IDE</string>
-  <string name="discussions_on_telegram">المناقشات على التيليغرام</string>
-  <string name="official_tg_channel">قناة التيليغرام الرسمية</string>
+   <string name="discussions_on_telegram">مشكلات GitHub</string>
+   <string name="official_tg_channel">مستودع MStudio على GitHub</string>
   <string name="msg_empty_view">لا يوجد بيانات</string>
   <string name="title_terminal">التيرمنال</string>
   <string name="reset">إعادة تعيين</string>
@@ -471,7 +471,7 @@
   <string name="title_unsupported_user">Unsupported user</string>
   <string name="title_socials">Socials</string>
   <string name="title_contributors">Contributors</string>
-  <string name="summary_contributors">Top community contributors.</string>
+   <string name="summary_contributors">اعتمادات المساهمين في مشروع AndroidIDE الأصلي الذي بُني عليه MStudio.</string>
   <string name="title_github_contributors">GitHub Contributors</string>
   <string name="title_crowdin_translators">Crowdin Translators</string>
   <string name="title_misc">Misc</string>
