@@ -307,3 +307,12 @@ Additional Phase 2 update:
 
 - Roadmap updated first in commit `9c25cd3fb5dbda89e674485c335e91013218aa6b`.
 - `AboutActivity.kt` labels the first action “GitHub Repository” and opens the MStudio repo, but still uses `R.drawable.ic_website`. The shared `R.drawable.ic_github` is confirmed to exist at `core/resources/src/main/res/drawable/ic_github.xml`; switch only that icon reference.
+
+
+### Phase 2 repository action icon and README commits — 2026-10-12
+
+- Roadmap updated first in commit `60eca546064e88b87bcb889ec6e8088a3390f123`.
+- `AboutActivity.kt` now uses `R.drawable.ic_github` for the GitHub Repository destination; commit `98bb103c9b1e1f5b800e15b41253e0f0f1da871b`.
+- README branding/destination updates: `1aac325cef97d2ab0911f84660e246f947879606`, `b09dfc089daeff9fcbae70c5f2448c100b15e520`, `ded14a43e57c65631e79dfc4715b08229c6051e0`.
+- Locale corrections: Arabic `7d0651d489b9750f825b5e977b8201276ae689f4`; Spanish `43799c4ca889988a2a53b7363aa7614c26665fe6`; French `a4525ca4c5ca216114e343bfe189f11fbfa9c81c`; Turkish `72e25fff369bf574ae877aa60e7a91a66a8d3174`.
+- No builds/tests/Actions. Phase 2 remains source-level until full audit and later verification.
