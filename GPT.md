@@ -412,3 +412,10 @@ Additional Phase 2 update:
 - Post-edit fetch verified all 12 maintained locale values of `btn_donate` now mean “Project repository,” matching the actual MStudio GitHub destination. Roadmap continuation note is in commit `57080ddbb83ee4f87df555ab2474f5d1926a16fd`.
 - Phase 2 source branding/documentation is substantially updated but not fully audited or device-verified. Phase 3 has per-component readiness and retry UI plus atomic repair and Java 17+ version parsing; remaining work is deeper setup/recovery source audit and later offline/interruption/low-storage/ABI/device validation.
 - No build/test/Actions until the roadmap explicitly reaches the verification gate.
+
+### Phase 3 AAPT2 validation hardening — 2026-10-12
+
+- Roadmap-first follow-up was recorded in roadmap commit `493e49c4b462f81256fa9851d0b507148f8dd9f2`; execution details were appended in roadmap commit `e94d9ca15f39fbfba92607febb54fd9f280ac855`.
+- `ToolsManager.isUsableAapt2()` no longer treats any zero-exit executable with arbitrary non-empty output as AAPT2. Commit `f47c90ba6b24aecdbc7ffd28a1dc618a1c3ad828` reads the `version` output and requires an AAPT/AAPT2 or “Android Asset Packaging Tool” marker. Timeout, forced process cleanup and temporary-output cleanup remain in place.
+- Reviewed `writeInitScript()`: it writes packaged defaults to `init.gradle.bak` but only creates `init.gradle` when missing. Do not change this to overwrite existing scripts until the project has a safe versioning/migration contract; an existing script may contain user edits and the current backup is not a reliable prior-version marker.
+- No build, test, workflow dispatch, Actions run or device validation was performed. This is source-level hardening only.
