@@ -277,3 +277,8 @@ The user requested that build and Actions verification be deferred until substan
 - Changed AAPT2 extraction to copy the packaged native binary to a temporary file and replace the destination only after a non-empty copy succeeds.
 - Missing source binary, empty output, and inability to set executable permission now produce explicit setup failures rather than a silent log-only condition.
 - Still unverified until later device/build phase; color-scheme directory replacement and repair of a pre-existing corrupt AAPT2 file remain follow-up work.
+
+
+### Application-ID-only compatibility caveat
+
+Changing `applicationId` does not change hard-coded manifest authorities. The documents provider still declares `dev.mutwakil.androidide.documents`; this may conflict with the upstream AndroidIDE package if both apps are installed. It was intentionally left untouched under the current application-ID-only scope. Before claiming side-by-side installation compatibility, revisit provider authorities and test installation on a clean device and with upstream AndroidIDE already installed.
