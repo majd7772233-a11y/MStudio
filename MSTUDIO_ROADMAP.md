@@ -382,3 +382,8 @@ No build, test task, workflow dispatch or Actions run was launched. Phase 1 base
 
 - A recursive source-tree query found 12 translated `values-*/strings.xml` files in addition to the default English resource. Several still override help text, About footer, unsupported-device text, first-build text, notification labels and SDK-install links with AndroidIDE branding or upstream Telegram/email/docs claims.
 - Complete Phase 2 by aligning translated product names and links with MStudio. Preserve the localized wording where practical; update help copy and Telegram/email labels to GitHub Issues/repository wording, and replace upstream docs URLs with the verified MStudio README/issues. The contributor-credit string must continue to clearly credit upstream AndroidIDE rather than accidentally relabel upstream contributors as MStudio contributors.
+
+
+### Phase 3 localization requirement — runtime recovery dialog (2026-10-12)
+
+- The new runtime failure/retry dialog strings are currently defined in the default English resource only. Add matching translations to the maintained locale resource files (at minimum Arabic, plus all currently maintained locales) so runtime recovery does not unexpectedly switch localized users to English. Preserve RTL behavior and resource keys.
