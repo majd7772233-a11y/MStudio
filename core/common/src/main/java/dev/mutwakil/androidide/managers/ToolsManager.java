@@ -97,27 +97,145 @@ public class ToolsManager {
   }
 
   private static void extractColorScheme(final BaseApplication app) {
-    final var defPath = "editor/schemes";
-    final var dir = new File(Environment.ANDROIDIDE_UI, defPath);
+    final String assetRoot = "editor/schemes";
+    final File destinationRoot = new File(Environment.ANDROIDIDE_UI, assetRoot);
     try {
-      for (final String asset : app.getAssets().list(defPath)) {
+      final String[] schemes = app.getAssets().list(assetRoot);
+      if (schemes == null) {
+        throw new IOException("Color-scheme asset directory is missing: " + assetRoot);
+      }
+      if (!destinationRoot.isDirectory()
+          && !destinationRoot.mkdirs()
+          && !destinationRoot.isDirectory()) {
+        throw new IOException("Unable to create color-scheme directory: " + destinationRoot);
+      }
 
-        final var prop = new File(dir, asset + "/" + "scheme.prop");
-        if (prop.exists() && !shouldExtractScheme(app, new File(dir, asset),
-            defPath + "/" + asset)) {
+      for (final String scheme : schemes) {
+        final String assetPath = assetRoot + "/" + scheme;
+        final File destination = new File(destinationRoot, scheme);
+        final File currentVersion = new File(destination, "scheme.prop");
+        if (currentVersion.isFile()
+            && !shouldExtractScheme(app, destination, assetPath)) {
           continue;
         }
 
-        final File schemeDir = new File(dir, asset);
-        if (schemeDir.exists()) {
-          schemeDir.delete();
-        }
-
-        ResourceUtils.copyFileFromAssets(defPath + "/" + asset, schemeDir.getAbsolutePath());
+        copyAssetDirectoryAtomically(app, assetPath, destination);
       }
-    } catch (IOException e) {
-      LOG.error("Failed to extract color schemes", e);
+    } catch (IOException error) {
+      throw new IllegalStateException("Failed to extract color schemes", error);
     }
+  }
+
+  /**
+   * Stages a complete asset directory beside its destination and swaps it only after copying
+   * succeeds. If the swap fails, the previous directory is restored whenever possible.
+   */
+  private static void copyAssetDirectoryAtomically(
+      BaseApplication app, String assetPath, File destination) throws IOException {
+    final File parent = destination.getParentFile();
+    if (parent == null || (!parent.isDirectory() && !parent.mkdirs() && !parent.isDirectory())) {
+      throw new IOException("Unable to create asset destination directory: " + parent);
+    }
+
+    final File temporary = new File(parent, destination.getName() + ".tmp");
+    final File backup = new File(parent, destination.getName() + ".bak");
+    deleteRecursively(temporary);
+    deleteRecursively(backup);
+
+    try {
+      copyAssetTree(app, assetPath, temporary);
+      if (!new File(temporary, "scheme.prop").isFile()) {
+        throw new IOException("Color scheme is missing scheme.prop: " + assetPath);
+      }
+
+      final boolean hadDestination = destination.exists();
+      if (hadDestination) {
+        movePath(destination, backup);
+      }
+
+      try {
+        movePath(temporary, destination);
+      } catch (IOException swapError) {
+        if (hadDestination && backup.exists() && !destination.exists()) {
+          try {
+            movePath(backup, destination);
+          } catch (IOException restoreError) {
+            swapError.addSuppressed(restoreError);
+          }
+        }
+        throw swapError;
+      }
+
+      if (backup.exists() && !deleteRecursively(backup)) {
+        LOG.warn("Unable to remove previous color-scheme backup: {}", backup);
+      }
+    } finally {
+      if (temporary.exists() && !deleteRecursively(temporary)) {
+        LOG.warn("Unable to remove temporary color-scheme directory: {}", temporary);
+      }
+    }
+  }
+
+  private static void copyAssetTree(BaseApplication app, String assetPath, File destination)
+      throws IOException {
+    final String[] children = app.getAssets().list(assetPath);
+    if (children != null && children.length > 0) {
+      if (!destination.isDirectory() && !destination.mkdirs() && !destination.isDirectory()) {
+        throw new IOException("Unable to create extracted asset directory: " + destination);
+      }
+      for (String child : children) {
+        copyAssetTree(app, assetPath + "/" + child, new File(destination, child));
+      }
+      return;
+    }
+
+    final File parent = destination.getParentFile();
+    if (parent != null && !parent.isDirectory() && !parent.mkdirs() && !parent.isDirectory()) {
+      throw new IOException("Unable to create extracted asset directory: " + parent);
+    }
+    try (InputStream input = app.getAssets().open(assetPath);
+         FileOutputStream output = new FileOutputStream(destination)) {
+      final byte[] buffer = new byte[8192];
+      int count;
+      while ((count = input.read(buffer)) != -1) {
+        output.write(buffer, 0, count);
+      }
+      output.getFD().sync();
+    }
+    if (!destination.isFile() || destination.length() == 0) {
+      throw new IOException("Extracted asset is empty: " + assetPath);
+    }
+  }
+
+  private static void movePath(File source, File destination) throws IOException {
+    try {
+      Files.move(
+          source.toPath(),
+          destination.toPath(),
+          StandardCopyOption.REPLACE_EXISTING,
+          StandardCopyOption.ATOMIC_MOVE);
+    } catch (AtomicMoveNotSupportedException unsupported) {
+      Files.move(
+          source.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    }
+  }
+
+  private static boolean deleteRecursively(File file) {
+    if (!file.exists()) {
+      return true;
+    }
+    if (file.isDirectory()) {
+      final File[] children = file.listFiles();
+      if (children == null) {
+        return false;
+      }
+      for (File child : children) {
+        if (!deleteRecursively(child)) {
+          return false;
+        }
+      }
+    }
+    return file.delete();
   }
 
   private static boolean shouldExtractScheme(final BaseApplication app, final File dir,
@@ -158,8 +276,8 @@ public class ToolsManager {
 
       return version > fileVersion;
     } catch (Throwable err) {
-      LOG.error("Failed to read color scheme version for scheme '{}'", path, err);
-      return false;
+      LOG.error("Failed to read color scheme version for scheme '{}'; scheduling repair", path, err);
+      return true;
     }
   }
 
@@ -178,13 +296,16 @@ public class ToolsManager {
 
   private static void extractAndroidJar() {
     if (Environment.ANDROID_JAR.isDirectory()) {
-      if (!Environment.ANDROID_JAR.delete()) {
-        throw new IllegalStateException(
-            "Unable to replace invalid Android API stub directory: " + Environment.ANDROID_JAR);
-      }
+      throw new IllegalStateException(
+          "Android API stub path is a directory and cannot be repaired safely: "
+              + Environment.ANDROID_JAR);
     }
-    if (!Environment.ANDROID_JAR.exists()) {
+    if (!Environment.ANDROID_JAR.isFile() || Environment.ANDROID_JAR.length() == 0) {
       copyAssetAtomically(getCommonAsset("android.jar"), Environment.ANDROID_JAR);
+    }
+    if (!Environment.ANDROID_JAR.isFile() || Environment.ANDROID_JAR.length() == 0) {
+      throw new IllegalStateException(
+          "Android API stub is missing or empty after extraction: " + Environment.ANDROID_JAR);
     }
   }
 
@@ -202,16 +323,21 @@ public class ToolsManager {
   }
 
   private static void extractAapt2() {
-    if (!Environment.AAPT2.exists()) {
+    if (Environment.AAPT2.isDirectory()) {
+      throw new IllegalStateException(
+          "AAPT2 destination is a directory and cannot be repaired safely: " + Environment.AAPT2);
+    }
+
+    if (!Environment.AAPT2.isFile() || Environment.AAPT2.length() == 0) {
       final var context = BaseApplication.getBaseInstance();
       final var nativeLibraryDir = context.getApplicationInfo().nativeLibraryDir;
       final var sourceAapt2 = new File(nativeLibraryDir, "libaapt2.so");
-      if (sourceAapt2.exists() && sourceAapt2.isFile()) {
-        copyFileAtomically(sourceAapt2, Environment.AAPT2);
-      } else {
+      if (!sourceAapt2.isFile() || sourceAapt2.length() == 0) {
         throw new IllegalStateException(
-            "AAPT2 binary is missing from the app's native library directory: " + sourceAapt2);
+            "AAPT2 binary is missing or empty in the app's native library directory: "
+                + sourceAapt2);
       }
+      copyFileAtomically(sourceAapt2, Environment.AAPT2);
     }
 
     if (!Environment.AAPT2.isFile() || Environment.AAPT2.length() == 0) {
