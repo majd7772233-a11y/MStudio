@@ -300,7 +300,7 @@ Changing `applicationId` does not change hard-coded manifest authorities. The do
 
 ## Roadmap numbering migration — 2026-10-12
 
-- Replaced the old Phase 0 + Phase 1–11 scheme with a single sequential Phase 1–12 scheme. Previous Phase 0 is now Phase 1; previous Phase 1 is Phase 2; previous Phase 2 is Phase 3; subsequent phases each move up by one. Substeps are scoped under their parent phase (for example 3.1–3.5), never standalone fractional phases.
+- **Superseded historical note:** this entry incorrectly claimed that a global Phase 0→Phase 1 renumbering was required. The main roadmap already used Phase 1–12; only document section/substep wording needed consistency. See the later `Roadmap consistency correction` and `Roadmap current-state clarification` entries. Main phases remain whole-numbered 1–12, with decimal substeps nested under their parent phase.
 - Historical execution records were renumbered to the same scheme. Completion claims remain evidence-based; a source change alone does not complete an acceptance gate.
 - Active implementation order: finish Phase 2 (identity/rebrand), then Phase 3 (runtime/setup repair). Phase 1's baseline CI and device smoke-test subtasks 1.4–1.5 are intentionally deferred until the source work reaches the verification gate; do not run builds or Actions early.
 
