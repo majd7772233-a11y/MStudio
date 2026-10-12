@@ -512,3 +512,9 @@ The following entries above record what was discovered at the time; use these li
 ### Phase 2 package identity disclosure — 2026-10-12
 
 - README should disclose the verified identity boundary: applicationId is `com.magd.mstudio`, while namespace/implementation packages remain `dev.mutwakil.androidide`; the DocumentsProvider authority still uses `dev.mutwakil.androidide.documents`. Until a named-device install test proves otherwise, do not claim side-by-side installation compatibility with upstream AndroidIDE.
+
+
+## Execution update — package identity caveat documented (2026-10-12)
+
+- README now explicitly records applicationId `com.magd.mstudio`, retained implementation namespace `dev.mutwakil.androidide`, and DocumentsProvider authority `dev.mutwakil.androidide.documents`; it does not claim upstream side-by-side compatibility. Commit: `611ac5872b8b873d1edfc54dc1535b768291efbc`.
+- This documents the current source boundary only; install/upgrade/provider behavior still requires device verification.
