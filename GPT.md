@@ -212,3 +212,11 @@ Additional Phase 2 update:
 - Roadmap was updated first in commit `9c6860e666d235d231a40dc9f6e6668faf6dd682`.
 - `utilities/build-info/build.gradle.kts` generates `BuildInfo.java` using `composite-builds/build-logic/common/src/main/java/dev/mutwakil/androidide/build/config/ProjectConfig.kt`. That live config still says `REPO_OWNER = AndroidIDE-Dev`, `REPO_NAME = AndroidIDE`, and `PROJECT_SITE = https://m.androidide.com`. This can make generated `BuildInfo.REPO_URL` and `PROJECT_SITE` send users to upstream (including the changelog action in `IDEApplication`). It is a concrete Phase 2 bug and must be corrected at its source, while leaving Maven group IDs and GPL/upstream attribution unchanged.
 - `GitHubContributors.kt` uses `GITHUB_API_REPO_URL` from a separate contributor service; audit its actual base URL before deciding whether About contributors should represent upstream or MStudio. Do not change contributor API URLs blindly without tracing the defining constant and current product intent.
+
+
+### Phase 3 implementation plan — main-screen runtime retry (2026-10-12)
+
+- Roadmap was amended first in commit `71167cad06099b011bec363c1ad6a557203430ec`.
+- `ToolsManager` status is about embedded runtime extraction/validation (JDK distribution discovery, managed Java, AAPT2, tooling JAR, android.jar, schemes and scripts). `OnboardingActivity` separately checks the installed JDK distribution and `Environment.ANDROID_HOME` and can launch terminal setup. Keep these distinct; do not claim the existing wizard fully represents `ToolsManager` readiness.
+- Planned UX: expose completed-vs-pending status, observe readiness with Activity lifecycle cleanup, show a retryable main-screen dialog only for completed failures, and let “Later” dismiss without pretending setup succeeded. Keep the existing `init(..., Runnable)` callback thread behavior stable.
+- Prevent concurrent initialization/retries because extraction uses deterministic `.tmp`/`.bak` paths. Coalesce callbacks into one initialization and notify UI observers on the main thread. No build/test/Actions until the later verification gate.
