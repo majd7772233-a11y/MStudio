@@ -405,3 +405,10 @@ Additional Phase 2 update:
 - Roadmap updated first in commit `54ce9c9a1d2ed7009d2286d2b2a0f6b20cc35afd`.
 - Commit `1c05b4a6f8f30b4e1e4858a2cebbb8bc67f87e0e` replaces `Files.readString` with `FileReader` plus a character buffer, avoiding a Java 11 API assumption on min SDK 26. The Java 17+ version parsing and timeout remain intact.
 - Re-fetched the source to confirm the change. No build/API lint/device verification was run.
+
+
+### Current continuation point — 2026-10-12
+
+- Post-edit fetch verified all 12 maintained locale values of `btn_donate` now mean “Project repository,” matching the actual MStudio GitHub destination. Roadmap continuation note is in commit `57080ddbb83ee4f87df555ab2474f5d1926a16fd`.
+- Phase 2 source branding/documentation is substantially updated but not fully audited or device-verified. Phase 3 has per-component readiness and retry UI plus atomic repair and Java 17+ version parsing; remaining work is deeper setup/recovery source audit and later offline/interruption/low-storage/ABI/device validation.
+- No build/test/Actions until the roadmap explicitly reaches the verification gate.
