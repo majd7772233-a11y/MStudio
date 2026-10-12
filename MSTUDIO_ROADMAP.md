@@ -651,3 +651,9 @@ This section summarizes the latest state after the bundled-JAR readiness change.
 - App ID is `com.magd.mstudio`; namespace/packages remain `dev.mutwakil.androidide`; DocumentsProvider authority remains `dev.mutwakil.androidide.documents`. Side-by-side install is unverified.
 - Signing secret **names** are `MY_KEYSTORE_JKS`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`; `MY_KEYSTORE_JKS` must be Base64-encoded JKS bytes for the inherited decoder. Cloudflare names are `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `MY_JWT_SECRET`. Never record or request secret values in these Markdown notes.
 - Never recommend `npx wrangler` for the user's Android/Termux environment; it does not work on their architecture.
+
+
+### Phase 3 source-audit finding — project marker reports false readiness (2026-10-12)
+
+- Live `ToolsManager.writeNoMediaFile()` logs an error when it cannot create the projects `.nomedia` marker, but returns normally. The enclosing `runComponent("projects-marker", ...)` therefore adds `projects-marker` to `readyComponents` even after marker creation failed. An existing non-file path at `.nomedia` is also treated as success because only `exists()` is checked.
+- Before source change, make this component fail explicitly when the marker path is not a regular file or cannot be created. Do not delete or replace an unexpected existing path because it could contain user data. This is setup-status accuracy only; no build/tests/Actions are authorized yet.
