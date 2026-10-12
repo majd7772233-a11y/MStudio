@@ -270,3 +270,10 @@ Updated `README.md` title and repository badges/issues/download destinations to 
 ### Sequencing guard
 
 The user requested that build and Actions verification be deferred until substantial code work is complete. Do not manually start Actions or a build during the current source phases. Phase 0.4 remains deferred.
+
+
+### Phase 2 follow-up — AAPT2 extraction
+
+- Changed AAPT2 extraction to copy the packaged native binary to a temporary file and replace the destination only after a non-empty copy succeeds.
+- Missing source binary, empty output, and inability to set executable permission now produce explicit setup failures rather than a silent log-only condition.
+- Still unverified until later device/build phase; color-scheme directory replacement and repair of a pre-existing corrupt AAPT2 file remain follow-up work.
