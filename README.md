@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./images/icon.png" alt="MStudio" width="80" height="80"/>
+  <img src="./images/mstudio-icon.svg" alt="MStudio" width="80" height="80"/>
 </p>
 
 <h2 align="center"><b>MStudio</b></h2>
