@@ -518,3 +518,9 @@ The following entries above record what was discovered at the time; use these li
 
 - README now explicitly records applicationId `com.magd.mstudio`, retained implementation namespace `dev.mutwakil.androidide`, and DocumentsProvider authority `dev.mutwakil.androidide.documents`; it does not claim upstream side-by-side compatibility. Commit: `611ac5872b8b873d1edfc54dc1535b768291efbc`.
 - This documents the current source boundary only; install/upgrade/provider behavior still requires device verification.
+
+
+### Phase 2 translated donation-action label audit — 2026-10-12
+
+- A broader localized-string scan found the default English `btn_donate` now says “Project repository” because the inherited donation destination has been replaced with the MStudio repository, but 12 locale files still label the same action as Donate/Support. That is a user-facing destination mismatch.
+- Update `btn_donate` in all 12 maintained locales to a localized “Project repository” label, preserving resource names and the existing GitHub destination. Do not restore the inherited sponsor/donation URL or imply MStudio accepts donations through an unverified channel.
