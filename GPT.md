@@ -392,3 +392,9 @@ Additional Phase 2 update:
 - Roadmap updated first in commit `d1ef8fdd7e4427a1c008ff089fe596a6eab76471`.
 - All 12 maintained locale resources now translate `btn_donate` as “Project repository” because the action opens the MStudio repository, not a donation/payment destination. Commit SHAs are recorded in `MSTUDIO_ROADMAP.md`.
 - This avoids a false donation promise and keeps the action consistent with the English resource. No builds/tests/Actions were run.
+
+
+### Phase 3 min-SDK compatibility follow-up — 2026-10-12
+
+- Roadmap updated first in commit `e9b8f14c51680238ecdd42f80de83fd026f0df76`.
+- The Java version parser introduced `Files.readString(Path, Charset)`, a Java 11 API that may not be available across min SDK 26 devices. Replace it with Java 8-compatible `FileReader`/reader logic before any build, preserving the parser and timeout.
