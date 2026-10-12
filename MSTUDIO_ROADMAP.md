@@ -420,3 +420,13 @@ No build, test task, workflow dispatch or Actions run was launched. Phase 1 base
 
 - The 12 locale files have consistent MStudio About-footer identity after the Arabic and Spanish corrections, but a targeted grep still found user-facing inherited wording: French `values-fr-rFR/strings.xml` describes the unsupported-device variant as AndroidIDE, and Turkish `values-tr-rTR/strings.xml` invites users to contribute to “Android IDE” rather than MStudio.
 - Correct these two user-facing strings only. Keep explicit upstream attribution (for example `summary_contributors`) mentioning AndroidIDE, and keep package names/paths/license headers unchanged. Re-fetch edited files to verify exact strings and format arguments.
+
+
+## Execution update — Phase 2 localized copy corrections (2026-10-12)
+
+- Corrected the Arabic About footer to `MStudio %1$s لـ %2$s` in commit `7d0651d489b9750f825b5e977b8201276ae689f4`.
+- Corrected the Spanish About footer to `MStudio %1$s para %2$s` in commit `43799c4ca889988a2a53b7363aa7614c26665fe6`.
+- Corrected French unsupported-device copy to name MStudio rather than AndroidIDE in commit `a4525ca4c5ca216114e343bfe189f11fbfa9c81c`.
+- Corrected Turkish contribution copy to name MStudio rather than “Android IDE” in commit `72e25fff369bf574ae877aa60e7a91a66a8d3174`.
+- Preserved explicit AndroidIDE upstream attribution, GPL notices, internal package names and resource format placeholders. Live scan of the maintained locale files also confirmed the Romanian and Bengali About footers already use MStudio. This is a targeted sweep, not proof that every user-facing string in every source file has been audited.
+- No build, test task, workflow dispatch or Actions run was launched.
