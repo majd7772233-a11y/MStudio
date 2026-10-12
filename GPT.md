@@ -220,3 +220,11 @@ Additional Phase 2 update:
 - `ToolsManager` status is about embedded runtime extraction/validation (JDK distribution discovery, managed Java, AAPT2, tooling JAR, android.jar, schemes and scripts). `OnboardingActivity` separately checks the installed JDK distribution and `Environment.ANDROID_HOME` and can launch terminal setup. Keep these distinct; do not claim the existing wizard fully represents `ToolsManager` readiness.
 - Planned UX: expose completed-vs-pending status, observe readiness with Activity lifecycle cleanup, show a retryable main-screen dialog only for completed failures, and let “Later” dismiss without pretending setup succeeded. Keep the existing `init(..., Runnable)` callback thread behavior stable.
 - Prevent concurrent initialization/retries because extraction uses deterministic `.tmp`/`.bak` paths. Coalesce callbacks into one initialization and notify UI observers on the main thread. No build/test/Actions until the later verification gate.
+
+
+### Phase 2 visual asset correction — 2026-10-12
+
+- Roadmap updated first in commit `913844ebb956533e789f8c701f7478cce8b0ad2e`.
+- Launcher/splash assets are tracked in `core/resources/src/main/res`, not the app module's `res` directory. `mipmap-anydpi-v26/ic_launcher.xml` uses the inherited PNG foreground; `drawable/ic_launcher_fg_vector.xml`, `drawable/ic_launcher_animated.xml`, `drawable/ic_launcher_main.xml` and `values/styles.xml` also contain/reference the inherited AndroidIDE logo. Manifest uses `@mipmap/ic_launcher`; `AppTheme.Splash` uses `@drawable/ic_launcher_animated`.
+- `core/resources/src/main/res/values/styles.xml` has a literal `XZ` after the closing splash style tag. This is malformed resource XML; remove it as a source correction, but do not run builds until the planned verification gate.
+- Visual implementation plan: create a small vector MStudio monogram suitable for the adaptive icon and splash, switch the adaptive icon and splash to that resource, and use a dark splash background with contrasting mark. Raster icon PNGs may remain as legacy fallback assets unless a safe binary-edit path is available; document that distinction rather than claiming every icon density was replaced.
