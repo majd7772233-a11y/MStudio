@@ -440,3 +440,10 @@ Additional Phase 2 update:
 - Roadmap spot-check was recorded in commit `8b88f390c78738ccc9e60a359caf92adb52bad8c`.
 - Re-fetched current `BuildConfig.kt`, app manifest and default user-facing resources: app label and internal product name are MStudio; onboarding help links target MStudio's README/issues; About labels now distinguish MStudio repository/contributors from upstream AndroidIDE translation credit.
 - Do not rename remaining “AndroidIDE” strings blindly: in inspected core files they are mainly GPL/copyright notices, namespace/provider identifiers, internal resource/style names, or explicit upstream attribution. This is a targeted spot-check, not a complete repository-wide audit or runtime proof. Phase 2 remains in progress.
+
+### Phase 3 bundled JAR readiness checks — 2026-10-12
+
+- Roadmap-first task was recorded in commit `6f8c802c8394854201a7f7e269c715afe354d77b`; execution record is in roadmap commit `0889cb5d44338a00d6891d3af098dcc6e602d7cb`.
+- `ToolsManager` now runs the shared `JarFile` validation against the extracted Gradle plugin JAR and Tooling API JAR after atomic copy, and reports component-specific errors if either is malformed. Commit: `0e5c63db1aafc16cf5b51b229297a7730453de19`.
+- The generic validator log no longer incorrectly says all invalid JARs are Android API stubs. The existing `android.jar` checks remain.
+- Re-fetch/source inspection only; no build, test, JAR execution, Actions, or device validation.
