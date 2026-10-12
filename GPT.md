@@ -292,3 +292,12 @@ Additional Phase 2 update:
 - Roadmap updated first in commit `49e674e70d110e9049eebe8a3b9251f211882860`.
 - The live README still links AndroidIDE docs and Telegram for MStudio support, uses the inherited F-Droid app ID `dev.mutwakil.androidide` despite the MStudio applicationId `com.magd.mstudio`, calls installation sources AndroidIDE, and points at the upstream AndroidIDE Crowdin project.
 - Correct README destinations and product names without claiming any release artifact or F-Droid package is verified. Keep AndroidIDE clearly credited as upstream foundation; only link to upstream resources in that context. No builds/Actions before the verification gate.
+
+
+### Phase 2 README correction and source-state reconciliation — 2026-10-12
+
+- Roadmap updated first in commit `e6bd65fd5384d3b75d53fb14b500d8920d8c8208`.
+- README commit `1aac325cef97d2ab0911f84660e246f947879606` removes misleading AndroidIDE docs/support, F-Droid package, upstream Crowdin and Telegram destinations. It explains that Actions artifacts are not verified releases and routes MStudio support to the MStudio issue tracker.
+- README follow-up commits `b09dfc089daeff9fcbae70c5f2448c100b15e520` and `ded14a43e57c65631e79dfc4715b08229c6051e0` clean the limitations/acknowledgement section and fix intro markup.
+- Current source confirms the root project name and generated repository metadata already target MStudio, CONTRIBUTING.md is fork-adapted, active launcher/splash resources use the MStudio vector, the old `XZ` is absent from styles.xml, and shared terminal error strings already say MStudio. Earlier roadmap discoveries that contradict this live state are historical, not current tasks.
+- Preserve upstream AndroidIDE attribution and GPL notice. No build/test/Actions until the explicit verification gate.
