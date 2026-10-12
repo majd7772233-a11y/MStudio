@@ -482,4 +482,9 @@
   <string name="summary_open_source_licenses">ओपन सोर्स लाइसेंस देखें</string>
   <string name="idepref_jdkVersion_title">JDK version</string>
   <string name="idepref_jdkVersion_summary">Currently selected: %1$s (requires restart if changed)</string>
+
+    <string name="runtime_setup_failed_title">रनटाइम सेटअप पर ध्यान देना आवश्यक है</string>
+    <string name="runtime_setup_failed_message">कुछ अंतर्निहित रनटाइम घटक तैयार नहीं हो सके। सेटअप ठीक होने तक प्रोजेक्ट बिल्ड विफल हो सकते हैं। अभी फिर प्रयास करें या MStudio का उपयोग जारी रखकर बाद में प्रयास करें।</string>
+    <string name="runtime_setup_retry">सेटअप फिर से प्रयास करें</string>
+    <string name="runtime_setup_later">बाद में</string>
 </resources>
