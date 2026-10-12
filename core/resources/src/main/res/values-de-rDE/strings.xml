@@ -4,16 +4,16 @@
   <string name="copy" tools:override="true">Kopieren</string>
   <string name="terminal_more">Mehr…</string>
   <string name="text_to_search">Zu suchender Text</string>
-  <string name="about_option_email">E-Mail</string>
+   <string name="about_option_email">GitHub-Issue melden</string>
   <string name="about_option_website">Internetseite</string>
   <string name="about_footer">MStudio %1$s f&#xFC;r %2$s</string>
   <string name="about_subtitle">Die IDE f&#xFC;r Android Ger&#xE4;te</string>
   <string name="msg_get_package_failed">Fehler beim Extrahieren des Paketnamens!</string>
-  <string name="msg_need_help">Wenn Sie bei der Verwendung von MStudio oder beim Erstellen von Android-Apps auf Probleme sto&#xDF;en, k&#xF6;nnen Sie unserer Telegram-Gruppe beitreten und dort um Hilfe bitten.\n\nSie k&#xF6;nnen uns auch Vorschl&#xE4;ge per E-Mail senden.</string>
+   <string name="msg_need_help">Wenn bei der Nutzung von MStudio oder beim Erstellen von Android-Apps Probleme auftreten, melden Sie sie bitte in den GitHub-Issues von MStudio oder schlagen Sie dort Verbesserungen vor.</string>
   <string name="need_help">Brauchen Sie Hilfe?</string>
   <string name="ide_preferences">IDE-Einstellungen</string>
-  <string name="discussions_on_telegram">Auf Telegram diskutieren</string>
-  <string name="official_tg_channel">Offizieller Telegram-Kanal</string>
+   <string name="discussions_on_telegram">GitHub-Issue melden</string>
+   <string name="official_tg_channel">MStudio-GitHub-Repository</string>
   <string name="msg_empty_view">Keine Daten vorhanden</string>
   <string name="title_terminal">Konsole</string>
   <string name="reset">Zur&#xFC;cksetzen</string>
@@ -471,7 +471,7 @@
   <string name="title_unsupported_user">Nicht unterstützter Nutzer</string>
   <string name="title_socials">Socials</string>
   <string name="title_contributors">Contributors</string>
-  <string name="summary_contributors">Top community contributors.</string>
+   <string name="summary_contributors">Danksagung an Mitwirkende des ursprünglichen AndroidIDE-Projekts, auf dem MStudio basiert.</string>
   <string name="title_github_contributors">GitHub Contributors</string>
   <string name="title_crowdin_translators">Crowdin Translators</string>
   <string name="title_misc">Misc</string>
