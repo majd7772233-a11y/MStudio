@@ -5,7 +5,7 @@
   <string name="terminal_more">अधिक विकल्प…</string>
   <string name="text_to_search">खोजने के लिए पाठ</string>
    <string name="about_option_email">GitHub पर समस्या रिपोर्ट करें</string>
-  <string name="about_option_website">वेबसाइट</string>
+    <string name="about_option_website">GitHub Repository</string>
   <string name="about_footer">%2$s के लिए MStudio %1$s</string>
   <string name="about_subtitle">बस, एक आईडीई एंड्रॉयड के लिए</string>
   <string name="msg_get_package_failed">पैकेज का नाम निकालने में विफल रहे !</string>
