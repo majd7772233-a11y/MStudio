@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
-    <!-- AndroidIDE -->
+    <!-- MStudio user-facing strings -->
     <string name="copy" tools:override="true">Copy</string>
     <string name="terminal_more">More…</string>
     <string name="text_to_search">Text to search</string>
-    <string name="app_name" translatable="false">AndroidIDE-Dev</string>
-    <string name="about_option_email">Email</string>
+    <string name="app_name" translatable="false">MStudio</string>
+    <string name="about_option_email">GitHub Issues</string>
     <string name="about_option_website">Website</string>
-    <string name="about_footer_alternate" translatable="false">AndroidIDE v\u2022 %s</string>
-    <string name="about_footer">AndroidIDE %1$s for %2$s</string>
+    <string name="about_footer_alternate" translatable="false">MStudio v\u2022 %s</string>
+    <string name="about_footer">MStudio %1$s for %2$s</string>
     <string name="about_subtitle">Simply, an IDE for Android</string>
     <string name="msg_get_package_failed">Failed to extract package name!</string>
-    <string name="msg_need_help">If you\'re facing issues while using AndroidIDE or with building Android Apps, you can join the Telegram Group ask for help there.\n\nYou can also send suggesstions on our email.</string>
+    <string name="msg_need_help">If you run into issues while using MStudio or building Android apps, report the problem or suggest an improvement in the MStudio GitHub issue tracker.</string>
     <string name="title_github" translatable="false">GitHub</string>
     <string name="need_help">Need Help?</string>
     <string name="ide_preferences">IDE preferences</string>
-    <string name="discussions_on_telegram">Discussions on Telegram</string>
-    <string name="official_tg_channel">Official Telegram Channel</string>
+    <string name="discussions_on_telegram">Report an issue on GitHub</string>
+    <string name="official_tg_channel">MStudio GitHub Repository</string>
     <string name="msg_empty_view">No data</string>
     <string name="title_terminal">Terminal</string>
     <string name="reset">Reset</string>
@@ -353,8 +353,8 @@
     <string name="msg_swipe_for_output">Swipe up for @@build output@@.</string>
     <string name="idepref_editor_useSoftTabs_title">Use soft tab</string>
     <string name="idepref_editor_useSoftTabs_summary">Choose whether to use spaces instead of tab character (\\t).</string>
-    <string name="btn_donate">Donate</string>
-    <string name="btn_docs">Documentation</string>
+    <string name="btn_donate">Project repository</string>
+    <string name="btn_docs">Project README</string>
     <string name="btn_close">Close</string>
     <string name="msg_ignore_case">Ignore case</string>
     <string name="msg_use_regex">Use regex</string>
@@ -704,7 +704,7 @@
     <string name="msg_files_being_saved">A file save operation is already in progress!</string>
     <string name="title_install_tools">SDK Installation</string>
     <string name="subtitle_install_tools">Install the development tools</string>
-    <string name="msg_install_tools">The development tools must be installed for the IDE to work. Clicking the done button will open terminal to install the tools. To install, follow the instructions <![CDATA[ <a href="https://docs.androidide.com/tutorials/get-started.html">here</a>.<br/><br/>Or read the <a href="https://docs.androidide.com/">documentation</a>]]>.</string>
+    <string name="msg_install_tools">The development tools must be installed for MStudio to work. Clicking Done opens the terminal to install them. Read the <a href="https://github.com/majd7772233-a11y/MStudio/blob/dev/README.md">project README</a> for project information, or report setup problems in <a href="https://github.com/majd7772233-a11y/MStudio/issues">GitHub Issues</a>.</string>
     <string name="greeting_title">Welcome</string>
     <string name="greeting_subtitle">Learn, build, launch. All on your Android.</string>
     <string name="title_grant">Grant</string>
@@ -736,7 +736,7 @@
     <string name="title_crowdin_translators">Crowdin Translators</string>
     <string name="title_misc">Misc</string>
     <string name="title_contribute">Contribute</string>
-    <string name="summary_contribute">It\'s not just an IDE, it\'s a community. Contribute code, ideas, and passion to AndroidIDE.</string>
+    <string name="summary_contribute">Help improve MStudio by reporting issues, suggesting ideas, or contributing code.</string>
     <string name="msg_app_unavailable_for_intent">No application available to handle intent.</string>
     <string name="title_open_source_licenses">Open source licenses</string>
     <string name="summary_open_source_licenses">View open source licenses.</string>
