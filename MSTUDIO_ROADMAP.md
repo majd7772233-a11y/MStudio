@@ -597,3 +597,8 @@ The following entries above record what was discovered at the time; use these li
 - Re-fetched current `BuildConfig.kt`, app manifest and default user-facing resource strings. `INTERNAL_NAME` and `app_name` both read MStudio; onboarding help links lead to the MStudio README and issue tracker; About copy now identifies the project repository and contributor sources accurately.
 - Remaining occurrences of “AndroidIDE” in the inspected core files are primarily inherited GPL/copyright notices, implementation namespace/provider identity, internal resource/style identifiers, or explicit upstream attribution. These are not blindly renamed because doing so could damage attribution or compatibility.
 - This is a targeted source spot-check, not a complete repository-wide string/reference proof, and not resource compilation or runtime evidence. Phase 2 remains in progress until the remaining sweep and later verification gate are completed.
+
+### Phase 3 bundled JAR validation follow-up — 2026-10-12
+
+- Source audit found `android.jar` is checked with `JarFile`, but the extracted Gradle plugin JAR and Tooling API JAR are only checked for non-empty copy success. A truncated or malformed packaged/runtime JAR could therefore be reported as ready and fail later during sync/build.
+- Reuse the existing ZIP/JAR validation helper for these two destinations after atomic extraction, and make the helper's diagnostic generic rather than claiming every invalid archive is the Android API stub. Do not change the Gradle Tooling API architecture or the JAR contents in this task.
