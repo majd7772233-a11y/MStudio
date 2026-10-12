@@ -17,6 +17,9 @@
  */
 package dev.mutwakil.androidide.managers;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import androidx.annotation.NonNull;
 
 import com.blankj.utilcode.util.ResourceUtils;
@@ -40,10 +43,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -60,25 +65,37 @@ public class ToolsManager {
 
   public static String COMMON_ASSET_DATA_DIR = "data/common";
 
+  private static final Object INIT_LOCK = new Object();
+  private static final Handler MAIN_HANDLER = new Handler(Looper.getMainLooper());
+  private static final List<Consumer<InitResult>> pendingCallbacks = new ArrayList<>();
+  private static final List<Consumer<InitResult>> resultListeners = new ArrayList<>();
+  private static boolean initInProgress;
   private static volatile InitResult lastInitResult =
-      new InitResult(false, Collections.emptySet(),
+      new InitResult(false, false, Collections.emptySet(),
           Collections.singletonMap("setup", "Runtime setup has not completed yet."));
 
   /** Immutable per-component setup status for onboarding and retry UI. */
   public static final class InitResult {
+    private final boolean completed;
     private final boolean supportedAbi;
     private final Set<String> readyComponents;
     private final Map<String, String> failures;
 
     private InitResult(
-        boolean supportedAbi, Set<String> readyComponents, Map<String, String> failures) {
+        boolean completed, boolean supportedAbi,
+        Set<String> readyComponents, Map<String, String> failures) {
+      this.completed = completed;
       this.supportedAbi = supportedAbi;
       this.readyComponents = Collections.unmodifiableSet(new LinkedHashSet<>(readyComponents));
       this.failures = Collections.unmodifiableMap(new LinkedHashMap<>(failures));
     }
 
+    public boolean isCompleted() {
+      return completed;
+    }
+
     public boolean isReady() {
-      return supportedAbi && failures.isEmpty();
+      return completed && supportedAbi && failures.isEmpty();
     }
 
     public boolean isSupportedAbi() {
@@ -98,13 +115,66 @@ public class ToolsManager {
     return lastInitResult;
   }
 
-  /** Keeps the original callback contract for existing callers. */
-  public static void init(@NonNull BaseApplication app, Runnable onFinish) {
-    initWithResult(app, result -> {
-      if (onFinish != null) {
-        onFinish.run();
+  /** Registers a lifecycle-managed listener for completed runtime setup results. */
+  public static void addInitResultListener(@NonNull Consumer<InitResult> listener) {
+    final InitResult current;
+    synchronized (INIT_LOCK) {
+      if (!resultListeners.contains(listener)) {
+        resultListeners.add(listener);
+      }
+      current = lastInitResult;
+      if (initInProgress || !current.isCompleted()) {
+        return;
+      }
+    }
+    MAIN_HANDLER.post(() -> notifyOneListener(listener, current));
+  }
+
+  /** Removes a previously registered setup-result listener. */
+  public static void removeInitResultListener(Consumer<InitResult> listener) {
+    synchronized (INIT_LOCK) {
+      resultListeners.remove(listener);
+    }
+  }
+
+  public static boolean isInitializationInProgress() {
+    synchronized (INIT_LOCK) {
+      return initInProgress;
+    }
+  }
+
+  private static void notifyResultListeners(InitResult result) {
+    final List<Consumer<InitResult>> listeners;
+    synchronized (INIT_LOCK) {
+      listeners = new ArrayList<>(resultListeners);
+    }
+    MAIN_HANDLER.post(() -> {
+      synchronized (INIT_LOCK) {
+        if (initInProgress || lastInitResult != result) {
+          return;
+        }
+      }
+      for (Consumer<InitResult> listener : listeners) {
+        notifyOneListener(listener, result);
       }
     });
+  }
+
+  private static void notifyOneListener(Consumer<InitResult> listener, InitResult result) {
+    try {
+      listener.accept(result);
+    } catch (Throwable error) {
+      LOG.error("Runtime setup result listener failed", error);
+    }
+  }
+
+  /** Keeps the original callback contract for existing callers. */
+  public static void init(@NonNull BaseApplication app, Runnable onFinish) {
+    if (onFinish == null) {
+      initWithResult(app, null);
+    } else {
+      initWithResult(app, result -> onFinish.run());
+    }
   }
 
   /**
@@ -116,13 +186,35 @@ public class ToolsManager {
     if (!IDEBuildConfigProvider.getInstance().supportsCpuAbi()) {
       Map<String, String> failures = new LinkedHashMap<>();
       failures.put("abi", "This device ABI is not supported by the bundled runtime.");
-      InitResult result = new InitResult(false, Collections.emptySet(), failures);
-      lastInitResult = result;
-      LOG.error("Device not supported by the bundled runtime");
-      if (onComplete != null) {
-        onComplete.accept(result);
+      InitResult result = new InitResult(true, false, Collections.emptySet(), failures);
+      final List<Consumer<InitResult>> callbacks;
+      synchronized (INIT_LOCK) {
+        lastInitResult = result;
+        initInProgress = false;
+        callbacks = new ArrayList<>(pendingCallbacks);
+        pendingCallbacks.clear();
+        if (onComplete != null) {
+          callbacks.add(onComplete);
+        }
       }
+      LOG.error("Device not supported by the bundled runtime");
+      dispatchCompletionCallbacks(callbacks, result);
+      notifyResultListeners(result);
       return;
+    }
+
+    synchronized (INIT_LOCK) {
+      if (initInProgress) {
+        if (onComplete != null) {
+          pendingCallbacks.add(onComplete);
+        }
+        return;
+      }
+      initInProgress = true;
+      pendingCallbacks.clear();
+      if (onComplete != null) {
+        pendingCallbacks.add(onComplete);
+      }
     }
 
     CompletableFuture.supplyAsync(() -> {
@@ -155,7 +247,7 @@ public class ToolsManager {
       runComponent("kotlin-artifact-script", ready, failures, ToolsManager::extractDownloadKtScript);
       runComponent("runtime-cleanup", ready, failures, ToolsManager::deleteIdeenv);
 
-      return new InitResult(true, ready, failures);
+      return new InitResult(true, true, ready, failures);
     }).whenComplete((result, error) -> {
       InitResult completed = result;
       if (error != null) {
@@ -163,18 +255,32 @@ public class ToolsManager {
         Map<String, String> failures = new LinkedHashMap<>();
         failures.put("setup", error.getMessage() == null
             ? error.getClass().getSimpleName() : error.getMessage());
-        completed = new InitResult(true, Collections.emptySet(), failures);
+        completed = new InitResult(true, true, Collections.emptySet(), failures);
       }
 
-      lastInitResult = completed;
-      if (onComplete != null) {
-        try {
-          onComplete.accept(completed);
-        } catch (Throwable callbackError) {
-          LOG.error("Runtime setup completion callback failed", callbackError);
-        }
+      final List<Consumer<InitResult>> callbacks;
+      synchronized (INIT_LOCK) {
+        lastInitResult = completed;
+        initInProgress = false;
+        callbacks = new ArrayList<>(pendingCallbacks);
+        pendingCallbacks.clear();
       }
+
+      // Preserve the legacy completion callback's execution thread.
+      dispatchCompletionCallbacks(callbacks, completed);
+      notifyResultListeners(completed);
     });
+  }
+
+  private static void dispatchCompletionCallbacks(
+      List<Consumer<InitResult>> callbacks, InitResult result) {
+    for (Consumer<InitResult> callback : callbacks) {
+      try {
+        callback.accept(result);
+      } catch (Throwable callbackError) {
+        LOG.error("Runtime setup completion callback failed", callbackError);
+      }
+    }
   }
 
   private static void runComponent(
