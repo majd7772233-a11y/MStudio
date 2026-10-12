@@ -228,3 +228,10 @@ Additional Phase 2 update:
 - Launcher/splash assets are tracked in `core/resources/src/main/res`, not the app module's `res` directory. `mipmap-anydpi-v26/ic_launcher.xml` uses the inherited PNG foreground; `drawable/ic_launcher_fg_vector.xml`, `drawable/ic_launcher_animated.xml`, `drawable/ic_launcher_main.xml` and `values/styles.xml` also contain/reference the inherited AndroidIDE logo. Manifest uses `@mipmap/ic_launcher`; `AppTheme.Splash` uses `@drawable/ic_launcher_animated`.
 - `core/resources/src/main/res/values/styles.xml` has a literal `XZ` after the closing splash style tag. This is malformed resource XML; remove it as a source correction, but do not run builds until the planned verification gate.
 - Visual implementation plan: create a small vector MStudio monogram suitable for the adaptive icon and splash, switch the adaptive icon and splash to that resource, and use a dark splash background with contrasting mark. Raster icon PNGs may remain as legacy fallback assets unless a safe binary-edit path is available; document that distinction rather than claiming every icon density was replaced.
+
+
+### Phase 2 translated-resource audit — 2026-10-12
+
+- Roadmap amended first in commit `c57f243a66526e02104ee7d68f7e75186b89c2a0`.
+- A recursive Git tree query found 12 locale-specific `values-*/strings.xml` files. They override many of the English resources, and multiple locales still mention AndroidIDE, upstream Telegram/email support, and docs.androidide.com in user-facing help/setup strings. Editing only the default English resource would therefore leave false destinations visible to users in those locales.
+- Update translated product labels and help text, replace upstream docs URLs with the MStudio README/issues, and change Telegram/email UI labels to GitHub issue/repository destinations. Preserve localized language where practical. Keep contributor credit explicit: MStudio is derived from AndroidIDE, and upstream contributors must not be mislabeled as MStudio contributors.
