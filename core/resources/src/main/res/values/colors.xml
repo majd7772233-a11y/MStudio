@@ -3,6 +3,8 @@
 
   <!--  other colors-->
   <color name="primaryColor">#121212</color>
+  <color name="mstudio_brand_background">#0B1020</color>
+  <color name="mstudio_brand_accent">#5EEAD4</color>
   <color name="primaryIconColor">#ffffff</color>
   <color name="rippleHighlightColor">#85121212</color>
 
@@ -17,7 +19,7 @@
 
   <color name="color_picker_default_color">#f44336</color>
 
-  <color name="splash_bg">@android:color/white</color>
+  <color name="splash_bg">@color/mstudio_brand_background</color>
   <color name="splash_icon_tint">@android:color/black</color>
   <color name="teal_200">#FF03DAC5</color>
   
