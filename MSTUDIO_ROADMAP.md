@@ -189,7 +189,7 @@ See `CLOUD_BUILD_PLAN.md`. Only begin after local MVP. Later flow: GitHub author
 
 ## Phase 12 — release
 
-Build from known commit; verify APK checksum/signature/ABI; test clean install/upgrade; create/import/build Java/XML project; resolve Maven dependency; test resources, failure/cancel, tool repair, cached offline build and install. Verify signing ownership, publication opt-in, GPL/third-party notices and limitations. README claims must match tested behavior.
+Build from known commit; verify APK checksum/signature/ABI; test clean install/upgrade; create/import/build Java/XML project; resolve Maven dependency; test resources, failure/cancel, tool repair, cached offline build and install. Replace inherited store/release raster artwork (`images/icon.png`, Fastlane icon/screenshots, and `core/app/src/main/ic_launcher-playstore.png`) with the MStudio monogram before publishing; these metadata assets are separate from the active adaptive launcher vector. Verify signing ownership, publication opt-in, GPL/third-party notices and limitations. README claims must match tested behavior.
 
 ## Local MVP evidence checklist
 
@@ -683,3 +683,24 @@ No build, tests, workflow dispatch, Actions run or device validation is authoriz
 ### Phase 2 — remaining raster identity assets found (2026-10-12)
 
 - The active vector/adaptive launcher and README use the MStudio monogram, but the tracked raster assets `images/icon.png`, `fastlane/metadata/android/en-US/images/icon.png`, and `core/app/src/main/ic_launcher-playstore.png` still contain the inherited AndroidIDE curly-brace/Android glyph. The legacy density PNGs under `core/resources/src/main/res/mipmap-*` also need to match the MStudio vector identity, including round and foreground variants. Update these assets from the same MStudio monogram so README/store/legacy launcher assets do not contradict the active icon. This is an asset identity change only; keep GPL attribution in source notices and do not imply store publication.
+
+
+## Phase 2/3 source implementation checkpoint — 2026-10-12
+
+### Phase 2 — source acceptance review
+
+- Re-fetched `ProjectConfig.kt`: generated repository metadata points to `majd7772233-a11y/MStudio`; `settings.gradle.kts` root project is `MStudio`; About opens only the verified MStudio repository and its `CONTRIBUTING.md`; README support/reporting links point to MStudio. App ID remains `com.magd.mstudio`, implementation namespace remains `dev.mutwakil.androidide`, and the DocumentsProvider authority remains `dev.mutwakil.androidide.documents`; no side-by-side-install claim is made.
+- Updated all 12 translated resource files plus the default English resources' related locale consistency. Every maintained `msg_install_tools` value now names MStudio, includes exactly one MStudio README link and one MStudio GitHub Issues link, and no longer has the duplicate README link or malformed/empty second anchor. Arabic, German, Spanish, French and Romanian setup/device/contribution copy was corrected where the inspected values were still English. Upstream AndroidIDE translation credit and GPL notices remain intact.
+- The active adaptive launcher (`mipmap-anydpi-v26/ic_launcher.xml`) points to the MStudio vector foreground and brand background, and the minimum SDK is 26. The remaining inherited raster icons under density fallback and store/Fastlane metadata are not the active launcher on supported API levels; the store/release artwork update is explicitly moved to Phase 12, before any release. No claim is made that these legacy PNGs have been replaced.
+- Phase 2 source acceptance is satisfied by the inspected app/UI/build metadata and locale/link sweep. This is not a device-rendering test.
+
+### Phase 3 — source implementation and readiness semantics
+
+- `ToolsManager.writeInitScript()` now creates a missing `init.gradle` through a sibling temporary file, flushes/syncs it, and atomically replaces only after a successful write. An existing empty or non-regular init-script path is reported as failure and left untouched; a valid user script is preserved. Refreshing `init.gradle.bak` is best-effort because it is a packaged-default copy, not a previous-version migration backup.
+- Stale `ideenv` cleanup now rejects unexpected non-file paths without deleting them. Cleanup is explicitly optional: a cleanup failure is logged and omitted from `readyComponents`, but does not mark otherwise usable runtime components as failed. The existing project-marker failure reporting, per-component readiness, atomic extraction, JAR validation, AAPT2/Java version checks, color-scheme recovery and retry UI remain in place.
+- Source-level post-edit checks re-fetched the exact `ToolsManager.java` and all 13 maintained `msg_install_tools` resources. They confirmed the atomic writer and guards are present, and each locale has exactly one README link and one GitHub Issues link with no malformed closing anchor.
+
+### Verification gate — still pending
+
+- No Build, test task, workflow dispatch, GitHub Actions run or device smoke test was performed in this source batch. The primary workflow is manual-dispatch for this branch, and the available GitHub connection has no workflow-dispatch write operation. Phase 1.4 baseline CI and Phase 1.5 device smoke test remain the required acceptance evidence before Phase 3 can be called fully verified or Phase 4 can be treated as unblocked. Do not infer runtime success from these source checks.
+- Source commits: atomic init-script writer `5e75a5e527fc97b7ec261402af6233fca460a58b`; cleanup path semantics `12a654bf218c7c0a1260fb1bddd7e27dc29524a0`; localized setup guidance `20102a96c037639b1cc6e31966f613256b89882a`.
