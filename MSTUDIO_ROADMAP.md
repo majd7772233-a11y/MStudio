@@ -414,3 +414,9 @@ No build, test task, workflow dispatch or Actions run was launched. Phase 1 base
 - Localized About-footer correction committed: Arabic `values-ar-rSA/strings.xml` commit `7d0651d489b9750f825b5e977b8201276ae689f4`; Spanish `values-es-rES/strings.xml` commit `43799c4ca889988a2a53b7363aa7614c26665fe6`. Both preserve `%1$s` and `%2$s` while displaying MStudio as the product name.
 - Planning/doc commits for this follow-up: roadmap `47495f5921ee9a34a356727c6019cb53b916bc41`; GPT memory `7f95899093c1b61fea37175029273cbeacc0bdc1`.
 - No build, test task, workflow dispatch, or Actions run was launched.
+
+
+### Phase 2 locale audit follow-up — inherited device/help wording (2026-10-12)
+
+- The 12 locale files have consistent MStudio About-footer identity after the Arabic and Spanish corrections, but a targeted grep still found user-facing inherited wording: French `values-fr-rFR/strings.xml` describes the unsupported-device variant as AndroidIDE, and Turkish `values-tr-rTR/strings.xml` invites users to contribute to “Android IDE” rather than MStudio.
+- Correct these two user-facing strings only. Keep explicit upstream attribution (for example `summary_contributors`) mentioning AndroidIDE, and keep package names/paths/license headers unchanged. Re-fetch edited files to verify exact strings and format arguments.
