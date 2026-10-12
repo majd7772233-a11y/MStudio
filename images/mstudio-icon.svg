@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">MStudio</title>
+  <desc id="desc">MStudio monogram on a dark navy background.</desc>
+  <rect width="512" height="512" rx="112" fill="#0B1020"/>
+  <path d="M128 330V150L194 235L256 160L318 235L384 150V330" fill="none" stroke="#5EEAD4" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M190 386H322" fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round"/>
+</svg>
