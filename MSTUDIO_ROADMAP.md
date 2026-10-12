@@ -495,3 +495,9 @@ The following entries above record what was discovered at the time; use these li
 - Post-edit fetch confirmed README no longer contains the old AndroidIDE docs/Telegram/Crowdin/F-Droid/package-ID/site destinations; it references `images/mstudio-icon.svg`, and the feature-verification caveat is present.
 - Post-edit fetch confirmed About's repository action uses `R.drawable.ic_github`, the new SVG exists, and Arabic/Spanish footers plus French unsupported-device and Turkish contribute text now use MStudio.
 - These checks verify file contents only. They are not Android resource compilation, APK installation, runtime, or device evidence.
+
+
+### Phase 3 managed Java version check — 2026-10-12
+
+- Static inspection found `isUsableJava()` currently runs `java -version` and checks only exit code plus non-empty output; it does not parse the reported version. That can falsely accept an incompatible or wrong executable that prints arbitrary text and exits zero.
+- Update the check to require a parseable Java version with major version 17 or newer (including modern `21.x` and legacy `1.8.x` notation, where legacy 8 must fail). Keep the five-second timeout and cleanup behavior. This is source-level validation only; actual managed-runtime compatibility remains for the later verification phase.
