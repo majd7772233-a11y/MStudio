@@ -318,9 +318,9 @@ Changing `applicationId` does not change hard-coded manifest authorities. The do
 
 - `ToolsManager` now exposes an immutable per-component `InitResult` through `initWithResult`, records successful components and failure messages, and always reports unsupported ABI instead of silently returning without a completion callback. The original Runnable overload remains for existing callers.
 - Android API stub extraction now validates that `android.jar` is a readable non-empty JAR and atomically repairs missing/empty/invalid files while refusing to delete an unexpected directory.
-- AAPT2 extraction repairs missing or zero-byte destinations from the packaged native library and reports invalid paths/permission failures clearly. A non-empty but executable-corrupt AAPT2 still requires invocation-level validation.
+- AAPT2 extraction runs the bundled binary's `version` command with a five-second timeout, replaces missing/empty/non-executable/broken destinations from the packaged native library, and fails setup clearly if the replacement is still unusable.
 - Color-scheme updates now stage a complete directory, validate `scheme.prop`, swap only after successful extraction, and recover a prior backup after an interrupted swap. Version-read errors now schedule repair rather than incorrectly treating the installed scheme as valid.
-- Remaining Phase 3 work: connect per-component readiness to user-visible onboarding/retry UX, validate non-empty AAPT2 by invocation/version, verify managed JDK selection/execution, and complete offline/interruption/low-storage/device tests. These are not claimed complete without evidence.
+- Remaining Phase 3 work: connect per-component readiness to user-visible onboarding/retry UX, verify managed JDK selection/execution, and complete offline/interruption/low-storage/device tests. The AAPT2 version check is implemented in source but remains unverified on-device.
 
 Commits for this batch:
 - `878fe9176dafb4e130dc80f3a1ca6e55c1c78113` — About destinations use the MStudio repository.
