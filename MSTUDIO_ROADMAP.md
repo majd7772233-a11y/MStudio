@@ -369,3 +369,10 @@ No build, test task, workflow dispatch or Actions run was launched. Phase 1 base
 - Keep the existing SDK/JDK onboarding wizard intact. Add a lifecycle-safe observer for `ToolsManager` runtime readiness and show a retryable warning in the main IDE only after runtime initialization completes with failures. Retry must rerun runtime preparation; “Later” must leave the IDE usable without falsely marking tools ready.
 - Serialize runtime initialization so a retry or repeated app entry cannot run two extraction jobs against the same deterministic temporary/backup paths. Publish results to UI observers on the main thread without changing the existing completion callback's thread contract for other callers.
 - This is source implementation only until the planned verification phase; no build, test or Actions run is allowed during this work batch.
+
+
+### Phase 2 discovery — actual launcher/splash resources located (2026-10-12)
+
+- Correcting the earlier assumption: launcher resources are tracked under `core/resources/src/main/res`, not `core/app/src/main/res`. `mipmap-anydpi-v26/ic_launcher.xml` points to the inherited `ic_launcher_foreground` PNG; `drawable/ic_launcher_fg_vector.xml`, `ic_launcher_animated.xml`, `ic_launcher_main.xml`, and `values/styles.xml` also contain or reference the inherited AndroidIDE mark. The app manifest uses `@mipmap/ic_launcher`, and `AppTheme.Splash` uses `@drawable/ic_launcher_animated`.
+- A source inspection of `core/resources/src/main/res/values/styles.xml` found the literal stray text `XZ` immediately after the closing `AppTheme.Splash` style tag (`</style>XZ`). This is invalid XML content and must be removed as part of the splash-resource repair. Do not run a build to test it yet; static source correction only.
+- Phase 2 visual rebrand can now use a small vector MStudio monogram shared by adaptive launcher icon and splash, with dark background/contrasting strokes. Preserve GPL headers/attribution where present; do not delete upstream source attribution.
