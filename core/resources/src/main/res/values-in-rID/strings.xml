@@ -482,4 +482,9 @@
   <string name="summary_open_source_licenses">Lihat lisensi sumber terbuka.</string>
   <string name="idepref_jdkVersion_title">Versi JDK</string>
   <string name="idepref_jdkVersion_summary">Saat ini dipilih: %1$s (perlu dimulai ulang jika diubah)</string>
+
+    <string name="runtime_setup_failed_title">Penyiapan runtime perlu diperhatikan</string>
+    <string name="runtime_setup_failed_message">Beberapa komponen runtime bawaan tidak dapat disiapkan. Build proyek mungkin gagal sampai penyiapan diperbaiki. Coba lagi sekarang atau lanjutkan menggunakan MStudio dan coba lagi nanti.</string>
+    <string name="runtime_setup_retry">Coba siapkan lagi</string>
+    <string name="runtime_setup_later">Nanti</string>
 </resources>
