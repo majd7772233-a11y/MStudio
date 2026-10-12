@@ -6,7 +6,7 @@
   <string name="text_to_search">Text to search</string>
    <string name="about_option_email">Informar de un problema en GitHub</string>
     <string name="about_option_website">Repositorio de GitHub</string>
-  <string name="about_footer">Android IDE %1$s para %2$s</string>
+  <string name="about_footer">MStudio %1$s para %2$s</string>
   <string name="about_subtitle">Simplemente un IDE para Android</string>
   <string name="msg_get_package_failed">¡Error al extraer el nombre del paquete!</string>
    <string name="msg_need_help">Si tiene problemas al usar MStudio o crear aplicaciones Android, repórtelos o sugiera mejoras en las incidencias de GitHub de MStudio.</string>
