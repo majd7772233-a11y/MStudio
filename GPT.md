@@ -249,3 +249,9 @@ Additional Phase 2 update:
 - `core/resources/src/main/res/values/termux_app_strings.xml` and `termux_shared_strings.xml` contain visible AndroidIDE error/setup copy. Update only the string values to MStudio; retain upstream license comments and all internal package/path strings such as `dev.mutwakil.androidide` and `.androidide`.
 - `core/app/src/main/res/layout/layout_about_header.xml` directly referenced the inherited raster `@mipmap/ic_launcher_foreground`. Switch it to `@drawable/mstudio_launcher_foreground`; `fragment_onboarding_greeting.xml` already uses `@drawable/ic_launcher_fg_vector`, which was rebranded.
 - `androidide_header.xml` and `androidide_header_compact.xml` are legacy wide vector resources; no use has yet been located in the inspected onboarding/About layouts. Do not rewrite/remove them without checking all references; the active manifest icon, onboarding greeting, About header and splash have known MStudio vector paths.
+
+
+### Phase 2 About destination label — 2026-10-12
+
+- Roadmap updated first in commit `0608fc5b8c04f5bef8d4fd99276c436724bff2a0`.
+- `AboutActivity.kt` opens `PROJECT_URL` at the MStudio GitHub repository, but the resource key `about_option_website` still labels it “Website”. MStudio has no separate website configured in source; change the label to “GitHub Repository” and update translated values where present.
