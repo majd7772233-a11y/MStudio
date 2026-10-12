@@ -6,7 +6,7 @@
   <string name="text_to_search">البحث عن نص</string>
    <string name="about_option_email">مشكلات GitHub</string>
     <string name="about_option_website">مستودع GitHub</string>
-  <string name="about_footer">أندرويد %1$s لـ %2$s</string>
+  <string name="about_footer">MStudio %1$s لـ %2$s</string>
   <string name="about_subtitle">ببساطة، منصة بناء تطبيقات للاندرويد</string>
   <string name="msg_get_package_failed">فشل في استخراج اسم الحزمة!</string>
    <string name="msg_need_help">إذا واجهت مشكلة أثناء استخدام MStudio أو بناء تطبيقات Android، فأبلغ عنها أو اقترح تحسينًا عبر مشكلات GitHub الخاصة بـ MStudio.</string>
