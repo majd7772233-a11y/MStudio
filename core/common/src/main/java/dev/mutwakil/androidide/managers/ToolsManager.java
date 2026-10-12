@@ -305,6 +305,11 @@ public class ToolsManager {
     copyAssetAtomically(
         getCommonAsset("androidide-gradle-plugin.jar"),
         Environment.ANDROIDIDE_GRADLE_PLUGIN_JAR);
+    if (!isValidJar(Environment.ANDROIDIDE_GRADLE_PLUGIN_JAR)) {
+      throw new IllegalStateException(
+          "Gradle plugin JAR is missing or invalid after extraction: "
+              + Environment.ANDROIDIDE_GRADLE_PLUGIN_JAR);
+    }
   }
   
   private static void extractDownloadKtScript() {
@@ -543,7 +548,7 @@ public class ToolsManager {
     try (JarFile jar = new JarFile(file)) {
       return jar.entries().hasMoreElements();
     } catch (IOException error) {
-      LOG.warn("Android API stub is not a valid JAR and will be repaired: {}", file, error);
+      LOG.warn("JAR is invalid and will be repaired: {}", file, error);
       return false;
     }
   }
@@ -765,6 +770,11 @@ public class ToolsManager {
     copyAssetAtomically(
         getCommonAsset("tooling-api-all.jar"),
         Environment.TOOLING_API_JAR);
+    if (!isValidJar(Environment.TOOLING_API_JAR)) {
+      throw new IllegalStateException(
+          "Tooling API JAR is missing or invalid after extraction: "
+              + Environment.TOOLING_API_JAR);
+    }
   }
 
   /**
