@@ -497,3 +497,9 @@ Read `MSTUDIO_ROADMAP.md` first; its latest handoff checkpoint was committed in 
 - The active adaptive launcher is the MStudio vector (`mipmap-anydpi-v26/ic_launcher.xml` -> `mstudio_launcher_foreground` with MStudio brand background), and `MIN_SDK=26`. Inherited density fallback PNGs and Fastlane/store artwork were not changed; their update is now explicitly scheduled in Phase 12 before release, not misreported as complete.
 - The roadmap records source-level Phase 2 acceptance and Phase 3 implementation, but the full runtime acceptance is **not verified**. No build, tests, workflow dispatch, Actions or device smoke test was run. The primary workflow is manually dispatched on this branch, and the available GitHub connection does not expose a workflow-dispatch write operation. Phase 1.4 baseline CI and Phase 1.5 device smoke test remain required before Phase 3 is fully verified or Phase 4 is unblocked.
 - Roadmap checkpoint: `de5a276985ea59446dddfcb5ad7fd6d7c2346e05`. Do not claim runtime success based on source checks alone. Keep the real Gradle Tooling API path and do not start cloud-build/NIDE work.
+
+
+### Raster asset scope correction — 2026-10-12
+
+- Roadmap correction commit: `da15e502e79a81c25af415e8dbe76d46f4549ef4`. The active adaptive launcher uses MStudio vector resources and `MIN_SDK=26`; density PNGs are unsupported pre-26 fallbacks, while Fastlane/Play Store PNGs are release metadata. These files remain unchanged and are assigned to Phase 12 before publication. Do not describe all raster artwork as rebranded.
+- Current verified roadmap revision is `da15e502e79a81c25af415e8dbe76d46f4549ef4`; source-level phase work is documented, but Phase 1.4 CI and Phase 1.5 device smoke test are still required for full runtime acceptance.
