@@ -23,15 +23,15 @@ import org.gradle.api.Project
 object ProjectConfig {
 
   const val REPO_HOST = "github.com"
-  const val REPO_OWNER = "AndroidIDE-Dev"
-  const val REPO_NAME = "AndroidIDE"
+  const val REPO_OWNER = "majd7772233-a11y"
+  const val REPO_NAME = "MStudio"
   const val REPO_URL = "https://$REPO_HOST/$REPO_OWNER/$REPO_NAME"
   const val SCM_GIT =
     "scm:git:git://$REPO_HOST/$REPO_OWNER/$REPO_NAME.git"
   const val SCM_SSH =
     "scm:git:ssh://git@$REPO_HOST/$REPO_OWNER/$REPO_NAME.git"
 
-  const val PROJECT_SITE = "https://m.androidide.com"
+  const val PROJECT_SITE = "https://github.com/majd7772233-a11y/MStudio"
 }
 
 private var shouldPrintNotAGitRepoWarning = true
