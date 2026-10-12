@@ -261,3 +261,12 @@ Additional Phase 2 update:
 
 - Roadmap updated first in commit pending from this planning change. Live inspection found `core/resources/src/main/res/values-ar-rSA/strings.xml` uses `أندرويد` in `about_footer`, and `values-es-rES/strings.xml` uses `Android IDE`, even though the product identity is MStudio. Correct these visible strings to MStudio without changing the existing format placeholders.
 - Phase 2 is still in progress: generated `BuildInfo` repository metadata and the broader inherited user-facing reference audit remain outstanding. No build/test/Actions until the explicit verification gate.
+
+
+### Phase 2/3 live-source correction — 2026-10-12
+
+- Roadmap correction added in commit `pending` (see latest `MSTUDIO_ROADMAP.md`).
+- Current live `ProjectConfig.kt` is at `composite-builds/build-logic/common/src/main/java/dev/mutwakil/androidide/build/config/ProjectConfig.kt`; it already sets the MStudio owner, repository name, URL, and project site. This supersedes the older note saying generated build metadata still points upstream. Do not rewrite correct constants; trace BuildInfo consumers if that remains relevant.
+- `MainActivity.kt` already observes runtime setup results with lifecycle-safe cleanup and a retry dialog. `ToolsManager` already returns per-component results and guards supported-ABI initialization against duplicate concurrent runs. These are source implementations, not device-tested behavior.
+- Arabic and Spanish About-footer branding fixed in commits `7d0651d489b9750f825b5e977b8201276ae689f4` and `43799c4ca889988a2a53b7363aa7614c26665fe6`, retaining format placeholders.
+- No builds/tests/Actions until the roadmap verification gate. Continue auditing remaining locales and Phase 3 semantics before marking either phase complete.
