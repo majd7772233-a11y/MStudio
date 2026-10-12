@@ -609,3 +609,45 @@ The following entries above record what was discovered at the time; use these li
 - Commit `0e5c63db1aafc16cf5b51b229297a7730453de19` now validates the extracted Gradle plugin JAR and Tooling API JAR with the existing `JarFile`-based helper after their atomic copies. Malformed/empty files are no longer marked ready merely because a non-empty copy completed; component failures will appear in `InitResult`.
 - Generalized the JAR validation warning so it no longer incorrectly describes every invalid JAR as the Android API stub. The actual `android.jar` validation remains in place.
 - Re-fetched the source after the change and confirmed both extraction paths call the shared validator and include component-specific failure messages. Source-level verification only; no build, test, JAR invocation, Actions run, or device validation.
+
+
+## Handoff checkpoint for a new conversation — 2026-10-12 19:16 +03:00
+
+This section summarizes the latest state after the bundled-JAR readiness change. It is a handoff snapshot, not a claim that Phases 2 or 3 are complete.
+
+### Current roadmap state
+- The canonical roadmap has **12 whole-number phases** (1–12); substeps use decimal numbering beneath each phase. The earlier note claiming a Phase 0 → Phase 1 migration was explicitly superseded as inaccurate. Do not renumber the phase plan again unless a real structural inconsistency is found.
+- Phase 1 security/build workflow work is source-recorded, but the authorized baseline build/device verification has **not** been run. Publishing guard and signing-secret wiring are documented in the earlier execution logs.
+- Phase 2 identity/rebrand is substantially changed in source but remains **in progress and unverified**. Do not claim full branding or compatibility acceptance until the remaining repository-wide source sweep and later verification gate.
+- Phase 3 runtime/setup hardening is in progress. Do not start build, tests, workflow dispatch, or GitHub Actions until the roadmap explicitly reaches its verification gate.
+
+### Latest completed source change — bundled JAR validation
+- Finding was recorded before implementation in roadmap commit `6f8c802c8394854201a7f7e269c715afe354d77b`.
+- Source change commit: `0e5c63db1aafc16cf5b51b229297a7730453de19`.
+- `ToolsManager` now validates the extracted Gradle plugin JAR and Tooling API JAR using the shared `JarFile`-based validator after atomic extraction. A malformed/empty JAR should surface as a component-specific initialization failure instead of being accepted merely because bytes were copied.
+- The shared validator's diagnostic was generalized so it does not incorrectly label every invalid JAR as `android.jar`; Android API stub validation remains.
+- Roadmap execution record: commit `0889cb5d44338a00d6891d3af098dcc6e602d7cb`.
+- Post-edit evidence is **source inspection only**. No build, test, JAR execution, CI/Actions, or device validation was performed.
+
+### Existing Phase 3 runtime safeguards (source-level only)
+- `ToolsManager.initWithResult` exposes per-component readiness/failure results; legacy `init(..., Runnable)` remains available.
+- Initialization/retry is single-flight to avoid concurrent staging/backup collisions; result observers are dispatched on the main thread and the Activity listener is removed at teardown.
+- Asset JAR/script writes and several tool extractions use staging/atomic replacement; Android `android.jar`, Gradle plugin JAR and Tooling API JAR are checked as JAR containers.
+- AAPT2 is validated by invoking `version` with a five-second timeout, requiring recognizable AAPT/AAPT2 output, and cleaning up the process/temp output.
+- Managed Java validation parses `java -version`, requires Java 17+, treats legacy `1.8.x` as major 8, uses a Java 8-compatible reader rather than `Files.readString`, and has a five-second timeout.
+- Color schemes are staged and swapped with backup recovery. Existing `init.gradle` is deliberately not overwritten because it may contain user edits; `init.gradle.bak` is regenerated from packaged defaults and therefore is not a reliable old-version marker for automatic migration.
+- These safeguards have not yet been proven by Android compilation, API lint, real JDK/AAPT2 invocation, offline/interruption/low-storage tests, or device runs.
+
+### Immediate next actions in a fresh conversation
+1. Re-fetch live `dev` source and both continuity documents before editing; do not rely on stale prior snippets.
+2. Continue Phase 3 source audit: inspect the shared JAR validator, all `ToolsManager` call paths/results, managed JDK and AAPT2 repair paths, init-script consumers, and failure/retry behavior. Make any new work item in this roadmap **before** changing code.
+3. Continue Phase 2 repository-wide identity/link/string/resource audit, preserving GPL and upstream AndroidIDE attribution. Do not blindly rename namespace/provider identifiers or claim side-by-side installation compatibility.
+4. Keep `GPT.md` synchronized with decisions, findings, exact commit SHAs and validation limitations after meaningful changes.
+5. No build/tests/Actions until the roadmap explicitly reaches verification; when that gate is reached, report actual evidence and failures rather than inferring success from source or APK creation.
+
+### Standing constraints
+- Keep the real Gradle Tooling API architecture; NIDE is only a selective feature source, not a replacement build engine.
+- Keep local on-device build usable without GitHub/cloud; cloud build remains deferred.
+- App ID is `com.magd.mstudio`; namespace/packages remain `dev.mutwakil.androidide`; DocumentsProvider authority remains `dev.mutwakil.androidide.documents`. Side-by-side install is unverified.
+- Signing secret **names** are `MY_KEYSTORE_JKS`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`; `MY_KEYSTORE_JKS` must be Base64-encoded JKS bytes for the inherited decoder. Cloudflare names are `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `MY_JWT_SECRET`. Never record or request secret values in these Markdown notes.
+- Never recommend `npx wrangler` for the user's Android/Termux environment; it does not work on their architecture.
