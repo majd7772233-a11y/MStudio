@@ -4,16 +4,16 @@
   <string name="copy" tools:override="true">Copy</string>
   <string name="terminal_more">More…</string>
   <string name="text_to_search">Text to search</string>
-  <string name="about_option_email">Correo</string>
+   <string name="about_option_email">Informar de un problema en GitHub</string>
   <string name="about_option_website">Web</string>
   <string name="about_footer">Android IDE %1$s para %2$s</string>
   <string name="about_subtitle">Simplemente un IDE para Android</string>
   <string name="msg_get_package_failed">¡Error al extraer el nombre del paquete!</string>
-  <string name="msg_need_help">Si estás enfrentando problemas durante el uso de Android IDE o con la creación de aplicaciones Android, puedes unirte al grupo en Telegram para pedir ayuda.\n\nTambién puedes enviar sugerencias a nuestro correo electrónico.</string>
+   <string name="msg_need_help">Si tiene problemas al usar MStudio o crear aplicaciones Android, repórtelos o sugiera mejoras en las incidencias de GitHub de MStudio.</string>
   <string name="need_help">¿Necesitas Ayuda?</string>
   <string name="ide_preferences">Configuración</string>
-  <string name="discussions_on_telegram">Debates en Telegram</string>
-  <string name="official_tg_channel">Canal Oficial en Telegram</string>
+   <string name="discussions_on_telegram">Informar de un problema en GitHub</string>
+   <string name="official_tg_channel">Repositorio de MStudio en GitHub</string>
   <string name="msg_empty_view">No data</string>
   <string name="title_terminal">Terminal</string>
   <string name="reset">Reiniciar</string>
@@ -471,7 +471,7 @@
   <string name="title_unsupported_user">Unsupported user</string>
   <string name="title_socials">Socials</string>
   <string name="title_contributors">Contributors</string>
-  <string name="summary_contributors">Top community contributors.</string>
+   <string name="summary_contributors">Créditos para quienes contribuyeron al proyecto AndroidIDE original en el que se basa MStudio.</string>
   <string name="title_github_contributors">GitHub Contributors</string>
   <string name="title_crowdin_translators">Crowdin Translators</string>
   <string name="title_misc">Misc</string>
