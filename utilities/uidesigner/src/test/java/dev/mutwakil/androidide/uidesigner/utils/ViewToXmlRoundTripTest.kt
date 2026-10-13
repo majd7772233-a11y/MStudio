@@ -72,6 +72,8 @@ class ViewToXmlRoundTripTest {
             "TextView",
             TextView(RuntimeEnvironment.getApplication()),
         )
+    view.namespaces[INamespace.ANDROID.uri] = INamespace.ANDROID
+    view.namespaces[INamespace.APP.uri] = INamespace.APP
     view.addAttribute(AttributeImpl(INamespace.ANDROID, "text", "Keep this text"), apply = false)
     view.addAttribute(AttributeImpl(INamespace.ANDROID, "contentDescription", "Keep accessibility"), apply = false)
     view.addAttribute(AttributeImpl(INamespace.APP, "layout_constraintStart_toStartOf", "parent"), apply = false)
