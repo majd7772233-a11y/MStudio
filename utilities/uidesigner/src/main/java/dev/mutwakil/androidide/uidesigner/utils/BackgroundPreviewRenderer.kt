@@ -166,7 +166,7 @@ class BackgroundPreviewRenderer {
     val drawableFolders =
         ProjectResourceLocator.findResourceDirectories(projectRoot, "drawable", context)
 
-    return loadImageFromFolders(view, drawableName, drawableFolders, context)
+    return loadImageFromFolders(view, drawableName, drawableFolders, context, layoutFile)
   }
 
   private fun loadFromResMipmap(
@@ -180,7 +180,7 @@ class BackgroundPreviewRenderer {
     val mipmapFolders =
         ProjectResourceLocator.findResourceDirectories(projectRoot, "mipmap", context)
 
-    return loadImageFromFolders(view, mipmapName, mipmapFolders, context)
+    return loadImageFromFolders(view, mipmapName, mipmapFolders, context, layoutFile)
   }
 
   private fun loadImageFromFolders(
@@ -188,6 +188,7 @@ class BackgroundPreviewRenderer {
       imageName: String,
       folders: List<File>,
       context: Context,
+      layoutFile: File?,
   ): Boolean {
     val extensions = listOf(".png", ".jpg", ".jpeg", ".webp", ".gif", ".xml")
 
@@ -201,7 +202,7 @@ class BackgroundPreviewRenderer {
             // Handle XML drawables (vectors, shapes, etc.)
             if (ext == ".xml") {
               log.debug("Attempting to load XML drawable: {}", imageFile.absolutePath)
-              if (loadXmlDrawable(view, imageFile, context)) {
+              if (loadXmlDrawable(view, imageFile, context, layoutFile)) {
                 return true
               }
               continue
