@@ -1014,3 +1014,12 @@ The Phase 7 closeout gate above remains in force: do not claim full acceptance o
 - Missing ID/custom attribute diagnostics: `8578c155139a19dc03b8fd624c0db8ec784eae54`.
 - Declared-ID extraction helper: `b41850269cebbfe680635aa81bd58c68329dbcde`.
 - Regression tests for invalidation and ID declarations: `f59dfea1d241bde70b4ab9df06dcabfc320b4d68`, `2ea65c264a7c43a15a52b080ca0f6191a9e8020a`.
+
+
+## Phase 8 execution log — 2026-10-13 (initial pass)
+
+- Started after the user's explicit authorization. Latest HEAD before implementation: `bfd60ae7995fb06ec90f4acc499ac2330371cb03`. Existing recent commits already address preserving template-creation outcomes through activity recreation and avoiding automatic reopening while a project is being created; those changes were reviewed rather than repeated.
+- Source review of `MainActivity.kt` and `MainViewModel.kt` found that `postTransition` removed its observer and ran its action on the immediate `LiveData` emission even when the transition state was still `true`. This contradicted the documented deferred-open behavior and could launch the created project before the screen transition completed.
+- Fixed `MainViewModel.postTransition` so it waits for the transition state to become false before removing the observer and running the action. Commit: `a1e3aeeae6fc3f40fb8f844f94734ebc00cdb2b2`.
+- **Phase 8 is not complete.** Remaining acceptance work includes full template catalog/source inspection; name/package/namespace/manifest/resources/wrapper/AGP/SDK consistency; actual Tooling API sync/build and install/launch acceptance for every advertised template; invalid/duplicate/Unicode names, low storage, cancellation, partial cleanup and reopen-after-restart handling; and onboarding/recovery UX with strings, RTL, keyboard/insets and narrow/landscape checks.
+- Per the standing verification hold, no unit tests, Gradle builds, GitHub Actions, install, or device checks were run. The fix is source-reviewed only; do not describe the app as compiling or templates as runnable until verification is authorized and evidence is available.
