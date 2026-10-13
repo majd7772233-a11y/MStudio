@@ -57,7 +57,7 @@ class ViewToXmlRoundTripTest {
 
     val xml = ViewToXml.generateXml(view)
 
-    assertTrue(xml.contains("xmlns=\\"urn:default\\""))
+    assertTrue(xml.contains("xmlns=\"urn:default\""))
     assertFalse(xml.contains("xmlns:="))
   }
 
