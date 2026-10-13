@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/decompiler_description"
+        android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/decompiler_choose"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/decompiler_choose_file"
+        app:icon="@drawable/ic_folder" />
+
+    <TextView
+        android:id="@+id/decompiler_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="@string/decompiler_idle"
+        android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
+
+    <TextView
+        android:id="@+id/decompiler_results"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        android:layout_weight="1"
+        android:background="?attr/colorSurfaceVariant"
+        android:padding="12dp"
+        android:scrollbars="vertical"
+        android:textIsSelectable="true"
+        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+</LinearLayout>
