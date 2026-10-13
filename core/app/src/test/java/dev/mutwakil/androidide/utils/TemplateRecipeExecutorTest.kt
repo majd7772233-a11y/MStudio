@@ -9,7 +9,6 @@
 
 package dev.mutwakil.androidide.utils
 
-import dev.mutwakil.androidide.templates.RecipeExecutor
 import dev.mutwakil.androidide.templates.TemplateRecipeResult
 import java.io.File
 import org.junit.Assert.assertEquals
@@ -58,6 +57,19 @@ class TemplateRecipeExecutorTest {
     assertTrue(result != null)
     assertEquals("settings", File(root, "settings.gradle.kts").readText())
     assertTrue(root.isDirectory)
+  }
+
+  @Test
+  fun refusesToStartInsideAnExistingProjectDirectory() {
+    val root = File(temporaryFolder.root, "ExistingProject").apply { mkdirs() }
+    val marker = File(root, "keep.txt").apply { writeText("keep") }
+    val executor = TemplateRecipeExecutor()
+
+    assertThrows(IllegalStateException::class.java) {
+      executor.beginProjectCreation(root)
+    }
+
+    assertEquals("keep", marker.readText())
   }
 
   @Test
