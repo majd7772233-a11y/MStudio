@@ -235,11 +235,11 @@ private fun AndroidModuleTemplateBuilder.ktPlugin(): String {
 }
 
 private fun ktPluginKts(): String {
-  return """id("kotlin-android")"""
+  return """id("org.jetbrains.kotlin.android")"""
 }
 
 private fun ktPluginGroovy(): String {
-  return "id 'kotlin-android'"
+  return "id 'org.jetbrains.kotlin.android'"
 }
 
 private fun AndroidModuleTemplateBuilder.composePlugin(): String {
