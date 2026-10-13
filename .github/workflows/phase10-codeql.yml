@@ -1,0 +1,40 @@
+name: Phase 10 — CodeQL security analysis
+
+# Intentionally manual so source verification can be scheduled after Phase 10 review.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+
+concurrency:
+  group: phase10-codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze Java and Kotlin
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout complete source and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: java-kotlin
+          build-mode: autobuild
+      - name: Build for analysis
+        uses: github/codeql-action/autobuild@v3
+      - name: Upload CodeQL results
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:java-kotlin
+
+# This workflow is prepared but has not been dispatched. Findings must be reviewed,
+# triaged, and fixed; a completed scan alone is not proof of security.
