@@ -31,6 +31,13 @@ import java.nio.file.Path
  * @property syncIssues The issues that occurred while syncing the project.
  * @author Akash Yadav
  */
+/**
+ * Checks directory containment using path segments rather than string prefixes. This avoids
+ * assigning files in "module-old" to a sibling module named "module".
+ */
+internal fun isPathWithinDirectory(filePath: Path, directoryPath: Path): Boolean =
+	filePath.toAbsolutePath().normalize().startsWith(directoryPath.toAbsolutePath().normalize())
+
 data class Workspace(
 	val rootProject: GradleProject,
 	val subProjects: List<GradleProject>,
@@ -93,8 +100,10 @@ data class Workspace(
 			return null
 		}
 
-		val path = file.path
-		var longestPath = ""
+		val path =
+			runCatching { file.canonicalFile.toPath() }
+				.getOrElse { file.absoluteFile.toPath().normalize() }
+		var longestPathDepth = -1
 		var moduleWithLongestPath: ModuleProject? = null
 
 		for (module in subProjects) {
@@ -102,15 +111,13 @@ data class Workspace(
 				continue
 			}
 
-			val moduleDir = module.delegate.projectDir.path
-			if (path.startsWith(moduleDir) && longestPath.length < moduleDir.length) {
-				longestPath = moduleDir
+			val moduleDir =
+				runCatching { module.delegate.projectDir.canonicalFile.toPath() }
+					.getOrElse { module.delegate.projectDir.absoluteFile.toPath().normalize() }
+			if (isPathWithinDirectory(path, moduleDir) && moduleDir.nameCount > longestPathDepth) {
+				longestPathDepth = moduleDir.nameCount
 				moduleWithLongestPath = module
 			}
-		}
-
-		if (longestPath.isEmpty() || moduleWithLongestPath == null) {
-			return null
 		}
 
 		return moduleWithLongestPath
