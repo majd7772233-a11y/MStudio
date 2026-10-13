@@ -36,6 +36,38 @@ class DecompilerInputPolicyTest {
     }
 
     @Test
+    fun rejectsUnknownAndOverflowingArchiveEntrySizes() {
+        assertTrue(DecompilerInputPolicy.canIncludeArchiveEntry(1, 0, 0))
+        assertTrue(DecompilerInputPolicy.canIncludeArchiveEntry(
+            1, DecompilerInputPolicy.MAX_EXPANDED_ARCHIVE_BYTES - 1, 1
+        ))
+        assertFalse(DecompilerInputPolicy.canIncludeArchiveEntry(1, 0, -1))
+        assertFalse(DecompilerInputPolicy.canIncludeArchiveEntry(1, 0, Long.MAX_VALUE))
+        assertFalse(DecompilerInputPolicy.canIncludeArchiveEntry(
+            DecompilerInputPolicy.MAX_ARCHIVE_ENTRIES + 1, 0, 0
+        ))
+        assertFalse(DecompilerInputPolicy.canIncludeArchiveEntry(
+            1, DecompilerInputPolicy.MAX_EXPANDED_ARCHIVE_BYTES, 1
+        ))
+    }
+
+    @Test
+    fun boundsGeneratedOutputFilesAndBytes() {
+        assertTrue(DecompilerInputPolicy.isWithinOutputLimits(0, 0))
+        assertTrue(DecompilerInputPolicy.isWithinOutputLimits(
+            DecompilerInputPolicy.MAX_OUTPUT_FILES,
+            DecompilerInputPolicy.MAX_OUTPUT_BYTES
+        ))
+        assertFalse(DecompilerInputPolicy.isWithinOutputLimits(
+            DecompilerInputPolicy.MAX_OUTPUT_FILES + 1, 0
+        ))
+        assertFalse(DecompilerInputPolicy.isWithinOutputLimits(
+            1, DecompilerInputPolicy.MAX_OUTPUT_BYTES + 1
+        ))
+        assertFalse(DecompilerInputPolicy.isWithinOutputLimits(1, -1))
+    }
+
+    @Test
     fun enforcesNonNegativeInputSizeLimit() {
         assertTrue(DecompilerInputPolicy.isWithinSizeLimit(0))
         assertTrue(DecompilerInputPolicy.isWithinSizeLimit(DecompilerInputPolicy.MAX_INPUT_BYTES))
