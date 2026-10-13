@@ -46,6 +46,19 @@ fun isValidModuleName(name: String): Boolean {
 }
 
 /**
+ * Checks whether a project name is safe to use as one directory segment.
+ *
+ * Unicode letters/digits and common separators are supported, including spaces. Path separators,
+ * control characters, dot-only names and traversal-like ".." sequences are rejected.
+ */
+fun isValidProjectName(name: String): Boolean {
+  if (name.isBlank() || name.length > 80 || name != name.trim()) return false
+  if (!name.first().isLetterOrDigit() || !name.last().isLetterOrDigit()) return false
+  if (".." in name) return false
+  return name.all { it.isLetterOrDigit() || it == ' ' || it == '_' || it == '-' || it == '.' }
+}
+
+/**
  * Converts a Gradle module name to a directory name.
  *
  * @param name The module name.
