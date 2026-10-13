@@ -148,6 +148,8 @@ class JavaLanguageServer : ILanguageServer {
         // A successful sync may replace module/classpath information without changing source files.
         // Discard diagnostics cached against the previous workspace before analyzing again.
         diagnosticProvider?.clearAllDiagnostics()
+        // Completion results can contain symbols from the previous project's classpath.
+        cachedCompletion = CachedCompletion.EMPTY
         LSPEditorActions.ensureActionsMenuRegistered(JavaCodeActionsMenu)
 
         (ProjectManagerImpl.getInstance().indexingServiceManager.getService(
@@ -289,6 +291,10 @@ class JavaLanguageServer : ILanguageServer {
         if (!DocumentUtils.isJavaFile(event.changedFile)) {
             return
         }
+
+        // Unsaved editor changes may not update the on-disk timestamp. Invalidate diagnostics
+        // explicitly so the analyze timer cannot reuse results for the previous buffer contents.
+        diagnosticProvider?.clearTimestamp(event.changedFile)
 
         // TODO Find an alternative to efficiently update changeDelta in JavaCompilerService instance
         JavaCompilerService.NO_MODULE_COMPILER.onDocumentChange(event)
