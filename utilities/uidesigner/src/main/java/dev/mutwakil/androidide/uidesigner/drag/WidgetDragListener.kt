@@ -51,8 +51,7 @@ internal class WidgetDragListener(
             when (val data = event.localState) {
               is IView -> data.name
               is UiWidget -> data.name
-              else ->
-                  throw IllegalArgumentException("A local state of UiWidget or IView is expected")
+              else -> return false
             }
 
         return event.clipDescription.hasMimeType(DRAGGING_WIDGET_MIME) &&
@@ -98,8 +97,7 @@ internal class WidgetDragListener(
                 data
               }
               is UiWidget -> data.createView(view.viewGroup.context, view.viewGroup, view.file)
-              else ->
-                  throw IllegalArgumentException("A local state of UiWidget or IView is expected")
+              else -> return false
             }
 
         var index = view.indexOfChild(this.placeholder)
