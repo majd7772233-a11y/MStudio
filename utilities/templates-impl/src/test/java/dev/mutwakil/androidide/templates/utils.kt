@@ -157,8 +157,11 @@ private fun assertGeneratedProject(
   assertThat(wrapperJar.isFile && wrapperJar.length() > 0L).isTrue()
   assertThat(wrapperProperties.isFile && wrapperProperties.length() > 0L).isTrue()
   assertThat(gradlew.isFile && gradlew.length() > 0L).isTrue()
+  assertThat(wrapperProperties.readText()).contains("gradle-${GRADLE_DISTRIBUTION_VERSION}-bin.zip")
+  assertThat(rootBuild.readText()).contains(ANDROID_GRADLE_PLUGIN_VERSION)
   assertThat(settings.readText()).contains(projectName)
   assertThat(appBuild.readText()).contains(packageName)
+  assertThat(appBuild.readText()).contains("compileSdk =")
 }
 
 fun Template<*>.setupRootProjectParams(name: String = "TestTemplate",
