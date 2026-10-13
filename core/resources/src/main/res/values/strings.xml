@@ -240,7 +240,7 @@
     <string name="idepref_build_clearCache_title">Clear Gradle caches</string>
     <string name="idepref_build_clearCache_summary">Clear Gradle caches directory. This will delete all dependencies downloaded by Gradle. Required files will be downloaded again in next build.</string>
     <string name="idepref_build_customgradlecommands_title">Additional Gradle commands</string>
-    <string name="idepref_build_customgradlecommands_summary">Choose additional commands that will be added while executing every task</string>
+    <string name="idepref_build_customgradlecommands_summary">Choose additional commands for every task. Gradle Build Scan (--scan) may upload build data to a remote service; enable it only when you explicitly agree to that upload.</string>
     <string name="idepref_editor_fontsize_title">Font size</string>
     <string name="idepref_editor_fontsize_summary">Font size of the editor</string>
     <string name="idepref_editor_paintingflags_title">Non-printable painting flags</string>
