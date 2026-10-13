@@ -490,4 +490,20 @@
     <string name="runtime_setup_failed_message">تعذر تجهيز بعض مكونات التشغيل المضمنة. قد يفشل بناء المشاريع حتى يتم إصلاح الإعداد. يمكنك إعادة المحاولة الآن أو متابعة استخدام MStudio والمحاولة لاحقًا.</string>
     <string name="runtime_setup_retry">إعادة المحاولة</string>
     <string name="runtime_setup_later">لاحقًا</string>
+  <!-- مفكك شيفرة Java -->
+  <string name="decompiler_title">مفكك شيفرة Java</string>
+  <string name="decompiler_description">استعرض الشيفرة المصدرية من ملفات JVM بصيغ .class أو .jar أو .zip دون اتصال. لا تدعم هذه الأداة ملفات APK أو DEX. لا يتم تشغيل الملفات المحددة.</string>
+  <string name="decompiler_choose_file">اختيار ملف أو أرشيف</string>
+  <string name="decompiler_idle">اختر ملف JVM للبدء.</string>
+  <string name="decompiler_running">جارٍ فك الشيفرة…</string>
+  <string name="decompiler_success">تم إنشاء %1$d ملف مصدر Java. اضغط القائمة لعرض ملف.</string>
+  <string name="decompiler_results_hint">حُفظت النتائج داخل مساحة MStudio الخاصة:\n%1$s</string>
+  <string name="decompiler_failed">فشل فك الشيفرة: %1$s</string>
+  <string name="decompiler_unsupported_type">اختر ملف .class أو .jar أو .zip. لا تدعم الأداة APK أو DEX.</string>
+  <string name="decompiler_input_too_large">حجم الملف يتجاوز حد الأمان البالغ 128 ميبيبايت.</string>
+  <string name="decompiler_no_sources">لم تُنتج ملفات Java. قد يكون الملف غير صالح أو غير مدعوم.</string>
+  <string name="decompiler_sources">ملفات Java الناتجة</string>
+  <string name="decompiler_read_failed">تعذرت قراءة المصدر: %1$s</string>
+  <string name="decompiler_export_failed">تعذر تصدير المصدر: %1$s</string>
+  <string name="decompiler_share">تصدير</string>
 </resources>
