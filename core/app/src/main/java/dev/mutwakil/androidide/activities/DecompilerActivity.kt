@@ -10,6 +10,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import dev.mutwakil.androidide.R
+import dev.mutwakil.androidide.resources.R as ResourcesR
 import dev.mutwakil.androidide.utils.DecompilerInputPolicy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -37,11 +38,11 @@ class DecompilerActivity : AppCompatActivity() {
                         source.inputStream().use { it.copyTo(output) }
                     } ?: throw IOException("Cannot open export destination")
                     withContext(Dispatchers.Main) {
-                        status.text = getString(R.string.decompiler_export_success, source.name)
+                        status.text = getString(ResourcesR.string.decompiler_export_success, source.name)
                     }
                 } catch (error: Exception) {
                     withContext(Dispatchers.Main) {
-                        status.text = getString(R.string.decompiler_export_failed, error.message ?: "")
+                        status.text = getString(ResourcesR.string.decompiler_export_failed, error.message ?: "")
                     }
                 }
             }
@@ -55,7 +56,7 @@ class DecompilerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_decompiler)
-        title = getString(R.string.decompiler_title)
+        title = getString(ResourcesR.string.decompiler_title)
         status = findViewById(R.id.decompiler_status)
         results = findViewById(R.id.decompiler_results)
         findViewById<Button>(R.id.decompiler_choose).setOnClickListener {
@@ -66,14 +67,14 @@ class DecompilerActivity : AppCompatActivity() {
 
     private fun decompile(uri: Uri) {
         running = true
-        status.text = getString(R.string.decompiler_running)
+        status.text = getString(ResourcesR.string.decompiler_running)
         results.text = ""
         lifecycleScope.launch {
             try {
                 val result = withContext(Dispatchers.IO) {
                     val name = queryDisplayName(uri) ?: "input.class"
                     if (!DecompilerInputPolicy.isSupportedFileName(name)) {
-                        throw IOException(getString(R.string.decompiler_unsupported_type))
+                        throw IOException(getString(ResourcesR.string.decompiler_unsupported_type))
                     }
                     val input = File(cacheDir, "decompiler-" + System.nanoTime() + "-" + safeName(name))
                     copyBounded(uri, input)
@@ -91,19 +92,19 @@ class DecompilerActivity : AppCompatActivity() {
                         .toList()
                     if (sources.isEmpty()) {
                         output.deleteRecursively()
-                        throw IOException(getString(R.string.decompiler_no_sources))
+                        throw IOException(getString(ResourcesR.string.decompiler_no_sources))
                     }
                     output to sources
                 }
                 outputRoot = result.first
                 generatedSources = result.second
                 val listed = generatedSources.take(DecompilerInputPolicy.MAX_LISTED_FILES)
-                status.text = getString(R.string.decompiler_success, listed.size)
-                results.text = getString(R.string.decompiler_results_hint, result.first.absolutePath) +
+                status.text = getString(ResourcesR.string.decompiler_success, listed.size)
+                results.text = getString(ResourcesR.string.decompiler_results_hint, result.first.absolutePath) +
                     "\n\n" + listed.joinToString("\n") { it.relativeTo(result.first).invariantSeparatorsPath } +
                     if (generatedSources.size > listed.size) "\n…" else ""
             } catch (error: Exception) {
-                status.text = getString(R.string.decompiler_failed, error.message ?: error.javaClass.simpleName)
+                status.text = getString(ResourcesR.string.decompiler_failed, error.message ?: error.javaClass.simpleName)
             } finally {
                 running = false
             }
@@ -132,7 +133,7 @@ class DecompilerActivity : AppCompatActivity() {
                     total += count
                     if (!DecompilerInputPolicy.isWithinSizeLimit(total)) {
                         destination.delete()
-                        throw IOException(getString(R.string.decompiler_input_too_large))
+                        throw IOException(getString(ResourcesR.string.decompiler_input_too_large))
                     }
                     target.write(buffer, 0, count)
                 }
@@ -151,11 +152,11 @@ class DecompilerActivity : AppCompatActivity() {
         val root = outputRoot ?: return
         val visible = generatedSources.take(DecompilerInputPolicy.MAX_LISTED_FILES)
         AlertDialog.Builder(this)
-            .setTitle(R.string.decompiler_sources)
+            .setTitle(ResourcesR.string.decompiler_sources)
             .setItems(visible.map { it.relativeTo(root).invariantSeparatorsPath }.toTypedArray()) { _, index ->
                 showSource(visible[index])
             }
-            .setNegativeButton(android.R.string.cancel, null)
+            .setNegativeButton(android.ResourcesR.string.cancel, null)
             .show()
     }
 
@@ -163,7 +164,7 @@ class DecompilerActivity : AppCompatActivity() {
         val content = try {
             file.readText(Charsets.UTF_8)
         } catch (error: Exception) {
-            getString(R.string.decompiler_read_failed, error.message ?: "")
+            getString(ResourcesR.string.decompiler_read_failed, error.message ?: "")
         }
         val text = TextView(this).apply {
             setPadding(24, 16, 24, 16)
@@ -174,8 +175,8 @@ class DecompilerActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle(file.name)
             .setView(scroll)
-            .setPositiveButton(android.R.string.ok, null)
-            .setNeutralButton(R.string.decompiler_export) { _, _ ->
+            .setPositiveButton(android.ResourcesR.string.ok, null)
+            .setNeutralButton(ResourcesR.string.decompiler_export) { _, _ ->
                 exportTarget = file
                 createExport.launch(file.name)
             }
