@@ -32,6 +32,7 @@ import dev.mutwakil.androidide.tasks.executeAsyncProvideError
 import dev.mutwakil.androidide.templates.ProjectTemplateRecipeResult
 import dev.mutwakil.androidide.templates.StringParameter
 import dev.mutwakil.androidide.templates.Template
+import dev.mutwakil.androidide.templates.base.util.isValidProjectName
 import dev.mutwakil.androidide.templates.impl.ConstraintVerifier
 import dev.mutwakil.androidide.utils.TemplateRecipeExecutor
 import dev.mutwakil.androidide.utils.flashError
@@ -85,12 +86,19 @@ class TemplateDetailsFragment :
         return@setOnClickListener
       }
 
-      val isValid = template.parameters.fold(true) { isValid, param ->
-        if (param is StringParameter) {
-          return@fold isValid && ConstraintVerifier.isValid(param.value,
-            param.constraints)
-        } else isValid
-      }
+      val projectName = template.parameters
+        .filterIsInstance<StringParameter>()
+        .firstOrNull()
+        ?.value
+      val isValid = projectName != null &&
+        isValidProjectName(projectName) &&
+        template.parameters.fold(true) { parametersValid, param ->
+          if (param is StringParameter) {
+            parametersValid && ConstraintVerifier.isValid(param.value, param.constraints)
+          } else {
+            parametersValid
+          }
+        }
 
       if (!isValid) {
         viewModel.creatingProject.value = false
@@ -100,7 +108,9 @@ class TemplateDetailsFragment :
 
       viewModel.creatingProject.value = true
       executeAsyncProvideError({
-        template.recipe.execute(TemplateRecipeExecutor())
+        TemplateRecipeExecutor().executeRecipe {
+          template.recipe.execute(this)
+        }
       }) { result, err ->
 
         viewModel.creatingProject.value = false
