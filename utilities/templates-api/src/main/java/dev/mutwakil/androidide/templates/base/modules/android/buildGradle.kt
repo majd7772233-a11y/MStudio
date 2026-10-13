@@ -26,13 +26,19 @@ import dev.mutwakil.androidide.templates.base.modules.dependencies
 private const val compose_kotlinCompilerExtensionVersion = "1.5.1"
 
 private val AndroidModuleTemplateBuilder.androidPlugin: String
-  get() {
-    return if (data.type == ModuleType.AndroidLibrary) "com.android.library"
-    else "com.android.application"
+  get() = when (data.type) {
+    ModuleType.AndroidApp -> "com.android.application"
+    ModuleType.AndroidLibrary -> "com.android.library"
+    ModuleType.JavaLibrary -> error(
+      "Java library modules must use a Java module builder, not AndroidModuleTemplateBuilder"
+    )
   }
 
 fun AndroidModuleTemplateBuilder.buildGradleSrc(isComposeModule: Boolean
 ): String {
+  require(data.type != ModuleType.JavaLibrary) {
+    "Java library modules must use a Java module builder, not AndroidModuleTemplateBuilder"
+  }
   return if (data.useKts) buildGradleSrcKts(
     isComposeModule) else buildGradleSrcGroovy(isComposeModule)
 }
@@ -57,11 +63,11 @@ android {
     }
     
     defaultConfig {
-        applicationId = "${data.packageName}"
+        ${if (data.type == ModuleType.AndroidApp) "applicationId = \"${data.packageName}\"" else ""}
         minSdk = ${data.versions.minSdk.api}
-        targetSdk = ${data.versions.targetSdk.api}
-        versionCode = 1
-        versionName = "1.0"
+        ${if (data.type == ModuleType.AndroidApp) "targetSdk = ${data.versions.targetSdk.api}" else ""}
+        ${if (data.type == ModuleType.AndroidApp) "versionCode = 1" else ""}
+        ${if (data.type == ModuleType.AndroidApp) "versionName = \"1.0\"" else ""}
         
         vectorDrawables { 
             useSupportLibrary = true
@@ -111,11 +117,11 @@ android {
     }
     
     defaultConfig {
-        applicationId = "${data.packageName}"
+        ${if (data.type == ModuleType.AndroidApp) "applicationId = \"${data.packageName}\"" else ""}
         minSdk = ${data.versions.minSdk.api}
-        targetSdk = ${data.versions.targetSdk.api}
-        versionCode = 1
-        versionName = "1.0"
+        ${if (data.type == ModuleType.AndroidApp) "targetSdk = ${data.versions.targetSdk.api}" else ""}
+        ${if (data.type == ModuleType.AndroidApp) "versionCode = 1" else ""}
+        ${if (data.type == ModuleType.AndroidApp) "versionName = \"1.0\"" else ""}
         
         vectorDrawables { 
             useSupportLibrary = true
