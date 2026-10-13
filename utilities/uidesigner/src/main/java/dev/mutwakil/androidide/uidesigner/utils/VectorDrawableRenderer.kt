@@ -74,7 +74,7 @@ class VectorDrawableRenderer {
     // Prefer the project file. Loading MStudio's own resource first can silently show an unrelated
     // image when the project defines the same drawable name.
     val projectRoot = findProjectRoot(layoutFile)
-    val vectorFile = projectRoot?.let { findVectorFile(it, drawableName, context) }
+    val vectorFile = projectRoot?.let { findVectorFile(it, drawableName, context, layoutFile) }
     if (vectorFile != null) {
       if (!isVectorDrawable(vectorFile)) return false
       log.debug("Found project vector drawable file: {}", vectorFile.absolutePath)
@@ -194,9 +194,15 @@ $modified"""
       projectRoot: File,
       drawableName: String,
       context: Context,
+      layoutFile: File?,
   ): File? {
     return ProjectResourceLocator
-        .findResourceDirectories(projectRoot, "drawable", context)
+        .findResourceDirectories(
+            projectRoot,
+            "drawable",
+            context,
+            ProjectResourceLocator.findModuleRoot(layoutFile),
+        )
         .asSequence()
         .map { File(it, "$drawableName.xml") }
         .firstOrNull { it.isFile && it.canRead() }
