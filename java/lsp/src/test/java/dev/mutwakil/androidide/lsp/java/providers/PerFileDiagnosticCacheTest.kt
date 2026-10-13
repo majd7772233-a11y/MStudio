@@ -31,6 +31,21 @@ class PerFileDiagnosticCacheTest {
   }
 
   @Test
+  fun clearingAllRemovesDiagnosticsFromThePreviousWorkspace() {
+    val cache = PerFileDiagnosticCache()
+    val first = Paths.get("/workspace/first/src/A.java")
+    val second = Paths.get("/workspace/second/src/B.java")
+    val analyzedAt = Instant.parse("2026-10-13T12:00:00Z")
+    cache.store(first, DiagnosticResult(first, emptyList()), analyzedAt)
+    cache.store(second, DiagnosticResult(second, emptyList()), analyzedAt)
+
+    cache.clearAll()
+
+    assertThat(cache.getOrNoUpdate(first)).isEqualTo(DiagnosticResult.NO_UPDATE)
+    assertThat(cache.getOrNoUpdate(second)).isEqualTo(DiagnosticResult.NO_UPDATE)
+  }
+
+  @Test
   fun clearingAFileRemovesItsResultAndFreshnessTimestamp() {
     val cache = PerFileDiagnosticCache()
     val file = Paths.get("/workspace/app/src/Main.java")
