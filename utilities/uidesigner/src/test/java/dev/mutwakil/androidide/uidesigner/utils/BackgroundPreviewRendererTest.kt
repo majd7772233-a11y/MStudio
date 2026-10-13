@@ -11,6 +11,7 @@ package dev.mutwakil.androidide.uidesigner.utils
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.GradientDrawable
 import android.view.View
 import java.io.File
 import org.junit.Assert.assertEquals
@@ -65,7 +66,10 @@ class BackgroundPreviewRendererTest {
             layoutFile,
         )
     )
-    assertEquals(Color.parseColor("#345678"), (preview.background as ColorDrawable).color)
+    assertEquals(
+        Color.parseColor("#345678"),
+        (preview.background as GradientDrawable).color?.defaultColor,
+    )
   }
 
   @Test
