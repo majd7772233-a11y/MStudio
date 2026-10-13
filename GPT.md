@@ -525,3 +525,13 @@ Read `MSTUDIO_ROADMAP.md` first; its latest handoff checkpoint was committed in 
 - Roadmap-first follow-up finding: commit `467a3b4f9c5421094712f0a37e1978156ef9d5f1`. The first exit-callback fix revealed the runner's `isStarted` flag and PID stayed stale after the child JVM exited, while `GradleBuildService` retained its server proxy and started flag.
 - `ToolingServerRunner` now resets `isStarted` and `pid` on process exit (commit `4ea24fb29278ec07bd53738e8436685a27ada168`); `GradleBuildService.onServerExited` clears the server proxy and started flag (commit `d5ece4b74fc0d66c03bbb0dd05cbf45ef87fef1d`). Roadmap execution record: `5649445631050df23474f474c691207ce5edc850`.
 - Remaining risk: process exit may leave outstanding Tooling API RPC futures or a build marked in progress; verify restart, failure and cancellation flows later. No build/test/Actions/device run was performed.
+
+## Phase 4 source implementation handoff — 2026-10-13
+
+- Roadmap remains the single source of task order; see the latest Phase 4 implementation record in `MSTUDIO_ROADMAP.md`. Work stayed on `dev`; no PNG/raster assets were changed.
+- `ToolingServerRunner.kt`: startup failures now clear state, destroy any process spawned before setup finished and call `Observer.onServerStartFailed`. When the process exits, the blocking RPC listener is run interruptibly and cancelled/joined so it cannot hold the runner open forever.
+- `GradleBuildService.kt`: pending server RPC futures (metadata, initialize/sync, task execution, cancellation) are tracked and completed exceptionally when the child process exits or startup fails. The service clears server/build state and stops the stderr reader and foreground notification. Wrapper extraction now succeeds only if the strict post-repair preflight passes.
+- Build Scan remains an explicit user-selected Gradle option; its preference summary now warns in English and Arabic that `--scan` may upload build data remotely and should be enabled only with explicit agreement.
+- Latest implementation commits include `307c981`, `03156b0`, `9d5d65b`, `672cff7`, `b4e056b`, `1738863`, `b61ef8a`, and `2f227a5`; the roadmap implementation record is `31cb1bf`.
+- No tests/builds/Actions/device verification were run, as instructed. Phase 4 source fixes are implemented, but runtime acceptance is not proven; keep all evidence checklist items unchecked until the user's later verification batch. Do not claim a verified APK build or installation.
+
