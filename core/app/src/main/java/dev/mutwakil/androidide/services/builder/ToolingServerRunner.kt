@@ -121,11 +121,22 @@ internal class ToolingServerRunner(
 					val processJob =
 						launch(Dispatchers.IO) {
 							try {
-								process?.waitFor()
+								val exitCode = process?.waitFor()
+
 								log.info(
+
 									"Tooling API process exited with code : {}",
-									process?.exitValue() ?: "<unknown>",
+
+									exitCode ?: "<unknown>",
+
 								)
+
+								if (exitCode != null) {
+
+									observer?.onServerExited(exitCode)
+
+								}
+
 								process = null
 							} finally {
 								log.info("Destroying Tooling API process...")
