@@ -50,11 +50,13 @@ class TemplateWidgetsListAdapter(private val widgets: List<Widget<*>>) :
 
   override fun onBindViewHolder(holder: WidgetViewHolder, position: Int) {
     holder.binding.apply {
+      // Detach the previous parameter view first so its lifecycle-bound observers are released.
+      root.removeAllViews()
+
       val viewProvider = ITemplateWidgetViewProvider.getInstance()
       val widget = widgets[position]
       val view = viewProvider.createView(root.context, widget)
 
-      root.removeAllViews()
       root.addView(view,
         LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
           ViewGroup.LayoutParams.WRAP_CONTENT))
