@@ -65,8 +65,8 @@ internal object ProjectResourceLocator {
                           preferredModuleRoot.absolutePath + File.separator
                       ))
             }
-                .thenByDescending { sourceSetScore(it, preferredSourceSet) }
                 .thenByDescending { qualifierScore(it.name, resourceType, context) }
+                .thenByDescending { sourceSetScore(it, preferredSourceSet) }
                 .thenBy { it.absolutePath }
         )
   }
