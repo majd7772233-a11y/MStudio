@@ -80,8 +80,12 @@ class TemplateDetailsFragment :
     }
 
     binding.finish.setOnClickListener {
+      if (viewModel.creatingProject.value == true) {
+        return@setOnClickListener
+      }
       viewModel.creatingProject.value = true
       val template = viewModel.template.value ?: run {
+        viewModel.creatingProject.value = false
         viewModel.setScreen(MainViewModel.SCREEN_MAIN)
         return@setOnClickListener
       }
@@ -106,7 +110,6 @@ class TemplateDetailsFragment :
         return@setOnClickListener
       }
 
-      viewModel.creatingProject.value = true
       executeAsyncProvideError({
         TemplateRecipeExecutor().executeRecipe {
           template.recipe.execute(this) as? ProjectTemplateRecipeResult
@@ -115,11 +118,11 @@ class TemplateDetailsFragment :
 
         viewModel.creatingProject.value = false
         if (result == null || err != null || result !is ProjectTemplateRecipeResult) {
-          err?.printStackTrace()
-          log.error("Failed to create project. result={}, err={}", result, err?.message)
           if (err != null) {
-            flashError(err.cause?.message ?: err.message)
+            log.error("Failed to create project", err)
+            flashError(err.cause?.message ?: err.message ?: getString(string.project_creation_failed))
           } else {
+            log.error("Template did not return a project result: {}", result)
             flashError(string.project_creation_failed)
           }
           return@executeAsyncProvideError
