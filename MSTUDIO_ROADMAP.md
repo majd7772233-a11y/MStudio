@@ -1107,3 +1107,8 @@ The NIDE audit remains investigative. No code has been imported. The formatter i
 - **Runtime acceptance: pending final verification.** No Gradle build, unit test, Actions run, APK install or device check has been executed. The authored integration test is not claimed as passed.
 - Final verification must confirm dependency resolution and D8 conversion, runtime compatibility on the managed supported Android runtime, representative class/JAR output, and safe failure for malformed/large archives. The 128 MiB cap is preliminary, not a measured memory guarantee.
 - This is not APK/DEX reverse engineering; do not advertise that feature.
+
+
+### Phase 9 decompiler execution/safety detail
+
+Vineflower runs in a child process using MStudio's managed Java runtime, not inside Android ART. The Gradle build stages the non-transitive Vineflower JAR into generated APK assets. The activity installs it under private files and starts it with a 384 MiB heap limit, two active processors, a three-minute timeout, merged/drained process output, and forced termination on interruption or timeout. Input is capped at 128 MiB; JAR/ZIP preflight rejects archives above 5,000 entries or 256 MiB declared expanded content. These controls still require runtime validation and memory profiling.
