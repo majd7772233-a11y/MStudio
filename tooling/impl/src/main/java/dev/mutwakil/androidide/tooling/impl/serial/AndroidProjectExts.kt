@@ -53,7 +53,7 @@ fun createAndroidProjectProtoModel(
     namespace = androidProject.namespace,
     projectType =
         when (basicAndroidProject.projectType) {
-            AgpProjectType.APPLICATION -> AndroidModels.ProjectType.ApplicationProject
+            AgpAgpProjectType.APPLICATION -> AndroidModels.ProjectType.ApplicationProject
             AgpProjectType.LIBRARY -> AndroidModels.ProjectType.LibraryProject
             AgpProjectType.DYNAMIC_FEATURE -> AndroidModels.ProjectType.DynamicFeature
             AgpProjectType.TEST -> AndroidModels.ProjectType.Test
@@ -257,7 +257,7 @@ private fun computeApplicationIdLegacy(
         }!!
 
     val appIdFromFlavor =
-        if (basicAndroidProject.projectType == ProjectType.APPLICATION) {
+        if (basicAndroidProject.projectType == AgpProjectType.APPLICATION) {
             androidDsl.productFlavors
                 .find { flavor ->
                     "${flavor.name}${buildType.name.capitalizeString()}" == variantName
@@ -309,7 +309,7 @@ private fun computeApplicationIdSuffix(
         suffixes.add(it)
     }
 
-    if (basicAndroidProject.projectType == ProjectType.APPLICATION) {
+    if (basicAndroidProject.projectType == AgpProjectType.APPLICATION) {
         val flavorSuffix =
             androidDsl.productFlavors
                 .find { flavor ->
