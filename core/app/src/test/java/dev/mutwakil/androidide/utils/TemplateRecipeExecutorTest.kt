@@ -85,6 +85,41 @@ class TemplateRecipeExecutorTest {
   }
 
   @Test
+  fun failedRecipeCannotWriteOutsideItsProjectRoot() {
+    val root = File(temporaryFolder.root, "NewProject")
+    val outside = File(temporaryFolder.root, "keep.txt").apply { writeText("original") }
+    val executor = TemplateRecipeExecutor()
+
+    assertThrows(IllegalStateException::class.java) {
+      executor.executeRecipe {
+        beginProjectCreation(root)
+        root.mkdirs()
+        save("replacement", outside)
+        object : TemplateRecipeResult {}
+      }
+    }
+
+    assertEquals("original", outside.readText())
+    assertFalse(root.exists())
+  }
+
+  @Test
+  fun nullRecipeResultRollsBackPartialOutput() {
+    val root = File(temporaryFolder.root, "NewProject")
+    val executor = TemplateRecipeExecutor()
+
+    val result = executor.executeRecipe {
+      beginProjectCreation(root)
+      root.mkdirs()
+      save("partial", File(root, "partial.txt"))
+      null
+    }
+
+    assertEquals(null, result)
+    assertFalse(root.exists())
+  }
+
+  @Test
   fun rollbackRetainsUntrackedContentAddedDuringFailure() {
     val root = File(temporaryFolder.root, "NewProject")
     val executor = TemplateRecipeExecutor()
