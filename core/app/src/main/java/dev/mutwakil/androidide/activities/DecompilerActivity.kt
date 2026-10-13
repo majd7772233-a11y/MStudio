@@ -184,12 +184,18 @@ class DecompilerActivity : AppCompatActivity() {
             name = "MStudio-Vineflower-Output"
             start()
         }
-        if (!process.waitFor(3, TimeUnit.MINUTES)) {
-            process.destroyForcibly()
+        try {
+            if (!process.waitFor(3, TimeUnit.MINUTES)) {
+                process.destroyForcibly()
+                reader.join(1000)
+                throw IOException("Decompilation timed out after three minutes.")
+            }
             reader.join(1000)
-            throw IOException("Decompilation timed out after three minutes.")
+        } catch (interrupted: InterruptedException) {
+            process.destroyForcibly()
+            Thread.currentThread().interrupt()
+            throw IOException("Decompilation was interrupted.", interrupted)
         }
-        reader.join(1000)
         if (process.exitValue() != 0) {
             val details = synchronized(log) { log.toString().takeLast(2000) }
             throw IOException("Vineflower exited with code " + process.exitValue() +
