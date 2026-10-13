@@ -578,3 +578,28 @@ Read `MSTUDIO_ROADMAP.md` first; its latest handoff checkpoint was committed in 
 ### نص المستخدم الإلزامي بخصوص المرحلة الخامسة
 
 عندما يقول المستخدم «يلا المرحلة الخامسة»، يجب تنفيذ المرحلة الخامسة من خريطة الطريق بشكل شامل وكامل، بجميع أجزائها الفرعية ووحداتها وتحسيناتها وإصلاحاتها وكل ما يتعلق بها، بحيث يكون المشروع مستعدًا للانتقال مباشرة إلى المرحلة التالية. ممنوع الاكتفاء بإصلاح جزئي أو بخطة أو بتحديث توثيق فقط. يظل منع تشغيل الاختبارات والبناء وGitHub Actions وفحوصات الجهاز قائمًا حتى يأذن المستخدم بها؛ لا تستخدم تأجيل التحقق ذريعة لترك أعمال المصدر القابلة للتنفيذ ناقصة، ولا تدّعِ نجاح تحقق لم يُنفّذ.
+
+
+## Phase 5 closure and Phase 6 start — 2026-10-13
+
+The user's latest instruction was to finish the two remaining Phase 5 gaps, then begin Phase 6. Latest source work is on branch dev; do not repeat the earlier statement that removable storage and composite builds are unsupported.
+
+### Phase 5: removable storage
+- BaseFragment resolves SAF external-storage document IDs through Android StorageManager. It accepts primary storage and a currently mounted removable volume whose UUID is reported by the system, maps removable volume roots to /storage/<UUID>, permits selecting a volume root, canonicalizes the selected directory, and rejects traversal/unmounted/unreadable paths.
+- Own document-provider authority checks remain. Providers that do not map to a real filesystem path are still unsupported because Gradle needs filesystem-backed files.
+- Commits: 0b78e430568c09925ed46236d3ceae70dbf9c46d and c829c37e0a0b494d9cbcd4d07f2450d64b183f91.
+
+### Phase 5: composite/included builds
+- RootModelBuilder fetches the Tooling API GradleBuild model, recursively visits included builds with canonical-root deduplication, requests IdeaProject for each included build, and appends its modules to the IDE model.
+- Included module and task paths are namespaced by the included directory name; Java module dependencies and Android project dependency metadata are remapped. Root-build Android dependencies are mapped to included-build module paths when AGP supplies a matching build ID. Variant selections are filtered/remapped per included build to avoid collisions with root modules that have the same local path.
+- Helpers/tests: CompositeBuildModelSupport.kt and CompositeBuildModelSupportTest.kt. Source commits include 66f67a43c6d6a1b0cfe5108b16d56888ec86447f, 35c10651af82f45790ee73ebdc47dfa22378ecc9, 8f10da15ecc777b139e970a7675f35fd9edcce10, 787420225c7d6dfeb0111899a523babdf5b0bc13, f7801575d9cd65d1168dd242cf4853c4968f4f8a, fd963f60ff86ae3352f24f0ff481d5ecf93823ed, 0dba230bb7f3a5e3bef35839100c70d2d138489f, f4708405d5b9b3a68d0c325238a2a65c4668e1d6. Test commits include f49f1b9b, e71c2637, ac4c417e.
+- Known edge: public ToolingGradleBuild does not expose an explicit includeBuild { name = ... } override. The current namespace uses the included directory name (Gradle's default). Explicit custom included-build aliases still need a supported way to discover their task-selector name. Do not claim those aliases work.
+- Phase 5 source work for the two requested gaps is implemented; runtime acceptance remains unverified. Do not run tests, builds, GitHub Actions or device checks until the user authorizes it.
+
+### Phase 6 has started — editor/LSP and diagnostics
+- JavaDiagnosticProvider previously paired per-file timestamps with one global cached DiagnosticResult, allowing a cache hit for file A to return diagnostics from the most recently analyzed file B. It now uses a concurrent per-file diagnostic cache, and clearing a document removes both its cached result and freshness timestamp.
+- Workspace.findModuleForFile previously used string-prefix matching, which could assign files under sibling paths like /workspace/app-old to /workspace/app. It now uses normalized/canonical Path segment containment and picks the deepest matching module.
+- JavaLanguageServer.analyzeSelected now analyzes the captured Path rather than re-reading mutable selectedFile inside the launched coroutine.
+- Added PerFileDiagnosticCacheTest and WorkspacePathMatchingTest source tests.
+- Source commits: f118137ea85246ec9e614d117cceec5a8ffd3741, 8f9f11239ac36978227c101cb80c69990130f12b, cde81243d63c0829dab8eb9ba530f7cf07090ed6, 968e766c027071e16ee35db8c2326ca0d7382a98, 20bcc3c27af992bcef6b7667d3bfb0201e1eab36. Test commits: d3a5e4862c19fa6dfa13905a4c750e5e93093502 and 915250a45b1e4d108d1e5475bb86a47ce46cb952.
+- Phase 6 remains in progress. Continue source audit of classpath/sync recovery, stale diagnostics, Java/Kotlin/XML completion/navigation/references/formatting/code actions, and indexing responsiveness. Keep roadmap and GPT.md updated before/after meaningful batches. No executable verification has been performed.
