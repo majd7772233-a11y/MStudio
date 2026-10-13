@@ -120,3 +120,8 @@ No Phase 9 code has been imported. This audit is not a completed Phase 9; an app
 | Migration helpers | **Reference-only.** | No destructive NIDE project-moving code imported. |
 
 **Phase 9 source boundary:** source implementation is complete for the selected port and candidate disposition audit; runtime/build/device acceptance remains pending final verification. Vineflower is a maintained Fernflower fork (Apache 2.0); NIDE's older module was not copied wholesale. Current UI supports JVM class/JAR/ZIP only, not APK/DEX.
+
+
+### Phase 9 implementation detail correction
+
+Vineflower is not executed inside Android's ART process. The app build stages the single non-transitive Vineflower JAR into generated APK assets; MStudio copies it into its private runtime directory and invokes it using the already-managed Java executable. The child JVM is capped at 384 MiB heap and two active processors, has a three-minute timeout, drains process output, and is forcibly terminated on interruption/timeout. Inputs are capped at 128 MiB; JAR/ZIP archives are preflight-limited to 5,000 entries and 256 MiB declared expanded size. These are source safeguards, not a substitute for device profiling.
