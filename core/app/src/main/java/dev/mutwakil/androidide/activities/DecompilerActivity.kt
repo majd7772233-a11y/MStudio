@@ -115,10 +115,11 @@ class DecompilerActivity : AppCompatActivity() {
     private fun runDecompiler(input: File, output: File) {
         val runtimeJar = File(filesDir, "decompiler/vineflower.jar")
         if (!runtimeJar.isFile) {
-            if (!runtimeJar.parentFile?.mkdirs()!! && !runtimeJar.parentFile!!.isDirectory) {
+            val runtimeDirectory = runtimeJar.parentFile ?: throw IOException("Invalid decompiler runtime directory")
+            if (!runtimeDirectory.isDirectory && !runtimeDirectory.mkdirs()) {
                 throw IOException("Cannot prepare decompiler runtime directory")
             }
-            val temporary = File(runtimeJar.parentFile, "vineflower.jar.tmp")
+            val temporary = File(runtimeDirectory, "vineflower.jar.tmp")
             assets.open("vineflower.jar").use { source ->
                 temporary.outputStream().use { target -> source.copyTo(target) }
             }
@@ -144,7 +145,7 @@ class DecompilerActivity : AppCompatActivity() {
             process.inputStream.bufferedReader().useLines { lines ->
                 lines.forEach { line ->
                     synchronized(log) {
-                        if (log.length < 32768) log.append(line).append('\\n')
+                        if (log.length < 32768) log.append(line).append("\n")
                     }
                 }
             }
@@ -162,7 +163,7 @@ class DecompilerActivity : AppCompatActivity() {
         if (process.exitValue() != 0) {
             val details = synchronized(log) { log.toString().takeLast(2000) }
             throw IOException("Vineflower exited with code " + process.exitValue() +
-                if (details.isBlank()) "" else ":\\n" + details)
+                if (details.isBlank()) "" else ":\n" + details)
         }
     }
 
