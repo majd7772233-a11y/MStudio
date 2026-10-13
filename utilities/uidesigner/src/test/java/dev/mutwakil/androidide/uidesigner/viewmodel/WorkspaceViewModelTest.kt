@@ -33,6 +33,18 @@ class WorkspaceViewModelTest {
   }
 
   @Test
+  fun reopeningTheSameFileKeepsCurrentEditState() {
+    val viewModel = WorkspaceViewModel()
+    val file = File("layout.xml")
+    viewModel.file = file
+    viewModel.markWorkspaceChanged()
+
+    viewModel.file = File("layout.xml")
+
+    assertTrue(viewModel.hasWorkspaceChanges)
+  }
+
+  @Test
   fun loadingAnUneditedLayoutDoesNotMarkItDirty() {
     val viewModel = WorkspaceViewModel()
     viewModel.file = File("layout.xml")
