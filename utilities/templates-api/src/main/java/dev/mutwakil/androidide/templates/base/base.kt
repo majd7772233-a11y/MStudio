@@ -41,6 +41,7 @@ import dev.mutwakil.androidide.templates.SpinnerWidget
 import dev.mutwakil.androidide.templates.StringParameter
 import dev.mutwakil.androidide.templates.TextFieldWidget
 import dev.mutwakil.androidide.templates.base.util.getNewProjectName
+import dev.mutwakil.androidide.templates.base.util.isValidProjectName
 import dev.mutwakil.androidide.templates.base.util.moduleNameToDir
 import dev.mutwakil.androidide.templates.enumParameter
 import dev.mutwakil.androidide.templates.minSdkParameter
@@ -98,14 +99,27 @@ inline fun baseProject(projectName: StringParameter = projectNameParameter(),
     preRecipe = {
       this@apply._executor = this
 
+      val saveRoot = File(saveLocation.value).canonicalFile
+      require(saveRoot.isDirectory && saveRoot.canRead() && saveRoot.canWrite()) {
+        "Project save location is not a readable, writable directory: '$saveRoot'"
+      }
+      require(isValidProjectName(projectName.value)) {
+        "Project name must be a valid single directory name"
+      }
+
+      val projectDir = File(saveRoot, projectName.value).canonicalFile
+      require(projectDir.parentFile == saveRoot) {
+        "Project directory must remain inside the selected save location"
+      }
+
       this@apply._data = ProjectTemplateData(projectName.value,
-        File(saveLocation.value, projectName.value), projectVersionData,
+        projectDir, projectVersionData,
         language = language.value, useKts = useKts.value)
 
-      if (data.projectDir.exists() && data.projectDir.listFiles()
-          ?.isNotEmpty() == true
-      ) {
-        throw IllegalArgumentException("Project directory already exists")
+      // Start the transaction before template builders create directories directly.
+      beginProjectCreation(data.projectDir)
+      require(!data.projectDir.exists()) {
+        "Project directory already exists: '${data.projectDir}'"
       }
 
       setDefaultModuleData(
