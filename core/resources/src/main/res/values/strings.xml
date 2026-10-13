@@ -649,6 +649,8 @@
     <string name="msg_invalid_layout_name">Invalid layout file name</string>
     <string name="msg_invalid_project_details">Invalid project details</string>
     <string name="msg_invalid_project_name">Use a project name of up to 80 characters with letters, numbers, spaces, dots, hyphens or underscores. Do not use path separators or start/end with punctuation.</string>
+    <string name="msg_no_templates_available">No project templates are available right now.</string>
+    <string name="msg_templates_load_failed">Project templates could not be loaded. Return and try again.</string>
     <string name="msg_use_kts">Use Kotlin Script (.kts) for Gradle build files</string>
     <string name="title_privacy">Privacy</string>
     <string name="title_androidide_statistics">MStudio Statistics</string>
