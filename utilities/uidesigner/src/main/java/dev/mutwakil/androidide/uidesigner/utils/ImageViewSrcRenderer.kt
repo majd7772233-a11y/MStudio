@@ -131,22 +131,9 @@ class ImageViewSrcRenderer {
     val projectRoot = findProjectRoot(layoutFile) ?: return false
 
     val drawableFolders =
-        listOf(
-            "src/main/res/drawable",
-            "src/main/res/drawable-hdpi",
-            "src/main/res/drawable-mdpi",
-            "src/main/res/drawable-xhdpi",
-            "src/main/res/drawable-xxhdpi",
-            "src/main/res/drawable-xxxhdpi",
-            "app/src/main/res/drawable",
-            "app/src/main/res/drawable-hdpi",
-            "app/src/main/res/drawable-mdpi",
-            "app/src/main/res/drawable-xhdpi",
-            "app/src/main/res/drawable-xxhdpi",
-            "app/src/main/res/drawable-xxxhdpi",
-        )
+        ProjectResourceLocator.findResourceDirectories(projectRoot, "drawable", context)
 
-    return loadImageFromFolders(imageView, drawableName, projectRoot, drawableFolders, context, layoutFile)
+    return loadImageFromFolders(imageView, drawableName, drawableFolders, context, layoutFile)
   }
 
   private fun loadFromResMipmap(
@@ -158,37 +145,22 @@ class ImageViewSrcRenderer {
     val projectRoot = findProjectRoot(layoutFile) ?: return false
 
     val mipmapFolders =
-        listOf(
-            "src/main/res/mipmap",
-            "src/main/res/mipmap-hdpi",
-            "src/main/res/mipmap-mdpi",
-            "src/main/res/mipmap-xhdpi",
-            "src/main/res/mipmap-xxhdpi",
-            "src/main/res/mipmap-xxxhdpi",
-            "app/src/main/res/mipmap",
-            "app/src/main/res/mipmap-hdpi",
-            "app/src/main/res/mipmap-mdpi",
-            "app/src/main/res/mipmap-xhdpi",
-            "app/src/main/res/mipmap-xxhdpi",
-            "app/src/main/res/mipmap-xxxhdpi",
-        )
+        ProjectResourceLocator.findResourceDirectories(projectRoot, "mipmap", context)
 
-    return loadImageFromFolders(imageView, mipmapName, projectRoot, mipmapFolders, context, layoutFile)
+    return loadImageFromFolders(imageView, mipmapName, mipmapFolders, context, layoutFile)
   }
 
   private fun loadImageFromFolders(
       imageView: ImageView,
       imageName: String,
-      projectRoot: File,
-      folders: List<String>,
+      folders: List<File>,
       context: Context,
       layoutFile: File?,
   ): Boolean {
     val extensions = listOf(".png", ".jpg", ".jpeg", ".webp", ".gif", ".xml")
 
-    for (folder in folders) {
-      val resourceDir = File(projectRoot, folder)
-      if (!resourceDir.exists()) continue
+    for (resourceDir in folders) {
+      if (!resourceDir.isDirectory || !resourceDir.canRead()) continue
 
       for (ext in extensions) {
         val imageFile = File(resourceDir, "$imageName$ext")
