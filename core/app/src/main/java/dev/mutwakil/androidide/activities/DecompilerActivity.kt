@@ -161,7 +161,7 @@ class DecompilerActivity : AppCompatActivity() {
         if (!java.isFile || !java.canExecute()) {
             throw IOException("The managed Java runtime is not ready. Finish MStudio runtime setup and retry.")
         }
-        val process = ProcessBuilder(
+        val processBuilder = ProcessBuilder(
             java.absolutePath,
             "-Xmx384m",
             "-XX:ActiveProcessorCount=2",
@@ -169,7 +169,9 @@ class DecompilerActivity : AppCompatActivity() {
             runtimeJar.absolutePath,
             input.absolutePath,
             output.absolutePath
-        ).redirectErrorStream(true).start()
+        ).redirectErrorStream(true)
+        Environment.putEnvironment(processBuilder.environment(), false)
+        val process = processBuilder.start()
         val log = StringBuilder()
         val reader = Thread {
             process.inputStream.bufferedReader().useLines { lines ->
