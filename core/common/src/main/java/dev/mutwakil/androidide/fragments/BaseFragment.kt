@@ -52,7 +52,7 @@ internal fun resolveExternalStorageDocument(documentId: String): File? {
 
   val volumeId = documentId.substring(0, separator)
   val relativePath = documentId.substring(separator + 1)
-  if (relativePath.isBlank() || File(relativePath).isAbsolute) return null
+  if (relativePath.isNotBlank() && File(relativePath).isAbsolute) return null
 
   val root =
     if (volumeId.equals("primary", ignoreCase = true)) {
