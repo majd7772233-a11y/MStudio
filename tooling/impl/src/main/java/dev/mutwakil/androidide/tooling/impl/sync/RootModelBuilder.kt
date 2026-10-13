@@ -38,6 +38,19 @@ import java.io.File
 import java.io.Serializable
 
 /**
+ * Maps IDEA module names to paths only when the name is unique. IDEA module dependencies expose
+ * target module names rather than stable project paths, so duplicate names must not silently map to
+ * whichever module happened to appear last.
+ */
+internal fun uniqueModuleNameToPath(moduleNamePaths: List<Pair<String, String>>): Map<String, String> =
+  moduleNamePaths
+    .groupBy({ it.first }, { it.second })
+    .mapNotNull { (name, paths) ->
+      if (paths.size == 1) name to paths.single() else null
+    }
+    .toMap()
+
+/**
  * Utility class to build the project models.
  *
  * @author Akash Yadav
@@ -60,8 +73,15 @@ object RootModelBuilder :
         val ideaProject = controller.getModelAndLog(IdeaProject::class.java)
 
         val ideaModules = ideaProject.modules
+        val moduleNameGroups = ideaModules.groupBy { it.name }
         val modulePaths =
-          mapOf(*ideaModules.map { it.name to it.gradleProject.path }.toTypedArray())
+          uniqueModuleNameToPath(ideaModules.map { it.name to it.gradleProject.path })
+        moduleNameGroups.filterValues { it.size > 1 }.keys.forEach { duplicateName ->
+          logger.warn(
+            "IDEA module name '{}' is ambiguous. Dependencies targeting this name will not be assigned a guessed project path.",
+            duplicateName,
+          )
+        }
         val rootModule =
           ideaModules.find { it.gradleProject.parent == null }
             ?: throw ModelBuilderException(
