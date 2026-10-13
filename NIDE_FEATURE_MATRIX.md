@@ -74,3 +74,15 @@ These are reasons not to use NIDE as a modern Android build engine.
 - Known limits/follow-up:
 
 Only mark Verified after the feature runs on a supported MStudio build with evidence.
+
+
+## Phase 9 live audit update — 2026-10-13
+
+| Candidate | Live MStudio counterpart / gap | Decision | Evidence and next gate |
+|---|---|---|---|
+| Java formatter styles | `java/lsp/.../JavaServerSettings.java` already exposes AOSP and Google styles; `CodeFormatProvider.java` invokes Google Java Format. | **Rejected as a duplicate port for now.** | Re-open only if a concrete formatter behavior unsupported by the current implementation is reproduced and can be tested. |
+| Java autocomplete/type resolution | Java LSP, javac services, project classpath and indexing already exist. | **Reference-only.** | Use NIDE's `JavaAutoCompleteProvider`, `TypeResolver` and related code only to derive specific regression tests; do not add a parallel engine without a demonstrated gap. |
+| Fernflower decompiler | No decompiler implementation was found in the live MStudio source-tree filename audit; this is a potentially unique Java/JAR inspection feature. | **Investigating — blocked before import.** | NIDE source headers identify Fernflower files as Apache 2.0, but the inspected NIDE repository root license is GPL-3.0 and the `lib-decompiler` module has no separate Apache license file in its directory listing. Its Gradle module targets Java 7 and has a broad legacy source tree. Recover and verify exact license provenance, dependencies, notices, API boundary and memory behavior before any port. |
+| NIDE Android builder, dx and FastGradleParser | MStudio's authoritative build path is Gradle/AGP through the Tooling API. | **Rejected for the core build path.** | Never replace Tooling API/AGP semantics with the old custom compiler or regex parser. |
+
+No Phase 9 code has been imported. This audit is not a completed Phase 9; an approved candidate must have a reproducible gap, exact source, minimal boundary, dependency/license audit, regression tests and runtime evidence before being marked Ported or Verified.
