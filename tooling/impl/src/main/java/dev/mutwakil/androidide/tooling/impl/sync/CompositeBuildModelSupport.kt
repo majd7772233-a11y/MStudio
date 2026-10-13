@@ -18,7 +18,10 @@ internal fun collectIncludedBuilds(rootBuild: ToolingGradleBuild): List<ToolingG
   val result = mutableListOf<ToolingGradleBuild>()
 
   fun visit(build: ToolingGradleBuild) {
-    build.includedBuilds.forEach { includedBuild ->
+    // Included-build support was added to the Tooling API model after Gradle 3.3. Older target
+    // builds should still sync as ordinary builds rather than fail while reading this optional API.
+    val children = runCatching { build.includedBuilds.toList() }.getOrDefault(emptyList())
+    children.forEach { includedBuild ->
       val rootPath =
         runCatching { includedBuild.rootProject.projectDirectory.canonicalPath }.getOrNull()
           ?: return@forEach
