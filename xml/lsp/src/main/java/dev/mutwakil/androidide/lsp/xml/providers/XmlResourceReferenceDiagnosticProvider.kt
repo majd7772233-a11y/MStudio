@@ -70,6 +70,7 @@ internal class XmlResourceReferenceDiagnosticProvider {
         }
     val diagnostics = mutableListOf<DiagnosticItem>()
     val comments = xmlCommentRanges(source)
+    val locallyDeclaredIds = declaredIds(source, comments)
     val moduleRoot = module.delegate.projectDir
     val sourceResources =
         sourceResourceCache.computeIfAbsent(moduleRoot.absolutePath) {
@@ -81,8 +82,9 @@ internal class XmlResourceReferenceDiagnosticProvider {
       val packageName = match.groups["package"]?.value
       val typeName = match.groups["type"]?.value ?: continue
       val resourceName = match.groups["name"]?.value ?: continue
-      if (packageName == "android" || typeName == "id" || typeName == "attr") continue
+      if (packageName == "android") continue
       val type = runCatching { AaptResourceType.valueOf(typeName.uppercase()) }.getOrNull() ?: continue
+      if (typeName == "id" && resourceName in locallyDeclaredIds) continue
 
       val isModulePackage = packageName == null || packageName == module.namespace
       if ((isModulePackage && "$typeName/$resourceName" in sourceResources) ||
@@ -175,12 +177,29 @@ internal class XmlResourceReferenceDiagnosticProvider {
           }
           if (file.extension in RESOURCE_FILE_EXTENSIONS) {
             resources.add("$directoryType/$filename")
+            // IDs are usually declared inside layout XML rather than values XML. Index those
+            // declarations too, so a valid @id reference in another layout is not flagged.
+            if (file.extension == "xml") {
+              runCatching {
+                val xml = file.readText(Charsets.UTF_8)
+                val comments = xmlCommentRanges(xml)
+                resources.addAll(declaredIds(xml, comments).map { "id/$it" })
+              }
+            }
           }
         }
       }
     }
     return resources
   }
+
+  private fun declaredIds(source: String, comments: List<IntRange>): Set<String> =
+      DECLARED_ID_REFERENCE.findAll(source)
+          .filter { match ->
+            comments.none { match.range.first >= it.first && match.range.first <= it.last }
+          }
+          .map { it.groupValues[1] }
+          .toSet()
 
   private fun positionAt(source: String, offset: Int): Position {
     val safeOffset = offset.coerceIn(0, source.length)
@@ -227,6 +246,7 @@ internal class XmlResourceReferenceDiagnosticProvider {
     private val LOG = LoggerFactory.getLogger(XmlResourceReferenceDiagnosticProvider::class.java)
     private val RESOURCE_REFERENCE =
         Regex("@(?:(?<package>[A-Za-z0-9_.]+):)?(?<type>[A-Za-z][A-Za-z0-9_]*)/(?<name>[A-Za-z0-9_.]+)")
+    private val DECLARED_ID_REFERENCE = Regex("@\\+id/([A-Za-z0-9_.]+)")
     private val IGNORED_DIRS =
         setOf(".git", ".gradle", ".idea", ".kotlin", "build", "node_modules", ".cxx", "out", "target")
     private val RESOURCE_FILE_EXTENSIONS =
