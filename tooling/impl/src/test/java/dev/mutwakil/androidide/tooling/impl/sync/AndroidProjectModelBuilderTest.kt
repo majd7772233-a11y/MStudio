@@ -108,4 +108,17 @@ class AndroidProjectModelBuilderTest {
     }
   }
 
+  @Test
+  fun mapsOnlyUniqueModuleNamesToProjectPaths() {
+    assertThat(
+      uniqueModuleNameToPath(
+        listOf(
+          "app" to ":app",
+          "core" to ":core",
+          "core" to ":tools:core",
+        ),
+      ),
+    ).containsExactly("app", ":app")
+  }
+
 }
