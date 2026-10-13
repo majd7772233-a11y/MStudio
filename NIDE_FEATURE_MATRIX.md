@@ -86,3 +86,20 @@ Only mark Verified after the feature runs on a supported MStudio build with evid
 | NIDE Android builder, dx and FastGradleParser | MStudio's authoritative build path is Gradle/AGP through the Tooling API. | **Rejected for the core build path.** | Never replace Tooling API/AGP semantics with the old custom compiler or regex parser. |
 
 No Phase 9 code has been imported. This audit is not a completed Phase 9; an approved candidate must have a reproducible gap, exact source, minimal boundary, dependency/license audit, regression tests and runtime evidence before being marked Ported or Verified.
+
+
+## Phase 9 implementation update — 2026-10-13
+
+| Candidate | Final disposition for this phase | Implementation/evidence |
+|---|---|---|
+| Fernflower / Java decompiler | **Ported at source level using maintained Vineflower fork.** | Added an offline Java class/JAR/ZIP decompiler entry to MStudio's main screen, source preview dialog, SAF source export, bounded input copy (128 MiB), private output directory, and explicit APK/DEX rejection. Dependency is centralized in the version catalog as org.vineflower:vineflower:1.12.0. See THIRD_PARTY_NOTICES.md. |
+| Decompiler tests | **Authored; not executed.** | Added policy tests for accepted/rejected extensions and input-size bounds, plus a JVM integration test that compiles a tiny class and expects decompiled Java output. These are source tests only until the final verification phase. |
+| Java formatter styles | **Rejected as duplicate.** | Existing Google Java Format integration already supports AOSP and Google style settings. |
+| Java autocomplete/type resolution | **Reference-only.** | Existing Java LSP, javac services, classpath and indexing remain authoritative. No parallel completion engine was added. |
+| Legacy Android builder, dx, FastGradleParser, manual AAR resolver | **Rejected for core build.** | Gradle/AGP Tooling API remains the single Android build path. |
+| Logcat | **No new port.** | Existing logging and app-log surfaces exist; no unique reproducible gap was established in this pass. |
+| Educational sample corpus | **Deferred, not silently marked complete.** | A safe curated sample set requires inventorying existing templates and sample coverage; no unreviewed bulk copy was added. |
+| Standalone Java/JAR execution | **Deferred.** | Needs a separately specified runtime/process model and sandboxing; it is not folded into the Android Gradle build path. |
+| Migration helpers | **Reference-only.** | Existing project import/sync remains authoritative; no destructive NIDE file-moving code was imported. |
+
+**Phase 9 source boundary:** unique decompiler source integration is implemented, but runtime/build/device acceptance remains pending the final verification stage. Vineflower is a maintained Fernflower fork (Apache 2.0); MStudio does not copy NIDE's older module wholesale. The current UI handles JVM class/JAR/ZIP only, not APK/DEX. Do not mark runtime verified until the integration test, APK build, and device smoke test run successfully.
