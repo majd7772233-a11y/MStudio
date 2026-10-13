@@ -58,6 +58,7 @@ internal fun uniqueModuleNameToPath(moduleNamePaths: List<Pair<String, String>>)
 object RootModelBuilder :
   AbstractModelBuilder<RootProjectModelBuilderParams, File>(), Serializable {
   private val serialVersionUID = 1L
+  private val log = LoggerFactory.getLogger(RootModelBuilder::class.java)
 
   private const val PROJECT_SYNC_LOCK_TIMEOUT_MS = 10 * 1000L
 
@@ -77,7 +78,7 @@ object RootModelBuilder :
         val modulePaths =
           uniqueModuleNameToPath(ideaModules.map { it.name to it.gradleProject.path })
         moduleNameGroups.filterValues { it.size > 1 }.keys.forEach { duplicateName ->
-          logger.warn(
+          log.warn(
             "IDEA module name '{}' is ambiguous. Dependencies targeting this name will not be assigned a guessed project path.",
             duplicateName,
           )
