@@ -80,6 +80,40 @@ class ProjectResourceLocatorTest {
   }
 
   @Test
+  fun resolvesDimensionAndColorAliasesWithoutInfiniteRecursion() {
+    val projectRoot = temporaryFolder.newFolder("alias-project")
+    File(projectRoot, "app/src/main/res/values/aliases.xml").apply {
+      parentFile?.mkdirs()
+      writeText(
+          """
+          <resources>
+              <color name="base">#123456</color>
+              <color name="accent">@color/base</color>
+              <color name="cycle_a">@color/cycle_b</color>
+              <color name="cycle_b">@color/cycle_a</color>
+              <dimen name="base_spacing">12dp</dimen>
+              <dimen name="screen_spacing">@dimen/base_spacing</dimen>
+          </resources>
+          """.trimIndent(),
+      )
+    }
+
+    val context = RuntimeEnvironment.getApplication()
+    assertEquals(
+        "#123456",
+        ProjectResourceLocator.resolveValueResource(projectRoot, "color", "accent", context),
+    )
+    assertEquals(
+        "12dp",
+        ProjectResourceLocator.resolveValueResource(projectRoot, "dimen", "screen_spacing", context),
+    )
+    assertEquals(
+        null,
+        ProjectResourceLocator.resolveValueResource(projectRoot, "color", "cycle_a", context),
+    )
+  }
+
+  @Test
   fun discoversResourcesInNonAppModulesAndQualifiedDirectories() {
     val projectRoot = temporaryFolder.newFolder("project")
     File(projectRoot, "feature/profile/src/main/res/drawable").mkdirs()
