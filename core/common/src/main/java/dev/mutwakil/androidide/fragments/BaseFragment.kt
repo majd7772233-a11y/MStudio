@@ -38,6 +38,48 @@ import android.text.Spanned
 import android.text.style.ClickableSpan
 import androidx.annotation.StringRes
 
+/**
+ * Resolve a Storage Access Framework document ID to a real, app-accessible filesystem path.
+ *
+ * The external-storage provider uses "primary:relative/path" for emulated shared storage and
+ * "<volume-uuid>:relative/path" for removable volumes. Only the primary volume or a currently
+ * mounted removable volume reported by Android is accepted; arbitrary volume names are never
+ * turned into filesystem paths.
+ */
+internal fun resolveExternalStorageDocument(documentId: String): File? {
+  val separator = documentId.indexOf(':')
+  if (separator <= 0 || separator == documentId.lastIndex) return null
+
+  val volumeId = documentId.substring(0, separator)
+  val relativePath = documentId.substring(separator + 1)
+  if (relativePath.isBlank() || File(relativePath).isAbsolute) return null
+
+  val root =
+    if (volumeId.equals("primary", ignoreCase = true)) {
+      runCatching { Environment.getExternalStorageDirectory().canonicalFile }.getOrNull()
+    } else {
+      val mountedVolume =
+        runCatching {
+          Environment.getStorageVolumes().firstOrNull { volume ->
+            volume.isRemovable &&
+              volume.uuid?.equals(volumeId, ignoreCase = true) == true &&
+              volume.state == Environment.MEDIA_MOUNTED
+          }
+        }.getOrNull() ?: return null
+
+      // Public removable storage is exposed as /storage/<volume UUID> on Android.
+      // The UUID must match an actual mounted removable StorageVolume above.
+      runCatching { File("/storage", mountedVolume.uuid!!).canonicalFile }.getOrNull()
+    } ?: return null
+
+  if (!root.isDirectory || !root.canRead()) return null
+  val selected = runCatching { File(root, relativePath).canonicalFile }.getOrNull() ?: return null
+  val rootPath = root.toPath()
+  val selectedPath = selected.toPath()
+  if (selectedPath != rootPath && !selectedPath.startsWith(rootPath)) return null
+  return selected.takeIf { it.isDirectory && it.canRead() }
+}
+
 open class BaseFragment @JvmOverloads constructor(contentLayoutId: Int = 0) :
   Fragment(contentLayoutId) {
 
@@ -93,22 +135,12 @@ open class BaseFragment @JvmOverloads constructor(contentLayoutId: Int = 0) :
         if (authority == ANDROIDIDE_DOCS_AUTHORITY) {
           runCatching { File(docId).canonicalFile }.getOrNull()
         } else {
-          val split = docId.split(':', limit = 2)
-          if (split.size != 2 || split[0] != "primary" || split[1].isBlank()) {
-            flashError(getString(string.msg_select_from_primary_storage))
-            return@registerForActivityResult
+          resolveExternalStorageDocument(docId).also { resolved ->
+            if (resolved == null) {
+              flashError(getString(string.msg_select_from_primary_storage))
+              return@registerForActivityResult
+            }
           }
-
-          val storageRoot = runCatching { Environment.getExternalStorageDirectory().canonicalFile }.getOrNull()
-          val selectedDirectory =
-            storageRoot?.let { root -> runCatching { File(root, split[1]).canonicalFile }.getOrNull() }
-          if (storageRoot == null || selectedDirectory == null ||
-            (selectedDirectory != storageRoot && !selectedDirectory.toPath().startsWith(storageRoot.toPath()))
-          ) {
-            flashError(getString(string.err_invalid_data_by_intent))
-            return@registerForActivityResult
-          }
-          selectedDirectory
         }
 
       if (dir == null || !dir.exists() || !dir.isDirectory || !dir.canRead()) {
