@@ -503,3 +503,11 @@ Read `MSTUDIO_ROADMAP.md` first; its latest handoff checkpoint was committed in 
 
 - Roadmap correction commit: `da15e502e79a81c25af415e8dbe76d46f4549ef4`. The active adaptive launcher uses MStudio vector resources and `MIN_SDK=26`; density PNGs are unsupported pre-26 fallbacks, while Fastlane/Play Store PNGs are release metadata. These files remain unchanged and are assigned to Phase 12 before publication. Do not describe all raster artwork as rebranded.
 - Current verified roadmap revision is `da15e502e79a81c25af415e8dbe76d46f4549ef4`; source-level phase work is documented, but Phase 1.4 CI and Phase 1.5 device smoke test are still required for full runtime acceptance.
+
+
+## Execution update — Tooling API process exit callback (2026-10-13)
+
+- Live `dev` source review found `ToolingServerRunner` waited for the managed Java process and logged its exit code but did not invoke its existing `Observer.onServerExited(exitCode)` callback. `GradleBuildService` implements that callback to clear foreground-service state, so the lifecycle signal was disconnected.
+- Roadmap-first finding recorded in commit `54dbf798ebb45cce1e88c7d81861d6a3d4c8f00f`. The source correction is commit `48b12cd2972e7c70ff6be0a8c7cef7065e192b59`: the process waiter now captures the `waitFor()` result and notifies the observer when an exit code is available. This is process-exit reporting only, not a build-success signal.
+- Roadmap execution record: `d9efa0a0c95f9ceffc22414e5abee9cbe5e66a44`.
+- Remaining lifecycle risks: startup failure before the waiter exists, cancellation actually terminating the child process, and concurrent build/service recreation behavior. Continue the Phase 4 source audit while preserving the actual Gradle Tooling API. Do not run builds, tests, Actions or device validation; the user will handle verification after the code batch.
