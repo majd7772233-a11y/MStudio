@@ -66,10 +66,13 @@ internal class WorkspaceViewModel : ViewModel() {
   var file: File
     get() = _file.value!!
     set(value) {
+      val previousPath = _file.value?.absolutePath
       _file.value = value
-      _hasWorkspaceChanges = false
-      _workspaceState.value = WorkspaceState()
-      _undoManager.value = UndoManager()
+      if (previousPath != value.absolutePath) {
+        _hasWorkspaceChanges = false
+        _workspaceState.value = WorkspaceState()
+        _undoManager.value = UndoManager()
+      }
     }
 
   var drawerOpened: Boolean
