@@ -866,3 +866,11 @@ Source-level boundary: this closes the identified implementation gaps in process
 - The included-build traversal now treats access to the Tooling API's includedBuilds property as optional. This property was added after older Gradle versions; failure to expose it must leave an ordinary build syncable instead of aborting the whole model build.
 - Source commit: e9a48859bdea06bcba990f0fd2bc6346b00b512c.
 - Source inspection only; no test/build/Actions/device verification was run.
+
+
+### Phase 6 follow-up — invalidate Java diagnostics after sync (2026-10-13)
+
+- A successful project sync can replace module/classpath data without changing source timestamps. The Java diagnostics cache is now cleared in JavaLanguageServer.setupWithProject before the new workspace is analyzed, so cached diagnostics from the previous classpath cannot be treated as fresh.
+- Added a clear-all cache test alongside the per-file cache tests.
+- Source commits: a4968892db009ff0685b9ab1c1d8e66006372f43 and 68d22c9bc0dcb1b77bb0d8097e367fd3fc3f50fd; test commit: 23c2a3c788f4a6aa8e060b2204540367856e9a75.
+- Source-level only; tests/builds/Actions/device checks remain deferred.
