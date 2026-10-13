@@ -60,7 +60,10 @@ class XMLLanguageServer : ILanguageServer {
     private set
 
   private var settings: IServerSettings? = null
+  private var workspace: Workspace? = null
   private val syntaxDiagnosticProvider = dev.mutwakil.androidide.lsp.xml.providers.XmlSyntaxDiagnosticProvider()
+  private val resourceDiagnosticProvider =
+      dev.mutwakil.androidide.lsp.xml.providers.XmlResourceReferenceDiagnosticProvider()
 
   override val serverId: String = SERVER_ID
 
@@ -82,7 +85,10 @@ class XMLLanguageServer : ILanguageServer {
     this.settings = settings
   }
 
-  override fun setupWithProject(workspace: Workspace) {}
+  override fun setupWithProject(workspace: Workspace) {
+    this.workspace = workspace
+    resourceDiagnosticProvider.clearCache()
+  }
   override fun complete(params: CompletionParams?): CompletionResult {
     val completionProvider: ICompletionProvider = if (!getSettings().completionsEnabled()) {
       NoCompletionsProvider()
@@ -119,7 +125,12 @@ class XMLLanguageServer : ILanguageServer {
     if (!getSettings().diagnosticsEnabled() || !DocumentUtils.isXmlFile(file)) {
       return DiagnosticResult.NO_UPDATE
     }
-    return syntaxDiagnosticProvider.analyze(file)
+    val syntaxResult = syntaxDiagnosticProvider.analyze(file)
+    if (syntaxResult.diagnostics.any { it.code == "xml-parse-error" }) {
+      return syntaxResult
+    }
+    val resourceResult = resourceDiagnosticProvider.analyze(file, workspace)
+    return DiagnosticResult(file, syntaxResult.diagnostics + resourceResult.diagnostics)
   }
 
   override fun formatCode(params: FormatCodeParams?): CodeFormatResult {
@@ -131,6 +142,7 @@ class XMLLanguageServer : ILanguageServer {
     if (!DocumentUtils.isXmlFile(event.changedFile)) {
       return
     }
+    resourceDiagnosticProvider.invalidate(event.changedFile, workspace)
     onContentChange(event)
   }
 
