@@ -165,7 +165,7 @@ $modified"""
         return false
       }
 
-      val drawable = createVectorDrawable(vectorData, context)
+      val drawable = createVectorDrawable(vectorData, context, layoutFile)
       if (drawable == null) {
         log.debug("Failed to create drawable from vector data")
         return false
@@ -325,7 +325,11 @@ $modified"""
   }
 
   /** Enhanced drawable creation with group support */
-  private fun createVectorDrawable(vectorData: VectorData, context: Context): Drawable? {
+  private fun createVectorDrawable(
+      vectorData: VectorData,
+      context: Context,
+      layoutFile: File?,
+  ): Drawable? {
     try {
       val density = context.resources.displayMetrics.density
       val bitmapWidth = (vectorData.width * density).toInt().coerceAtLeast(1)
@@ -402,7 +406,7 @@ $modified"""
         val fillPaint =
             Paint().apply {
               style = Paint.Style.FILL
-              color = parseColor(pathData.fillColor)
+              color = parseColor(pathData.fillColor, context, layoutFile)
               alpha = (pathData.fillAlpha * 255).toInt()
               isAntiAlias = true
             }
@@ -418,7 +422,7 @@ $modified"""
         val strokePaint =
             Paint().apply {
               style = Paint.Style.STROKE
-              color = parseColor(pathData.strokeColor)
+              color = parseColor(pathData.strokeColor, context, layoutFile)
               strokeWidth = pathData.strokeWidth
               alpha = (pathData.strokeAlpha * 255).toInt()
               isAntiAlias = true
@@ -438,20 +442,36 @@ $modified"""
   }
 
   /** Parse color string with better support for various formats */
-  private fun parseColor(colorString: String): Int {
-    return try {
-      when {
-        colorString.startsWith("#") -> Color.parseColor(colorString)
-        colorString == "@android:color/white" -> Color.WHITE
-        colorString == "@android:color/black" -> Color.BLACK
-        colorString == "@android:color/transparent" -> Color.TRANSPARENT
-        colorString.startsWith("@android:color/") -> Color.GRAY
-        else -> Color.parseColor("#FF000000")
-      }
-    } catch (e: Exception) {
-      log.debug("Could not parse color: {}, using black", colorString)
-      Color.BLACK
+  private fun parseColor(colorString: String, context: Context, layoutFile: File?): Int {
+    if (colorString.startsWith("#")) return Color.parseColor(colorString)
+
+    if (colorString.startsWith("@color/")) {
+      val projectRoot = ProjectResourceLocator.findProjectRoot(layoutFile)
+      val projectValue =
+          projectRoot?.let {
+            ProjectResourceLocator.resolveValueResource(
+                it,
+                "color",
+                colorString.substringAfter("@color/"),
+                context,
+            )
+          }
+      if (projectValue != null) return Color.parseColor(projectValue)
+
+      val name = colorString.substringAfter("@color/")
+      val resourceId = context.resources.getIdentifier(name, "color", context.packageName)
+      if (resourceId != 0) return ContextCompat.getColor(context, resourceId)
+      throw IllegalArgumentException("Unresolved vector color resource: $colorString")
     }
+
+    if (colorString.startsWith("@android:color/")) {
+      val name = colorString.substringAfter("@android:color/")
+      val resourceId = context.resources.getIdentifier(name, "color", "android")
+      if (resourceId != 0) return ContextCompat.getColor(context, resourceId)
+      throw IllegalArgumentException("Unresolved Android vector color: $colorString")
+    }
+
+    throw IllegalArgumentException("Unsupported vector color value: $colorString")
   }
 
   /** Find project root (reused from existing logic) */
