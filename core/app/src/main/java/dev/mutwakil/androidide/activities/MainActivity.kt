@@ -322,7 +322,12 @@ class MainActivity : EdgeToEdgeIDEActivity() {
         runtimeSetupDialog?.dismiss()
         runtimeSetupDialog = null
         pendingRuntimeSetupResult = null
-        ITemplateProvider.getInstance().release()
+        // Keep the selected template and its parameter state alive across configuration
+        // changes. Releasing it here would leave the activity ViewModel holding a released
+        // template while the recreated details screen tries to reuse it.
+        if (isFinishing && !isChangingConfigurations) {
+            ITemplateProvider.getInstance().release()
+        }
         super.onDestroy()
         _binding = null
     }
