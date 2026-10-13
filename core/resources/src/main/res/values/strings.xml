@@ -802,4 +802,20 @@
     <string name="msg_extract_method_uses_backing_field">The selection uses the property\'s backing field, which only exists inside this accessor</string>
     <string name="msg_extract_method_smart_cast_parameter">The selection uses %1$s under a smart cast that does not hold outside the selection</string>
     <string name="msg_extract_method_captured_local_declaration">The selection uses %1$s, which goes out of scope once the selection moves</string>
+    <!-- Offline JVM bytecode decompiler -->
+    <string name="decompiler_title">Java Decompiler</string>
+    <string name="decompiler_description">Inspect Java bytecode from a .class, .jar, or .zip file offline. Android APK/DEX files are not supported by this tool. Inputs are never executed.</string>
+    <string name="decompiler_choose_file">Choose class or archive</string>
+    <string name="decompiler_idle">Choose a JVM class file or archive to begin.</string>
+    <string name="decompiler_running">Decompiling…</string>
+    <string name="decompiler_success">Generated %1$d Java source file(s). Tap the list to view a source.</string>
+    <string name="decompiler_results_hint">Output is stored privately at:\n%1$s</string>
+    <string name="decompiler_failed">Decompilation failed: %1$s</string>
+    <string name="decompiler_unsupported_type">Choose a .class, .jar, or .zip file. APK and DEX are not supported.</string>
+    <string name="decompiler_input_too_large">Input exceeds the 128 MiB safety limit.</string>
+    <string name="decompiler_no_sources">No Java source files were produced. The file may be invalid or unsupported.</string>
+    <string name="decompiler_sources">Generated Java sources</string>
+    <string name="decompiler_read_failed">Unable to read source: %1$s</string>
+    <string name="decompiler_export_failed">Unable to export source: %1$s</string>
+    <string name="decompiler_share">Export</string>
 </resources>
