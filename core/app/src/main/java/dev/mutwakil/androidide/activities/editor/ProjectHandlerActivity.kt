@@ -613,6 +613,7 @@ abstract class ProjectHandlerActivity : BaseEditorActivity() {
 
     initialSetup()
     setStatus(getString(string.msg_project_initialized))
+    showProjectSyncErrorsIfAny()
     editorViewModel.isInitializing = false
 
     if (mFindInProjectDialog?.isShowing == true) {
@@ -620,6 +621,27 @@ abstract class ProjectHandlerActivity : BaseEditorActivity() {
     }
 
     mFindInProjectDialog = null // Create the dialog again if needed
+  }
+
+  /**
+   * AGP may complete model import while still reporting configuration errors. Surface those errors
+   * after the workspace is initialized instead of leaving them only in the log.
+   */
+  private fun showProjectSyncErrorsIfAny() {
+    val errors =
+      ProjectManagerImpl.getInstance().projectSyncIssues
+        .filter { issue -> issue.severityValue == 1 }
+
+    if (errors.isEmpty()) return
+
+    val details = errors.take(3).joinToString(separator = "\n\n") { issue ->
+      val extra = issue.multilineMessageList.filter { it.isNotBlank() }
+      if (extra.isEmpty()) issue.message
+      else issue.message + "\n" + extra.joinToString("\n")
+    }
+    val remaining = errors.size - minOf(errors.size, 3)
+    val suffix = if (remaining > 0) "\n\n…and $remaining more sync error(s)." else ""
+    flashError("Gradle sync reported ${errors.size} error(s):\n\n$details$suffix")
   }
 
   private fun updateBuildVariants(buildVariants: Map<String, BuildVariantInfo>) {
