@@ -27,6 +27,7 @@ import androidx.lifecycle.viewModelScope
 import dev.mutwakil.androidide.roomData.recentproject.RecentProject
 import dev.mutwakil.androidide.roomData.recentproject.RecentProjectDao
 import dev.mutwakil.androidide.templates.Language
+import dev.mutwakil.androidide.templates.ProjectTemplateRecipeResult
 import dev.mutwakil.androidide.templates.Template
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -71,6 +72,8 @@ class MainViewModel(
 
 	internal val template = MutableLiveData<Template<*>>(null)
 	internal val creatingProject = MutableLiveData(false)
+	internal val pendingCreatedProject = MutableLiveData<ProjectTemplateRecipeResult?>(null)
+	internal val pendingTemplateCreationError = MutableLiveData<String?>(null)
 
 	val currentScreen: LiveData<Int> = _currentScreen
 
