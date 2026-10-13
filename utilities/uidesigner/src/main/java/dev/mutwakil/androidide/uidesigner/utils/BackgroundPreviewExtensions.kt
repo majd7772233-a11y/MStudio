@@ -170,7 +170,8 @@ fun ViewImpl.applyPreview(context: Context, workspace: Workspace?, layoutFile: F
         handledAttributes.add(attr.name)
 
         val applied =
-            m3Renderer.applyM3Preview(this.view, attr.name, attr.value, context, fileToUse)
+            ProjectTextResourcePreview.apply(this.view, attr.name, attr.value, context, fileToUse) ||
+                m3Renderer.applyM3Preview(this.view, attr.name, attr.value, context, fileToUse)
 
         // If M3 preview failed, fall back to normal attribute application
         if (!applied) {
@@ -193,7 +194,11 @@ fun ViewImpl.applyPreview(context: Context, workspace: Workspace?, layoutFile: F
   this.attributes.forEach { attr ->
     if (attr.name !in handledAttributes) {
       try {
-        this.applyAttribute(attr)
+        if (ProjectTextResourcePreview.apply(this.view, attr.name, attr.value, context, fileToUse)) {
+          handledAttributes.add(attr.name)
+        } else {
+          this.applyAttribute(attr)
+        }
       } catch (e: Exception) {
         // Continue with other attributes even if one fails
       }
@@ -299,7 +304,13 @@ fun ViewImpl.applyAttributePreview(
     }
     isM3Attribute(attributeName) && isM3Component(this.view) -> {
       val result =
-          m3Renderer.applyM3Preview(this.view, attributeName, attributeValue, context, fileToUse)
+          ProjectTextResourcePreview.apply(
+              this.view,
+              attributeName,
+              attributeValue,
+              context,
+              fileToUse,
+          ) || m3Renderer.applyM3Preview(this.view, attributeName, attributeValue, context, fileToUse)
 
       // If M3 preview failed, try normal attribute application
       if (!result) {
@@ -323,6 +334,10 @@ fun ViewImpl.applyAttributePreview(
       result
     }
     else -> {
+      // Resolve project string resources before the generic inflater consults IDE resources.
+      if (ProjectTextResourcePreview.apply(this.view, attributeName, attributeValue, context, fileToUse)) {
+        return true
+      }
       // For other attributes, apply them normally
       try {
         val tempAttr = this.attributes.find { it.name.equals(attributeName, ignoreCase = true) }
