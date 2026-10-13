@@ -70,7 +70,7 @@ internal class ToolingServerRunner(
 	fun startAsync(envs: Map<String, String>) =
 		runnerScope
 			.launch {
-				var process: Process?
+				var process: Process? = null
 				try {
 					log.info("Starting tooling API server...")
 					val command =
@@ -189,6 +189,8 @@ internal class ToolingServerRunner(
 				} catch (e: Throwable) {
 					isStarted = false
 					pid = null
+					process?.destroyForcibly()
+					process = null
 					if (e !is CancellationException) {
 						log.error("Unable to start tooling API server", e)
 						observer?.onServerStartFailed(e)
