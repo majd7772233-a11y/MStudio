@@ -95,7 +95,13 @@ internal object ProjectStylePreview {
             "invisible" -> View.INVISIBLE
             else -> View.VISIBLE
           }
-          "enabled" -> view.isEnabled = value.toBooleanStrictOrNull() ?: view.isEnabled
+          "enabled" ->
+              view.isEnabled =
+                  when (value.lowercase()) {
+                    "true" -> true
+                    "false" -> false
+                    else -> view.isEnabled
+                  }
         }
       } catch (error: Exception) {
         log.debug("Could not apply project style item '{}'='{}': {}", rawName, value, error.message)
