@@ -789,3 +789,36 @@ Source-level boundary: this closes the identified implementation gaps in process
 - Source fix committed as `52a8c27f385d0a31048f02e6230abb7370f0837f` (`fix: recognize valid Gradle projects beyond app module layouts`). Validation now rejects non-candidate selected directories, requires regular Gradle build-script files, accepts root single-module Gradle projects, and recognizes settings-based multi-module layouts by finding a descendant module build script (bounded depth, skipping hidden/VCS/generated directories). The inherited special plugin-project structure is preserved with regular-file checks.
 - This is structural pre-validation only. Gradle sync remains authoritative; this change does not parse Gradle DSL, guarantee SAF/document-provider compatibility, or prove that arbitrary builds can import. The current container picker still only checks direct children, so parent-container and SAF flows need caller-level inspection before being marked complete.
 - No tests, builds, Actions or device checks were run. The project instructions keep executable verification deferred. Phase 5 remains in progress; next inspect project selection/callers, model builder variant/classpath mapping, and dependency/sync issue presentation before further changes.
+
+
+## Phase 5 source implementation record — 2026-10-13
+
+**Status:** Phase 5 source implementation is complete for the identified import/modeling paths. Runtime acceptance remains **unverified and deliberately deferred**; do not check acceptance off until the owner requests the verification batch.
+
+### Implemented
+
+- Project structure validation no longer assumes an `app/` module. It recognizes root Gradle builds, Groovy/Kotlin DSL, custom module names, library-only and root Java layouts, and settings-based module trees; it rejects arbitrary/incomplete folders and non-file build-script paths.
+- Parent-folder import now discovers valid project roots recursively to a bounded depth, skips hidden/generated/VCS/dependency folders, avoids canonical-path cycles/duplicates, registers discovered projects and opens a project root rather than the container.
+- SAF folder selection now validates the selected document is a directory, guards malformed document IDs, restricts authorities, checks readability, and canonicalizes primary-storage paths to prevent traversal outside the selected storage root. Non-primary external-storage document IDs remain explicitly unsupported because Gradle needs a real filesystem path.
+- Added `ProjectValidationTest` coverage for root Java/Gradle, custom module names, Kotlin DSL, library-only modules, incomplete/invalid structures, nested Unicode/space paths, hidden/generated paths and plugin projects.
+- Android variant selection now preserves valid explicit selections and fails with the available variants when a saved explicit selection is stale; only an absent selection chooses the initial default. Product-flavor variant class-JAR lookup searches only the selected variant's output directory and never borrows another variant's JAR.
+- Extended the Android project protobuf model and serializer to preserve Android-test, unit-test, test-fixture, device-test and host-test compile dependency graphs, including unresolved dependency details. AGP and protobuf types in the serializer are explicitly aliased to avoid ambiguous model references.
+- Duplicate IDEA module names no longer silently overwrite one another in the name-to-path map; ambiguous dependency paths are left unguessed and logged. Sync issue conversion preserves message, details, type and severity; initialization now surfaces reported Gradle sync errors to the user.
+- Project switching now compares canonical paths and clears stale workspace, variants, sync issues and indexer state before opening a different project; editor state restoration uses the same lifecycle.
+- Added source tests for explicit/default/stale variants, flavor class-JAR isolation, module-name ambiguity, dependency graph serialization, sync issue conversion, project-switch path normalization, and structural project validation.
+
+### Relevant implementation commits
+
+- `52a8c27f` project structure validation; `2ca624bc` recursive parent-container discovery; `2ce0a049` nested folder import; `8632bae7` validation tests.
+- `a2ec66a9` SAF selection safety.
+- `df362b27`, `611732a4`, `317684d6` variant and selected-classpath handling; `c71bb121`, `d94dc182` variant/class-JAR tests.
+- `3889a0c5`, `f990dd36`, `84e96c64`, `e734e824`, `d2a8b67e`, `e27417d6`, `45ca3b99` test dependency model and serializer type corrections; `ec94a935` dependency serialization test.
+- `6cba6176`, `62341076`, `5e88f259` module path ambiguity handling/tests.
+- `3176e7e5`, `32b157c8`, `820ac79a` sync issue preservation, user-facing errors and tests.
+- `67943d72`, `5d7ca255`, `fc077795`, `5dc46b83` project switching lifecycle and tests.
+
+### Verification and limitations
+
+- Per the user's standing constraint, **no tests, Gradle builds, GitHub Actions, or device checks were run**. All newly added tests are source-only and still need execution when the user authorizes verification.
+- SAF selection still intentionally rejects non-primary removable-storage paths; composite/included builds are delegated to Gradle's Tooling API model and have not been independently verified as separate IDE modules.
+- The acceptance statement above is not a runtime claim: confirm module/task/variant/dependency models, dependency resolution, sync error UX, project switching and import safety in the deferred verification batch before calling Phase 5 fully accepted.
