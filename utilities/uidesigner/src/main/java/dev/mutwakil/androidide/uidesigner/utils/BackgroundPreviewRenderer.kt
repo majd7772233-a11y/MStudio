@@ -682,7 +682,7 @@ class BackgroundPreviewRenderer {
     return if (value.startsWith("@color/")) {
       resolveProjectColor(projectRoot, value.substringAfter("@color/"), context, visited)
     } else {
-      value.takeIf { it.startsWith("#") || it.lowercase() in setOf("black", "white", "red", "green", "blue", "transparent") }
+      value.takeIf { !it.startsWith("@") && !it.startsWith("?") }
     }
   }
 
