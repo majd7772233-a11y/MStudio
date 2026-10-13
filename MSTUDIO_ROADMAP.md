@@ -948,3 +948,13 @@ Phase 7 has broad source changes, but **must not be marked fully accepted/closed
 5. Compose fixes have source-level changes only; no runtime confirmation exists.
 
 Do not begin Phase 8 or edit its implementation. Phase 8 remains locked until the user explicitly says: **«يلا الان إبدأ بالمرحلة الثامنة»**.
+
+
+### Phase 7 latest delta — module precedence and strict preview failure (2026-10-13)
+
+- Resource lookup now threads the layout file's module root through drawable, mipmap, vector, color and dimension preview paths, so same-named resources in sibling modules prefer the opened module before falling back to other scanned project directories.
+- Shape previews resolve project colors/dimensions and aliases; vector custom rendering resolves project fill/stroke colors. Missing/unrecognized references fail rather than silently substituting gray, transparent, black, or a generic colored rectangle in the affected preview path.
+- Added tests for module-local color precedence, shape color resources, unsupported ImageView drawable XML and module settings-root detection. These are authored source tests only; they have not been executed.
+- Commits: `e3a93bfe635be76de790342fd64905f53e0a324e`, `3b4a02e6eff38f483ad9b0e62a779e5539f3dec6`, `2bd32a851e16a25ae012e56cdf2db4d45b01c71c`, `6faddd97d3e9636bc14c21b4e9bb26441f79ec25`, `568d6e05530c39d08134f814318dc8da807c7f26`, `09e40c450824421157807912aa0e7ad7d7d74a34`, `1f7ad16f85e66a3b9dad2e3376b891b37e1c7772`, `62aef7f3886ebf859bcd08199f2fa8d4783c1ebc`, `b105ca2c4c1ee4aca2d2014c22baf6478ccb8244`, `d9c23a73b4aea78736cf720bfee24720e3a2ee18`, `43e00da3d780427f0c04a5c45d01911e3434c4d0`, `735c638eb2775d97e7fa1081ae6fde6acefa61f7`.
+
+The Phase 7 closeout gate above remains in force: do not claim full acceptance or start Phase 8 while the documented XML-only editing, full AAPT resource merging/style resolution, broad resource diagnostics, and runtime acceptance gaps remain.
