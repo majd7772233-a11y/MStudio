@@ -1112,3 +1112,17 @@ The NIDE audit remains investigative. No code has been imported. The formatter i
 ### Phase 9 decompiler execution/safety detail
 
 Vineflower runs in a child process using MStudio's managed Java runtime, not inside Android ART. The Gradle build stages the non-transitive Vineflower JAR into generated APK assets. The activity installs it under private files and starts it with a 384 MiB heap limit, two active processors, a three-minute timeout, merged/drained process output, and forced termination on interruption or timeout. Input is capped at 128 MiB; JAR/ZIP preflight rejects archives above 5,000 entries or 256 MiB declared expanded content. These controls still require runtime validation and memory profiling.
+
+
+## Phase 10 execution update — 2026-10-13 (source hardening and verification preparation)
+
+- Hardened archive preflight: negative/unknown ZIP entry sizes are rejected and expanded-size limits use subtraction-before-addition to prevent signed-long overflow bypass. Added unit cases for hostile sizes and output caps.
+- Added a 10,000-file / 256 MiB decompiler-output ceiling monitored while the child JVM runs. Existing limits remain 128 MiB input, 5,000 archive entries, 256 MiB declared archive expansion, 384 MiB child heap, two processors and three minutes.
+- Restricted `.services.InstallationResultReceiver` to `exported=false` and removed its mismatched implicit filter; `ApkInstaller` delivers the result through an explicit app-created PendingIntent. Fixed Android framework dialog resource references in the decompiler UI.
+- Added `scripts/ci/phase10_static_checks.py` for wrapper HTTPS/validation, manifest exported declarations, backup/network invariants, the private install callback, and decompiler limits.
+- Prepared manual-only workflows (not dispatched): `.github/workflows/phase10-verification.yml` runs static checks, app JVM tests, Tooling API build/tests, debug APK build, SHA-256 fingerprints and artifact/report uploads; `.github/workflows/phase10-codeql.yml` runs Java/Kotlin CodeQL. Neither publishes packages or signs a release.
+- **Not verified:** no local tests, Gradle tasks, Actions workflow, CodeQL scan, APK install or device test has run. Final acceptance must prove dependency resolution/D8 packaging, test availability/results, merged manifest behavior, install callback, malformed/oversized inputs, output-monitor overhead, low-storage recovery, and memory profiling across supported API/ABI devices.
+- Manually review all exported components (crash handler, launcher, DocumentsProvider, permission-protected log service). The static check inventories them but does not establish that every exposure is product-correct.
+- Root `gradle.properties` still requests a 5096 MiB Gradle heap and 4096 MiB Kotlin daemon heap. It was not tuned without measurements; these source-build values are not evidence of the managed on-device build runtime's memory budget.
+
+**Phase 10 status: source hardening and verification preparation in progress; acceptance gates pending.**
