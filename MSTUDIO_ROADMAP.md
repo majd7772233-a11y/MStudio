@@ -1048,3 +1048,30 @@ The repository's active verification hold remains in force: no tests, Gradle bui
 ## Verification authorization update — 2026-10-13
 
 The user's latest instruction to finish Phase 8 fully supersedes the earlier source-only verification hold. Verification is now authorized as part of Phase 8 acceptance. No build, test, workflow run, generated-template Tooling API build, install, or launch result has yet been obtained in this session; the phase must remain unaccepted until those checks are actually completed and their results recorded.
+
+
+## Phase 8 source closeout — 2026-10-13 (runtime gate deferred)
+
+### Audited advertised template catalog
+
+The live `TemplateProviderImpl` registers eight project templates: No Activity, Empty Activity, Basic Activity, Navigation Drawer, Bottom Navigation, Tabbed Activity, No AndroidX Activity, and Compose Activity. The No Activity template is intentionally headless and therefore has no launcher intent; acceptance for it is successful generation/sync/build/install, not launching a nonexistent Activity. Compose is Kotlin-only by design.
+
+### Source-level acceptance work
+
+- Existing source changes unify template completion through the activity-scoped ViewModel, wait for the screen transition to finish, validate that the generated directory exists, and attempt to save the project to recents before publishing the pending launch result.
+- Added and merged generated-project contract assertions in `c256987eaa19ceed6ece474383d38ccbeec45d75` (PR #1): root and app Gradle files, project settings/module inclusion, namespace/applicationId/SDK declarations, Gradle distribution version, manifest package and launcher intent filters (except for the intentional No Activity template).
+- The existing generator harness exercises applicable templates across Java/Kotlin and Groovy/Kotlin-DSL combinations. These are source-level generator assertions, not proof that Gradle can sync/build the generated projects.
+
+### Closeout boundary
+
+- **Phase 8 source implementation: closed for this pass.**
+- **Runtime acceptance: deferred and still open.** The PR did not produce an Actions run/check, and no local Gradle/device execution environment was available. Tests were added but not run. No claim is made that generated APKs build, install, or launch.
+- At the final verification gate, run generator/unit tests, then for all eight templates run actual local Tooling API sync/build, install, and launch where a launcher Activity exists. Also cover duplicate/invalid/Unicode names, low storage, cancellation/rollback, restart recovery, RTL, keyboard/insets, narrow and landscape layouts. Preserve actionable recovery for failures.
+
+## Phase 9 execution start — NIDE candidate audit (2026-10-13)
+
+- **Formatter styles:** not approved for port. MStudio already routes Java formatting through Google Java Format; `JavaServerSettings` exposes AOSP and Google styles and `CodeFormatProvider` invokes the formatter. Porting NIDE's separate formatter would duplicate an existing implementation unless a specific missing behavior is demonstrated.
+- **Decompiler:** unique gap candidate, but blocked for now. NIDE's `lib-decompiler` sources identify JetBrains Fernflower code as Apache 2.0 in source headers, while the inspected NIDE root license is GPL-3.0 and the module directory does not contain a separate Apache license file. The module also declares Java 7 source/target compatibility and exposes a broad old source tree. Do not copy or bundle it until the exact Apache license/provenance is recovered, dependencies and source notices are audited, a narrow class/JAR-only API is isolated, and low-memory behavior/tests are defined.
+- **Autocomplete/type resolution:** MStudio already has Java LSP, javac services, project classpaths and indexing. NIDE parser/type resolver is reference material for targeted regression cases only; no competing completion engine is approved.
+- **Legacy Android builder/dx/FastGradleParser/AAR resolver:** rejected for the core build path because they duplicate or bypass Gradle/AGP semantics and have documented incomplete tasks. Do not port them into Tooling API builds.
+- Phase 9 is **investigating**, not complete. Next candidate decision must identify a unique user-visible gap and a source/license/testable boundary before any bulk code import.
