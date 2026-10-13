@@ -187,6 +187,7 @@ object RootModelBuilder :
             controller.getModel(includedBuild.rootProject, IdeaProject::class.java)
           val includedModules = includedIdeaProject.modules
           val buildName = includedBuild.rootProject.name
+          val includedInitializeParams = initializeParamsForIncludedBuild(initializeParams, buildName)
           val includedModulePaths =
             uniqueModuleNameToPath(
               includedModules.map { module ->
@@ -206,7 +207,7 @@ object RootModelBuilder :
               val androidProject =
                 AndroidProjectModelBuilder
                   .build(
-                    initializeParams,
+                    includedInitializeParams,
                     AndroidProjectModelBuilderParams(
                       controller,
                       includedModule,
