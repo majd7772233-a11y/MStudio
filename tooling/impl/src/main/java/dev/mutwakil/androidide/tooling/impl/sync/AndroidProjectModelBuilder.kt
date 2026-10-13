@@ -30,6 +30,30 @@ import org.gradle.tooling.model.GradleProject
 import java.io.File
 
 /**
+ * Resolves a module's configured Android variant without silently discarding an explicit selection.
+ * If there is no saved selection, the first AGP-reported variant is used as the initial default.
+ */
+internal fun resolveConfiguredAndroidVariant(
+  requestedVariant: String?,
+  variantNames: List<String>,
+  projectPath: String,
+): String {
+  if (requestedVariant != null && requestedVariant !in variantNames) {
+    throw ModelBuilderException(
+      "The selected build variant '$requestedVariant' is not available for project '$projectPath'. " +
+        "Available variants: ${variantNames.ifEmpty { listOf("<none>") }.joinToString()}. " +
+        "Refresh the project model and choose an available variant; the requested selection was not replaced.",
+    )
+  }
+
+  return requestedVariant ?: variantNames.firstOrNull()?.takeIf { it.isNotBlank() }
+  ?: throw ModelBuilderException(
+    "No build variants were reported for project '$projectPath'. " +
+      "Check the Android Gradle Plugin configuration and sync output.",
+  )
+}
+
+/**
  * Builds model for Android application and library projects.
  *
  * @author Akash Yadav
@@ -53,22 +77,12 @@ object AndroidProjectModelBuilder :
       "${variantNames.size} build variants found for project '$projectPath': $variantNames",
     )
 
-    val requestedVariant = androidParams.variantSelections[projectPath]
-    if (requestedVariant != null && requestedVariant !in variantNames) {
-      throw ModelBuilderException(
-        "The selected build variant '$requestedVariant' is not available for project '$projectPath'. " +
-          "Available variants: ${variantNames.ifEmpty { listOf("<none>") }.joinToString()}. " +
-          "Refresh the project model and choose an available variant; the requested selection was not replaced.",
+    val configurationVariant =
+      resolveConfiguredAndroidVariant(
+        requestedVariant = androidParams.variantSelections[projectPath],
+        variantNames = variantNames,
+        projectPath = projectPath,
       )
-    }
-
-    val configurationVariant = requestedVariant ?: variantNames.firstOrNull()
-    if (configurationVariant.isNullOrBlank()) {
-      throw ModelBuilderException(
-        "No build variants were reported for project '$projectPath'. " +
-          "Check the Android Gradle Plugin configuration and sync output.",
-      )
-    }
 
     log("Selected build variant '$configurationVariant' for project '$projectPath'")
 
