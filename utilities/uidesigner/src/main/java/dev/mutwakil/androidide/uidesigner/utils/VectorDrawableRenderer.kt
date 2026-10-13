@@ -454,6 +454,7 @@ $modified"""
                 "color",
                 colorString.substringAfter("@color/"),
                 context,
+                ProjectResourceLocator.findModuleRoot(layoutFile),
             )
           }
       if (projectValue != null) return Color.parseColor(projectValue)
