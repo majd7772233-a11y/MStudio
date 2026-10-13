@@ -904,19 +904,24 @@ Source-level boundary: this closes the identified implementation gaps in process
 - For edited layouts, the designer fails closed instead of silently dropping XML-only constructs it cannot faithfully represent: `<include>`, `<merge>`, `<requestFocus>`, `<tag>`, `<fragment>`, and `<view class="...">`. The designer remains open and reports the existing preview/save error; it does not return a destructive replacement. This is an explicit safety boundary, **not** full editing support for those constructs.
 - XML generation now emits a valid `xmlns` declaration for an empty/default namespace prefix and refuses to serialize a namespaced attribute whose prefix is unavailable, rather than emitting invalid XML or silently changing its namespace.
 - The custom Material component registry is mutable by design, so runtime registration no longer relies on casting a `mapOf` implementation to `MutableMap`.
+- Added `ProjectResourceLocator` to discover drawable/mipmap folders across modules, source sets and qualifier directories, prioritizing qualifiers matching the preview device's night mode, orientation, density, API level and supported screen-size qualifiers. Both ImageView src and background preview paths use it.
+- Project vector drawable previews now go through `VectorDrawableRenderer` to parse vector/path data rather than passing XML through `Drawable.createFromStream` and displaying a fake blue/green placeholder as if rendering succeeded.
 - Compose preview now sets its initialized flag after successful first initialization, discards compile results/errors from stale source generations, and recreates its class loader/renderers after memory-pressure cleanup in both Activity and Fragment flows.
-- Added source tests for XML-only construct guards, default namespace serialization, dirty-state reset when switching files, and retaining dirty state when the same file is reopened.
+- Added source tests for XML-only construct guards, default namespace serialization, dirty-state reset when switching files, retaining dirty state when the same file is reopened, and qualified resource-directory discovery.
 
 ### Source commits
 
 - Dirty-state tracking: `3d21ae47202d54096403ec2eca4be3be05201c25`, `db7a36822a8c1fd905eaed2ac3ff391930883cb2`, `6ceffa55290efd66256e02be04bbbed4047d8795`, `7993d25bc786d7d7c0b9963172a085b486121cc3`, `32c1a3ecef0a1d7864a915c081061f8ed8bafb22`.
 - XML safety/serialization and component registry: `77b947ba88a613fdfb772f329d5c9c1eaf1ea70e`, `c2bfebc00c0202b798dd830ab8a4598f0f0c3ef1`, `27a35ecdd201e8d204a1a2ceef243b99b7a5802b`.
-- Tests: `5552ec19b90b05ac51b97738aad3f1b93e61d190`, `69a2c383555d1f5ae78b97946bf85d1796ce693f`, `e89bb975add0fc5866d26f67ddfa1fb588faa089`, `9deaf6b289b03cd987b768c2fc5b1aab3e51b18f`, `8d3c5f6af507b4747ccf879ba93ef954675b40f8`.
+- Resource discovery and real vector rendering: `fd82b1fae7fe4bdd6ccfd55bf8322d3f61a7b472`, `9b06596736410c14a7ea22bbfcd94b8011fe0be8`, `a97c9d80ff1055e5b620de37afee974dce7d83f7`, `06053b7205328c55b2410b9d433ccdaf2454e159`, `55b31ae2f8fc49cdcfe29b512988ef626f5bd432`, `5641191c685b741a9f35c5e314271f4d27fdb31b`.
+- Tests: `5552ec19b90b05ac51b97738aad3f1b93e61d190`, `69a2c383555d1f5ae78b97946bf85d1796ce693f`, `e89bb975add0fc5866d26f67ddfa1fb588faa089`, `9deaf6b289b03cd987b768c2fc5b1aab3e51b18f`, `8d3c5f6af507b4747ccf879ba93ef954675b40f8`, `3764473011bde6740672b2092d8a03ddc553ce29`.
 - Compose preview fixes: `7a6cc2d84d938f628937a218f3afa3d192795904`, `44c53b374267236950e8b439d9acbeaed3cad74d`, `41edcea10623917ab0d9d339f0304ce1e2be8198`, `761acb8d0bd10938a77ec3c82c851ab90178edcb`.
 
 ### Scope and acceptance boundary
 
 - XML open/parse failure safety, source preservation when untouched, attribute/hierarchy dirty tracking, namespace serialization safety, and Compose preview initialization/stale-result/memory recovery now have source changes and source tests where applicable.
 - **Phase 7 is not runtime-accepted.** Per the user's standing instruction, no tests, Gradle builds, GitHub Actions, or device checks were run.
-- The fail-closed guard deliberately prevents editing/saving layouts containing the XML-only constructs listed above; full tree-preserving editing for those constructs remains a functional gap. Configuration-qualified resource resolution, missing-resource diagnostics across all resource types, and end-to-end resource/preview round-tripping still require a dedicated source audit and acceptance coverage. Do not mark those as proven merely because the existing inflater/completion pipeline is present.
+- The fail-closed guard deliberately prevents editing/saving layouts containing the XML-only constructs listed above; full tree-preserving editing for those constructs remains a functional gap.
+- Configuration-aware filesystem discovery is now implemented for drawable/mipmap previews, including qualifier folders and non-`app` modules. This is not a full AAPT resource-merger: selected product-flavor/source-set precedence, project `@color`/`@dimen`/`@string`/`@style` value resolution and references between values still need implementation and tests.
+- Missing-resource diagnostics across all resource types and end-to-end resource/preview round-tripping still require dedicated coverage. Do not mark them as proven merely because the existing inflater/completion pipeline is present.
 - Keep Phase 8 locked. Do not change Phase 8 implementation files or begin Phase 8 until the user explicitly says: **«يلا الان إبدأ بالمرحلة الثامنة»**.
