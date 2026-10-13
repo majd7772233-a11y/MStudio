@@ -17,6 +17,7 @@
 
 package dev.mutwakil.androidide.uidesigner.utils
 
+import dev.mutwakil.androidide.uidesigner.models.PlaceholderView
 import dev.mutwakil.androidide.uidesigner.models.UiViewGroup
 import dev.mutwakil.androidide.uidesigner.viewmodel.WorkspaceViewModel
 
@@ -49,7 +50,7 @@ internal class WorkspaceHierarchyChangeListener(
       view: dev.mutwakil.androidide.inflater.IView,
       index: Int,
   ) {
-    if (!loadingSource && view !== workspaceView) {
+    if (!loadingSource && view !== workspaceView && view !is PlaceholderView) {
       viewModel.markWorkspaceChanged()
     }
   }
