@@ -60,11 +60,11 @@ internal class WorkspaceViewHierarchyHandler : IViewGroup.SingleOnHierarchyChang
       added: Boolean,
   ) {
     val frag = this.fragment ?: return
-    if (view is PlaceholderView) {
+    if (view is PlaceholderView || frag.isInflating) {
       return
     }
 
-    if (!frag.isInflating) frag.viewModel.markWorkspaceChanged()
+    frag.viewModel.markWorkspaceChanged()
 
     val lastAction = frag.undoManager.peekUndo()
 
