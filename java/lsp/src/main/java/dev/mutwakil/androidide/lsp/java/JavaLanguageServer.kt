@@ -145,6 +145,9 @@ class JavaLanguageServer : ILanguageServer {
     }
 
     override fun setupWithProject(workspace: Workspace) {
+        // A successful sync may replace module/classpath information without changing source files.
+        // Discard diagnostics cached against the previous workspace before analyzing again.
+        diagnosticProvider?.clearAllDiagnostics()
         LSPEditorActions.ensureActionsMenuRegistered(JavaCodeActionsMenu)
 
         (ProjectManagerImpl.getInstance().indexingServiceManager.getService(
