@@ -20,6 +20,7 @@ package dev.mutwakil.androidide.fragments
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
 import dev.mutwakil.androidide.R
@@ -37,6 +38,7 @@ import dev.mutwakil.androidide.utils.TemplateRecipeExecutor
 import dev.mutwakil.androidide.utils.flashError
 import dev.mutwakil.androidide.viewmodel.MainViewModel
 import org.slf4j.LoggerFactory
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 /**
@@ -138,19 +140,22 @@ class TemplateDetailsFragment :
         // Persist the successful result before navigating. If Android kills the process
         // between generation and launch, the project is still discoverable in Saved Projects.
         val now = System.currentTimeMillis().toString()
-        viewModel.saveProjectToRecents(
-          RecentProject(
-            location = result.data.projectDir.path,
-            name = result.data.name,
-            createdAt = now,
-            lastModified = now,
-            templateName = templateName,
-            language = result.data.language?.name ?: "unknown"
-          )
+        val recentProject = RecentProject(
+          location = result.data.projectDir.path,
+          name = result.data.name,
+          createdAt = now,
+          lastModified = now,
+          templateName = templateName,
+          language = result.data.language?.name ?: "unknown"
         )
 
-        // MainActivity observes this value and owns the screen transition and launch.
-        viewModel.pendingCreatedProject.value = result
+        // Use the activity ViewModel's scope so a rotation does not cancel persistence.
+        // Deliver the result only after the recent-project write has completed.
+        viewModel.viewModelScope.launch {
+          viewModel.saveProjectToRecents(recentProject)
+          // MainActivity owns the screen transition and editor launch.
+          viewModel.pendingCreatedProject.value = result
+        }
       }
     }
 
