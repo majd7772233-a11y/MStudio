@@ -67,6 +67,9 @@ internal class WorkspaceViewModel : ViewModel() {
     get() = _file.value!!
     set(value) {
       _file.value = value
+      _hasWorkspaceChanges = false
+      _workspaceState.value = WorkspaceState()
+      _undoManager.value = UndoManager()
     }
 
   var drawerOpened: Boolean
@@ -162,6 +165,11 @@ internal class WorkspaceViewModel : ViewModel() {
       _workspaceState.value =
           _workspaceState.value?.copy(hasChanges = value) ?: WorkspaceState(hasChanges = value)
     }
+
+  /** Mark the visual workspace as edited by an actual user action. */
+  fun markWorkspaceChanged() {
+    hasWorkspaceChanges = true
+  }
 
   fun saveWorkspaceState(m3Components: List<M3ComponentState>) {
     val currentState = _workspaceState.value ?: WorkspaceState()
