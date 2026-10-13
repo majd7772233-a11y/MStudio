@@ -33,7 +33,6 @@ import dev.mutwakil.androidide.templates.base.util.isValidModuleName
 import dev.mutwakil.androidide.templates.base.util.isValidProjectName
 import dev.mutwakil.androidide.templates.impl.R.string
 import dev.mutwakil.androidide.templates.impl.R
-import dev.mutwakil.androidide.resources.R.string as sharedString
 import dev.mutwakil.androidide.utils.AndroidUtils
 import jdkx.lang.model.SourceVersion
 import java.io.File
@@ -164,7 +163,7 @@ object ConstraintVerifier {
 
   private fun validateProjectName(input: String): String? {
     if (isValidProjectName(input)) return null
-    return BaseApplication.getBaseInstance().getString(sharedString.msg_invalid_project_name)
+    return BaseApplication.getBaseInstance().getString(string.msg_invalid_project_name)
   }
 
   private fun validateClassName(name: String): String? {
