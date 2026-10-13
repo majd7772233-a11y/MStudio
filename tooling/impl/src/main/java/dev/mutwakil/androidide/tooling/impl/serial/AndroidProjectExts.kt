@@ -53,7 +53,7 @@ fun createAndroidProjectProtoModel(
     namespace = androidProject.namespace,
     projectType =
         when (basicAndroidProject.projectType) {
-            AgpAgpProjectType.APPLICATION -> AndroidModels.ProjectType.ApplicationProject
+            AgpProjectType.APPLICATION -> AndroidModels.ProjectType.ApplicationProject
             AgpProjectType.LIBRARY -> AndroidModels.ProjectType.LibraryProject
             AgpProjectType.DYNAMIC_FEATURE -> AndroidModels.ProjectType.DynamicFeature
             AgpProjectType.TEST -> AndroidModels.ProjectType.Test
