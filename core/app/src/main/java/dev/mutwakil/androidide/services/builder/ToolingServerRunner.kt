@@ -31,7 +31,8 @@ import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.io.InputStream
@@ -170,7 +171,7 @@ internal class ToolingServerRunner(
 					val serverJob =
 						launch(Dispatchers.IO) {
 							try {
-								future.get()
+								runInterruptible { future.get() }
 							} catch (err: Throwable) {
 								err.ifCancelledOrInterrupted {
 									log.info("ToolingServerThread has been cancelled or interrupted.")
@@ -182,10 +183,15 @@ internal class ToolingServerRunner(
 						}
 
 					processJob.join()
-					joinAll(serverJob, processJob)
+					// The RPC listener can outlive the child process if its blocking future
+					// never completes. Interrupt it once the process has definitely exited.
+					serverJob.cancelAndJoin()
 				} catch (e: Throwable) {
+					isStarted = false
+					pid = null
 					if (e !is CancellationException) {
 						log.error("Unable to start tooling API server", e)
+						observer?.onServerStartFailed(e)
 					}
 				}
 			}.also {
@@ -206,6 +212,8 @@ internal class ToolingServerRunner(
 		)
 
 		fun onServerExited(exitCode: Int)
+
+		fun onServerStartFailed(error: Throwable)
 
 		fun getClient(): IToolingApiClient
 	}
