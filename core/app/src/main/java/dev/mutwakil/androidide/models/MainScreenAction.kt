@@ -48,6 +48,7 @@ constructor(
     const val ACTION_PREFERENCES = 5
     const val ACTION_DONATE = 6
     const val ACTION_DOCS = 7
+    const val ACTION_DECOMPILE_CLASSES = 8
 
     /**
      * Get all main screen actions.
@@ -96,6 +97,11 @@ constructor(
           R.string.btn_docs,
           R.drawable.ic_docs)
 
+        val decompileClasses = MainScreenAction(
+          ACTION_DECOMPILE_CLASSES,
+          R.string.decompiler_title,
+          R.drawable.ic_folder)
+
         Collections.addAll(this,
           createProject,
           openProject,
@@ -103,7 +109,8 @@ constructor(
           openTerminal,
           preferences,
           donate,
-          docs
+          docs,
+          decompileClasses
         )
       }
     }
