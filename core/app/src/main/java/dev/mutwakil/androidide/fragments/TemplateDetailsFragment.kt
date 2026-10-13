@@ -109,7 +109,7 @@ class TemplateDetailsFragment :
       viewModel.creatingProject.value = true
       executeAsyncProvideError({
         TemplateRecipeExecutor().executeRecipe {
-          template.recipe.execute(this)
+          template.recipe.execute(this) as? ProjectTemplateRecipeResult
         }
       }) { result, err ->
 
