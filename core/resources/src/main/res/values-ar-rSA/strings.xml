@@ -506,4 +506,6 @@
   <string name="decompiler_read_failed">تعذرت قراءة المصدر: %1$s</string>
   <string name="decompiler_export_failed">تعذر تصدير المصدر: %1$s</string>
   <string name="decompiler_share">تصدير</string>
+  <string name="decompiler_export">تصدير المصدر</string>
+  <string name="decompiler_export_success">تم تصدير %1$s بنجاح.</string>
 </resources>
