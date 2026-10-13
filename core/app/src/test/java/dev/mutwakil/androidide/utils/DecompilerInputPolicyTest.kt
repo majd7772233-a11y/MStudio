@@ -21,6 +21,21 @@ class DecompilerInputPolicyTest {
     }
 
     @Test
+    fun boundsArchiveEntryCountAndExpandedSize() {
+        assertTrue(DecompilerInputPolicy.isArchiveWithinLimits(0, 0))
+        assertTrue(DecompilerInputPolicy.isArchiveWithinLimits(
+            DecompilerInputPolicy.MAX_ARCHIVE_ENTRIES,
+            DecompilerInputPolicy.MAX_EXPANDED_ARCHIVE_BYTES
+        ))
+        assertFalse(DecompilerInputPolicy.isArchiveWithinLimits(
+            DecompilerInputPolicy.MAX_ARCHIVE_ENTRIES + 1, 0
+        ))
+        assertFalse(DecompilerInputPolicy.isArchiveWithinLimits(
+            1, DecompilerInputPolicy.MAX_EXPANDED_ARCHIVE_BYTES + 1
+        ))
+    }
+
+    @Test
     fun enforcesNonNegativeInputSizeLimit() {
         assertTrue(DecompilerInputPolicy.isWithinSizeLimit(0))
         assertTrue(DecompilerInputPolicy.isWithinSizeLimit(DecompilerInputPolicy.MAX_INPUT_BYTES))
