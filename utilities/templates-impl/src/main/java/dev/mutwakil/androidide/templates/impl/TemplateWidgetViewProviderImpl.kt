@@ -107,7 +107,7 @@ class TemplateWidgetViewProviderImpl : ITemplateWidgetViewProvider {
         }
       }
 
-      param.observe(observer)
+      observeWhileAttached(root, param, observer)
     }.root
   }
 
@@ -139,7 +139,7 @@ class TemplateWidgetViewProviderImpl : ITemplateWidgetViewProvider {
       }
 
       input.setText(param.value)
-      param.observe(observer)
+      observeWhileAttached(root, param, observer)
 
     }.root
   }
@@ -202,8 +202,26 @@ class TemplateWidgetViewProviderImpl : ITemplateWidgetViewProvider {
         }
       }
 
-      param.observe(observer)
+      observeWhileAttached(root, param, observer)
     }.root
+  }
+
+  private fun <T> observeWhileAttached(
+    view: View,
+    parameter: Parameter<T>,
+    observer: DefaultObserver<T>,
+  ) {
+    parameter.observe(observer)
+    view.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+      override fun onViewAttachedToWindow(view: View) {
+        parameter.observe(observer)
+        observer.onChanged(parameter)
+      }
+
+      override fun onViewDetachedFromWindow(view: View) {
+        parameter.removeObserver(observer)
+      }
+    })
   }
 
   private inline fun TextFieldParameter<*>.configureTextField(context: Context,
