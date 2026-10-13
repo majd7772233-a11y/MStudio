@@ -15,7 +15,6 @@ import dev.mutwakil.androidide.lsp.models.DiagnosticSeverity.ERROR
 import dev.mutwakil.androidide.models.Position
 import dev.mutwakil.androidide.models.Range
 import java.io.StringReader
-import java.nio.file.Files
 import java.nio.file.Path
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
@@ -26,13 +25,14 @@ import org.slf4j.LoggerFactory
 internal class XmlSyntaxDiagnosticProvider {
 
   fun analyze(file: Path): DiagnosticResult {
-    if (!Files.isRegularFile(file) || !Files.isReadable(file)) {
+    val sourceFile = file.toFile()
+    if (!sourceFile.isFile || !sourceFile.canRead()) {
       return DiagnosticResult.NO_UPDATE
     }
 
     val source =
         try {
-          String(Files.readAllBytes(file), Charsets.UTF_8)
+          sourceFile.readText(Charsets.UTF_8)
         } catch (error: Exception) {
           LOG.warn("Unable to read XML for diagnostics: {}", file, error)
           return DiagnosticResult.NO_UPDATE
