@@ -32,14 +32,49 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
+ * Keeps diagnostics and freshness timestamps paired by canonical document identity.
+ *
+ * A single global cached result is unsafe because the analyzer visits multiple files; a cache hit
+ * for one file must never return diagnostics that were produced for another file.
+ */
+internal class PerFileDiagnosticCache {
+  private val timestamps = ConcurrentHashMap<Path, Instant>()
+  private val results = ConcurrentHashMap<Path, DiagnosticResult>()
+
+  fun getFresh(file: Path, modifiedAt: Instant): DiagnosticResult? {
+    if (timestamps[file]?.isAfter(modifiedAt) != true) return null
+    val result = results[file]
+    if (result == null) timestamps.remove(file)
+    return result
+  }
+
+  fun getOrNoUpdate(file: Path): DiagnosticResult =
+    results[file] ?: DiagnosticResult.NO_UPDATE
+
+  fun store(file: Path, result: DiagnosticResult, analyzedAt: Instant = Instant.now()) {
+    if (result.file == file) {
+      results[file] = result
+      timestamps[file] = analyzedAt
+    } else {
+      // NO_UPDATE and failures have no fresh diagnostics for this file.
+      timestamps.remove(file)
+    }
+  }
+
+  fun clear(file: Path) {
+    timestamps.remove(file)
+    results.remove(file)
+  }
+}
+
+/**
  * Code analyzer for java source code.
  *
  * @author Akash Yadav
  */
 class JavaDiagnosticProvider {
 
-  private val analyzeTimestamps = ConcurrentHashMap<Path, Instant>()
-  private val cachedDiagnostics = ConcurrentHashMap<Path, DiagnosticResult>()
+  private val diagnosticCache = PerFileDiagnosticCache()
   private var analyzing = AtomicBoolean(false)
   private var analyzingThread: AnalyzingThread? = null
 
@@ -59,15 +94,9 @@ class JavaDiagnosticProvider {
     log.debug("Analyzing: {}", file)
 
     val modifiedAt = FileManager.getLastModified(file)
-    val analyzedAt = analyzeTimestamps[file]
-
-    if (analyzedAt?.isAfter(modifiedAt) == true) {
-      cachedDiagnostics[file]?.let {
-        log.debug("Using cached analyze results for {}", file)
-        return it
-      }
-      // A timestamp without its matching result must never make another file's diagnostics reusable.
-      analyzeTimestamps.remove(file)
+    diagnosticCache.getFresh(file, modifiedAt)?.let {
+      log.debug("Using cached analyze results for {}", file)
+      return it
     }
 
     analyzingThread?.let { analyzingThread ->
@@ -100,8 +129,7 @@ class JavaDiagnosticProvider {
   }
 
   fun clearTimestamp(file: Path) {
-    analyzeTimestamps.remove(file)
-    cachedDiagnostics.remove(file)
+    diagnosticCache.clear(file)
   }
 
   private fun doAnalyze(file: Path, task: CompileTask): DiagnosticResult {
@@ -111,7 +139,7 @@ class JavaDiagnosticProvider {
         // The returned list is accessed and the list returned by Collections.emptyList()
         // throws exception when trying to access.
         log.info("Using cached diagnostics for {}", file)
-        cachedDiagnostics[file] ?: DiagnosticResult.NO_UPDATE
+        diagnosticCache.getOrNoUpdate(file)
       } else
         DiagnosticResult(
           file,
@@ -153,15 +181,7 @@ class JavaDiagnosticProvider {
           compiler.destroy()
           analyzing.set(false)
         }
-          .also { result ->
-            if (result.file == file) {
-              cachedDiagnostics[file] = result
-              analyzeTimestamps[file] = Instant.now()
-            } else {
-              // NO_UPDATE and failures have no fresh diagnostics for this file.
-              analyzeTimestamps.remove(file)
-            }
-          }
+          .also { result -> diagnosticCache.store(file, result) }
     }
   }
 }
