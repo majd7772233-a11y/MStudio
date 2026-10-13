@@ -24,6 +24,13 @@ import java.io.File
 import java.nio.file.Path
 
 /**
+ * Checks directory containment using path segments rather than string prefixes. This avoids
+ * assigning files in "module-old" to a sibling module named "module".
+ */
+internal fun isPathWithinDirectory(filePath: Path, directoryPath: Path): Boolean =
+	filePath.toAbsolutePath().normalize().startsWith(directoryPath.toAbsolutePath().normalize())
+
+/**
  * Model for representing the whole project that is opened in the IDE (including the root project).
  *
  * @property rootProject The root Gradle project.
@@ -31,13 +38,6 @@ import java.nio.file.Path
  * @property syncIssues The issues that occurred while syncing the project.
  * @author Akash Yadav
  */
-/**
- * Checks directory containment using path segments rather than string prefixes. This avoids
- * assigning files in "module-old" to a sibling module named "module".
- */
-internal fun isPathWithinDirectory(filePath: Path, directoryPath: Path): Boolean =
-	filePath.toAbsolutePath().normalize().startsWith(directoryPath.toAbsolutePath().normalize())
-
 data class Workspace(
 	val rootProject: GradleProject,
 	val subProjects: List<GradleProject>,
