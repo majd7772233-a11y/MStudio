@@ -169,7 +169,7 @@ private fun assertGeneratedProject(
 
   assertThat(rootBuildText).contains(ANDROID_GRADLE_PLUGIN_VERSION)
   assertThat(settingsText).contains(projectName)
-  assertThat(settingsText).contains("include(\"app\")")
+  assertThat(settingsText).contains("include(\":app\")")
   assertThat(appBuildText).contains(packageName)
   assertThat(appBuildText).contains("namespace")
   assertThat(appBuildText).contains("applicationId =")
