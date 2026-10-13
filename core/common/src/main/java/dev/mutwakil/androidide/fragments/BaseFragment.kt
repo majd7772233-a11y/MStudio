@@ -68,14 +68,21 @@ open class BaseFragment @JvmOverloads constructor(contentLayoutId: Int = 0) :
         return@registerForActivityResult
       }
 
-      if (!pickedDir.exists()) {
+      if (!pickedDir.exists() || !pickedDir.isDirectory) {
         flashError(getString(string.msg_picked_isnt_dir))
         return@registerForActivityResult
       }
 
-      val docUri = buildDocumentUriUsingTree(uri, getTreeDocumentId(uri)!!)!!
-      val docId = DocumentsContractCompat.getDocumentId(docUri)!!
-      val authority = docUri.authority
+      val treeDocumentId = runCatching { getTreeDocumentId(uri) }.getOrNull()
+      val docUri =
+        treeDocumentId?.let { runCatching { buildDocumentUriUsingTree(uri, it) }.getOrNull() }
+      val docId = docUri?.let { runCatching { DocumentsContractCompat.getDocumentId(it) }.getOrNull() }
+      val authority = docUri?.authority
+
+      if (docId.isNullOrBlank() || authority.isNullOrBlank()) {
+        flashError(getString(string.err_invalid_data_by_intent))
+        return@registerForActivityResult
+      }
 
       if (!allowedAuthorities.contains(authority)) {
         flashError(getString(string.err_authority_not_allowed, authority))
@@ -84,18 +91,27 @@ open class BaseFragment @JvmOverloads constructor(contentLayoutId: Int = 0) :
 
       val dir =
         if (authority == ANDROIDIDE_DOCS_AUTHORITY) {
-          File(docId)
+          runCatching { File(docId).canonicalFile }.getOrNull()
         } else {
-          val split = docId.split(':')
-          if ("primary" != split[0]) {
+          val split = docId.split(':', limit = 2)
+          if (split.size != 2 || split[0] != "primary" || split[1].isBlank()) {
             flashError(getString(string.msg_select_from_primary_storage))
             return@registerForActivityResult
           }
 
-          File(Environment.getExternalStorageDirectory(), split[1])
+          val storageRoot = runCatching { Environment.getExternalStorageDirectory().canonicalFile }.getOrNull()
+          val selectedDirectory =
+            storageRoot?.let { root -> runCatching { File(root, split[1]).canonicalFile }.getOrNull() }
+          if (storageRoot == null || selectedDirectory == null ||
+            (selectedDirectory != storageRoot && !selectedDirectory.toPath().startsWith(storageRoot.toPath()))
+          ) {
+            flashError(getString(string.err_invalid_data_by_intent))
+            return@registerForActivityResult
+          }
+          selectedDirectory
         }
 
-      if (!dir.exists() || !dir.isDirectory) {
+      if (dir == null || !dir.exists() || !dir.isDirectory || !dir.canRead()) {
         flashError(getString(string.err_invalid_data_by_intent))
         return@registerForActivityResult
       }
