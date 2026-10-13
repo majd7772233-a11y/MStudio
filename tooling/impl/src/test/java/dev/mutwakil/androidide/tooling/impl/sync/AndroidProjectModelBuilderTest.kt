@@ -5,6 +5,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import com.android.builder.model.v2.ide.SyncIssue as AndroidSyncIssue
+import com.android.builder.model.v2.ide.ArtifactDependencies as AgpArtifactDependencies
+import com.android.builder.model.v2.ide.GraphItem as AgpGraphItem
+import com.android.builder.model.v2.ide.UnresolvedDependency as AgpUnresolvedDependency
+import dev.mutwakil.androidide.tooling.impl.serial.asProtoModel
 import io.mockk.every
 import io.mockk.mockk
 import java.io.File
@@ -142,6 +146,32 @@ class AndroidProjectModelBuilderTest {
     assertThat(mapped.severity).isEqualTo(
       dev.mutwakil.androidide.project.GradleModels.SyncIssueSeverity.SeverityError,
     )
+  }
+
+  @Test
+  fun preservesResolvedAndUnresolvedCompileDependencies() {
+    val graphItem = mockk<AgpGraphItem>()
+    every { graphItem.key } returns "external-lib"
+    every { graphItem.requestedCoordinates } returns "org.example:library:1.2.3"
+    every { graphItem.dependencies } returns emptyList()
+
+    val unresolved = mockk<AgpUnresolvedDependency>()
+    every { unresolved.name } returns "org.example:missing:1.0"
+    every { unresolved.cause } returns "Artifact not found"
+
+    val artifact = mockk<AgpArtifactDependencies>()
+    every { artifact.compileDependencies } returns listOf(graphItem)
+    every { artifact.unresolvedDependencies } returns listOf(unresolved)
+
+    val mapped = artifact.asProtoModel()
+
+    assertThat(mapped.compileDependencyList).hasSize(1)
+    assertThat(mapped.compileDependencyList.single().key).isEqualTo("external-lib")
+    assertThat(mapped.compileDependencyList.single().requestedCoordinates)
+      .isEqualTo("org.example:library:1.2.3")
+    assertThat(mapped.unresolvedDependencyList).hasSize(1)
+    assertThat(mapped.unresolvedDependencyList.single().name).isEqualTo("org.example:missing:1.0")
+    assertThat(mapped.unresolvedDependencyList.single().cause).isEqualTo("Artifact not found")
   }
 
 }
