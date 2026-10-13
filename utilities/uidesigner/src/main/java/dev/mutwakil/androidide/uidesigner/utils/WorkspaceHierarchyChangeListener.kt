@@ -28,4 +28,39 @@ import dev.mutwakil.androidide.uidesigner.viewmodel.WorkspaceViewModel
 internal class WorkspaceHierarchyChangeListener(
     private val viewModel: WorkspaceViewModel,
     private val workspaceView: UiViewGroup,
-) : dev.mutwakil.androidide.inflater.IViewGroup.SingleOnHierarchyChangeListener() {}
+) : dev.mutwakil.androidide.inflater.IViewGroup.SingleOnHierarchyChangeListener() {
+
+  /**
+   * Inflation builds the model tree programmatically; those additions are not user edits.
+   * Suppress hierarchy dirty-state notifications only during that initial parse.
+   */
+  private var loadingSource = false
+
+  fun beginSourceLoad() {
+    loadingSource = true
+  }
+
+  fun endSourceLoad() {
+    loadingSource = false
+  }
+
+  override fun onViewAdded(
+      group: dev.mutwakil.androidide.inflater.IViewGroup,
+      view: dev.mutwakil.androidide.inflater.IView,
+      index: Int,
+  ) {
+    if (!loadingSource && view !== workspaceView) {
+      viewModel.markWorkspaceChanged()
+    }
+  }
+
+  override fun onViewRemoved(
+      group: dev.mutwakil.androidide.inflater.IViewGroup,
+      view: dev.mutwakil.androidide.inflater.IView,
+      index: Int,
+  ) {
+    if (!loadingSource && view !== workspaceView) {
+      viewModel.markWorkspaceChanged()
+    }
+  }
+}
