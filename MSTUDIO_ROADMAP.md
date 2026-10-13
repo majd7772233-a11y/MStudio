@@ -1087,3 +1087,23 @@ The live `TemplateProviderImpl` registers eight project templates: No Activity, 
 ### Phase 9 current disposition
 
 The NIDE audit remains investigative. No code has been imported. The formatter is already implemented through Google Java Format with AOSP/Google styles; Fernflower decompilation remains blocked until its Apache 2.0 license provenance is verified independently of the NIDE root GPL-3.0 license. See the live candidate table appended to `NIDE_FEATURE_MATRIX.md`.
+
+
+## Phase 9 source implementation closeout — 2026-10-13
+
+### Implemented: offline JVM class/JAR decompilation
+
+- Added the Java Decompiler action to the main screen and registered a non-exported activity.
+- Integrated maintained Vineflower 1.12.0, a modern Fernflower fork, through the version catalog instead of copying NIDE's old Java-7-era source tree wholesale.
+- Added document-picker input for .class/.jar/.zip; input is copied into cache with a 128 MiB cap, passed to the decompiler as data (never executed), and deleted afterward.
+- Generated sources stay in MStudio's private files directory. The UI lists files, opens source text in a selectable dialog, and supports SAF export.
+- APK/DEX is explicitly rejected because Vineflower decompiles JVM bytecode, not Android DEX.
+- Added English/Arabic strings, third-party notice, policy tests, and a JVM integration test that compiles a fixture class and checks decompiled Java output.
+- Candidate audit is synchronized in NIDE_FEATURE_MATRIX.md: formatter duplicate rejected; Java LSP/type resolver reference-only; legacy builder/dx/FastGradleParser/manual AAR resolver rejected for core builds; no Logcat port absent a proven gap; samples and standalone Java/JAR execution deferred.
+
+### Phase 9 status
+
+- **Source implementation: complete for the selected safe port and candidate disposition audit.**
+- **Runtime acceptance: pending final verification.** No Gradle build, unit test, Actions run, APK install or device check has been executed. The authored integration test is not claimed as passed.
+- Final verification must confirm dependency resolution and D8 conversion, runtime compatibility on the managed supported Android runtime, representative class/JAR output, and safe failure for malformed/large archives. The 128 MiB cap is preliminary, not a measured memory guarantee.
+- This is not APK/DEX reverse engineering; do not advertise that feature.
