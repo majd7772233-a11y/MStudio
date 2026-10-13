@@ -141,7 +141,7 @@
   <string name="idepref_build_clearCache_title">مسح جميع ذاكرة التخزين المؤقت</string>
   <string name="idepref_build_clearCache_summary">مسح دليل ذاكرة التخزين المؤقت. سيؤدي هذا إلى حذف جميع التبعيات التي تم تحميلها بواسطة Gradle. سيتم تحميل الملفات المطلوبة مرة أخرى في النسخة التالية.</string>
   <string name="idepref_build_customgradlecommands_title">أوامر Gradle الإضافية</string>
-  <string name="idepref_build_customgradlecommands_summary">اختر أوامر إضافية سيتم إضافتها أثناء تنفيذ كل مهمة</string>
+  <string name="idepref_build_customgradlecommands_summary">اختر أوامر إضافية لكل مهمة. قد يرفع Gradle Build Scan (--scan) بيانات البناء إلى خدمة خارجية؛ فعّله فقط إذا وافقت صراحةً على رفع تلك البيانات.</string>
   <string name="idepref_editor_fontsize_title">حجم الخط</string>
   <string name="idepref_editor_fontsize_summary">حجم خط المحرر</string>
   <string name="idepref_editor_paintingflags_title">أعلام الرسوم غير المطبوعة</string>
