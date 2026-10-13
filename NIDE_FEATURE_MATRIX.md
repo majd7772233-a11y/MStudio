@@ -103,3 +103,20 @@ No Phase 9 code has been imported. This audit is not a completed Phase 9; an app
 | Migration helpers | **Reference-only.** | Existing project import/sync remains authoritative; no destructive NIDE file-moving code was imported. |
 
 **Phase 9 source boundary:** unique decompiler source integration is implemented, but runtime/build/device acceptance remains pending the final verification stage. Vineflower is a maintained Fernflower fork (Apache 2.0); MStudio does not copy NIDE's older module wholesale. The current UI handles JVM class/JAR/ZIP only, not APK/DEX. Do not mark runtime verified until the integration test, APK build, and device smoke test run successfully.
+
+
+## Phase 9 implementation update — 2026-10-13
+
+| Candidate | Final disposition for this phase | Implementation/evidence |
+|---|---|---|
+| Fernflower / Java decompiler | **Ported at source level using maintained Vineflower fork.** | Added offline Java class/JAR/ZIP decompiler entry, source preview, SAF export, bounded input copy (128 MiB), private output directory, and explicit APK/DEX rejection. Dependency is centralized as org.vineflower:vineflower:1.12.0. See THIRD_PARTY_NOTICES.md. |
+| Decompiler tests | **Authored; not executed.** | Added policy tests for extension/size validation and a JVM integration test compiling a class and checking decompiled output. |
+| Java formatter styles | **Rejected as duplicate.** | Existing Google Java Format supports AOSP and Google styles. |
+| Java autocomplete/type resolution | **Reference-only.** | Existing Java LSP, javac services, classpath and indexing remain authoritative. |
+| Legacy Android builder, dx, FastGradleParser, manual AAR resolver | **Rejected for core build.** | Gradle/AGP Tooling API remains the sole Android build path. |
+| Logcat | **No new port.** | Existing logging surfaces exist; no unique gap was established. |
+| Educational samples | **Deferred.** | Curate only after inventorying existing template/sample coverage. |
+| Standalone Java/JAR execution | **Deferred.** | Requires separate runtime/process and sandbox scope; not folded into Android builds. |
+| Migration helpers | **Reference-only.** | No destructive NIDE project-moving code imported. |
+
+**Phase 9 source boundary:** source implementation is complete for the selected port and candidate disposition audit; runtime/build/device acceptance remains pending final verification. Vineflower is a maintained Fernflower fork (Apache 2.0); NIDE's older module was not copied wholesale. Current UI supports JVM class/JAR/ZIP only, not APK/DEX.
