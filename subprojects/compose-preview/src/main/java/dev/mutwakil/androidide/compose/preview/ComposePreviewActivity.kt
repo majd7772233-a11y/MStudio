@@ -270,6 +270,7 @@ class ComposePreviewActivity : AppCompatActivity() {
                 LOG.debug("No preview composables found")
             }
             is PreviewState.Ready -> {
+                ensurePreviewResources()
                 LOG.info(
                     "Runtime DEX files from state: {}, project DEX files: {}",
                     state.runtimeDex.size,
@@ -444,20 +445,34 @@ class ComposePreviewActivity : AppCompatActivity() {
         return item
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    private fun ensurePreviewResources() {
+        if (classLoader == null) {
+            setupClassLoader()
+        }
+        if (singleRenderer == null) {
+            setupSinglePreview()
+        }
+    }
+
+    private fun releasePreviewResources() {
         multiRenderers.clear()
+        binding.previewListContainer.removeAllViews()
         singleRenderer = null
         classLoader?.release()
         classLoader = null
+    }
+
+    override fun onDestroy() {
+        releasePreviewResources()
+        super.onDestroy()
         selectorAdapter = null
         toggleMenuItem = null
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        classLoader?.release()
-        LOG.warn("Low memory - released preview resources")
+        releasePreviewResources()
+        LOG.warn("Low memory - released preview resources; they will be recreated when preview resumes")
     }
 
     companion object {
