@@ -78,6 +78,7 @@ import org.greenrobot.eventbus.ThreadMode
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.concurrent.atomic.AtomicLong
 import java.util.Objects
 
 class JavaLanguageServer : ILanguageServer {
@@ -89,6 +90,7 @@ class JavaLanguageServer : ILanguageServer {
 
     private var _settings: IServerSettings? = null
     private var selectedFile: Path? = null
+    private val workspaceGeneration = AtomicLong(0)
     private val timer = AnalyzeTimer { analyzeSelected() }
     private var cachedCompletion: CachedCompletion
 
@@ -145,8 +147,10 @@ class JavaLanguageServer : ILanguageServer {
     }
 
     override fun setupWithProject(workspace: Workspace) {
-        // A successful sync may replace module/classpath information without changing source files.
-        // Discard diagnostics cached against the previous workspace before analyzing again.
+        // Invalidate in-flight results as well as caches: a compile started against the previous
+        // workspace/classpath must not publish diagnostics after this workspace has been installed.
+        workspaceGeneration.incrementAndGet()
+        diagnosticProvider?.cancel()
         diagnosticProvider?.clearAllDiagnostics()
         // Completion results can contain symbols from the previous project's classpath.
         cachedCompletion = CachedCompletion.EMPTY
@@ -336,10 +340,15 @@ class JavaLanguageServer : ILanguageServer {
         if (client == null) return
         if (!Files.exists(file)) return
 
+        val generation = workspaceGeneration.get()
         CoroutineScope(Dispatchers.Default).launch {
             val result = analyze(file)
             withContext(Dispatchers.Main) {
-                client?.publishDiagnostics(result)
+                // Sync can finish while analysis is running. Drop results from the old workspace
+                // instead of repainting the editor with diagnostics based on a stale classpath.
+                if (generation == workspaceGeneration.get()) {
+                    client?.publishDiagnostics(result)
+                }
             }
         }
     }
