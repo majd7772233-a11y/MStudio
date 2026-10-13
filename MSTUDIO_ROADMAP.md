@@ -738,3 +738,10 @@ No build, tests, workflow dispatch, Actions run or device validation is authoriz
 - Source correction committed as `62b333c644694d033f750a70d0d41e753d9c7aee` in `core/app/src/main/java/dev/mutwakil/androidide/services/builder/GradleBuildService.kt`.
 - Wrapper preflight now rejects missing/non-regular/empty `gradlew`, wrapper JAR and properties; unreadable/empty properties; a missing or empty `distributionUrl`; and a wrapper JAR that cannot be opened as a non-empty ZIP archive. Rejected wrapper state now enters the existing repair path rather than being treated as available merely because paths exist.
 - The asset extraction/repair path still needs runtime validation for read-only projects, partial extraction, and preservation of user wrapper files. No build, tests, Actions or device validation was performed.
+
+
+### Phase 4 source-audit finding — dead Tooling process leaves stale started state (2026-10-13)
+
+- Follow-up review after connecting `onServerExited` found `ToolingServerRunner.isStarted` is set to true after the RPC listener starts but was never reset when the child JVM exits; the PID also remains stale. `GradleBuildService` likewise retains the old server reference and started flag. A subsequent build request can therefore treat a dead process as running and route calls to a dead proxy.
+- Reset the runner's started/PID state when its child process exits, and clear the service's server/started state in the existing exit callback. This makes a later start eligible to create a fresh runner and avoids stale server references.
+- Source correction only; no build, tests, Actions or device validation.
