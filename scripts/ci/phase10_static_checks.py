@@ -81,10 +81,10 @@ def main() -> None:
     ):
         require(invariant in policy, f"decompiler safety invariant exists: {invariant}")
 
-    print("\\nExported Android components requiring human review:")
+    print("\nExported Android components requiring human review:")
     for kind, name, permission in exported:
         print(f"  {kind}: {name} (permission={permission or 'none'})")
-    print("\\nStatic checks passed. This is not a substitute for merged-manifest, runtime, or device testing.")
+    print("\nStatic checks passed. This is not a substitute for merged-manifest, runtime, or device testing.")
 
 
 if __name__ == "__main__":
