@@ -280,6 +280,8 @@ class GradleBuildService : Service(), BuildService, IToolingApiClient,
       request.completeExceptionally(cause)
     }
     pendingServerRequests.clear()
+    outputReaderJob?.cancel()
+    outputReaderJob = null
     stopForeground(STOP_FOREGROUND_REMOVE)
   }
 
