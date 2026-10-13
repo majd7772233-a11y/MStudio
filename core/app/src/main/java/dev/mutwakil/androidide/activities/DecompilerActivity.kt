@@ -18,6 +18,7 @@ import kotlinx.coroutines.withContext
 import dev.mutwakil.androidide.utils.Environment
 import java.io.File
 import java.io.IOException
+import java.util.zip.ZipFile
 import java.util.concurrent.TimeUnit
 
 /** Offline JVM bytecode inspection. Input is parsed as data and is never executed. */
@@ -79,6 +80,7 @@ class DecompilerActivity : AppCompatActivity() {
                     }
                     val input = File(cacheDir, "decompiler-" + System.nanoTime() + "-" + safeName(name))
                     copyBounded(uri, input)
+                    validateArchive(input)
                     val output = File(filesDir, "decompiled/" + System.currentTimeMillis()).apply {
                         if (!mkdirs() && !isDirectory) throw IOException("Cannot create output directory")
                     }
@@ -111,6 +113,24 @@ class DecompilerActivity : AppCompatActivity() {
                 status.text = getString(ResourcesR.string.decompiler_failed, error.message ?: error.javaClass.simpleName)
             } finally {
                 running = false
+            }
+        }
+    }
+
+    private fun validateArchive(input: File) {
+        if (input.extension.lowercase() !in setOf("jar", "zip")) return
+        ZipFile(input).use { archive ->
+            val entries = archive.entries()
+            var count = 0
+            var expandedBytes = 0L
+            while (entries.hasMoreElements()) {
+                val entry = entries.nextElement()
+                count++
+                val size = entry.size
+                if (size > 0) expandedBytes += size
+                if (!DecompilerInputPolicy.isArchiveWithinLimits(count, expandedBytes)) {
+                    throw IOException(getString(ResourcesR.string.decompiler_archive_too_large))
+                }
             }
         }
     }
