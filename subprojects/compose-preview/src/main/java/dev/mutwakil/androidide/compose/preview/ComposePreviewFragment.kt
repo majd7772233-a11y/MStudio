@@ -110,6 +110,9 @@ class ComposePreviewFragment : Fragment() {
                 binding.initializingText.setText(ResourcesR.string.preview_build_required_title)
             }
             is PreviewState.Ready -> {
+                if (classLoader == null || renderer == null) {
+                    setupPreview()
+                }
                 val loader = classLoader ?: return
                 val render = renderer ?: return
 
