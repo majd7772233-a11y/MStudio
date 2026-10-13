@@ -34,6 +34,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicInteger
@@ -123,8 +124,8 @@ class MainViewModel(
 		}
 	}
 
-	fun saveProjectToRecents(project: RecentProject) {
-		viewModelScope.launch(Dispatchers.IO) {
+	suspend fun saveProjectToRecents(project: RecentProject) {
+		withContext(Dispatchers.IO) {
 			try {
 				// Insert is IGNOREd for projects already in recents, so refresh the
 				// detected language separately - but never clobber a stored value
