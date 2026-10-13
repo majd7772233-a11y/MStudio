@@ -813,6 +813,7 @@
     <string name="decompiler_failed">Decompilation failed: %1$s</string>
     <string name="decompiler_unsupported_type">Choose a .class, .jar, or .zip file. APK and DEX are not supported.</string>
     <string name="decompiler_input_too_large">Input exceeds the 128 MiB safety limit.</string>
+    <string name="decompiler_archive_too_large">Archive exceeds the safety limits (5,000 entries or 256 MiB expanded data).</string>
     <string name="decompiler_no_sources">No Java source files were produced. The file may be invalid or unsupported.</string>
     <string name="decompiler_sources">Generated Java sources</string>
     <string name="decompiler_read_failed">Unable to read source: %1$s</string>
