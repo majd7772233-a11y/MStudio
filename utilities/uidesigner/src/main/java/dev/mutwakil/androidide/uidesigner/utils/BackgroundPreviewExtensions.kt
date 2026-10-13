@@ -171,6 +171,7 @@ fun ViewImpl.applyPreview(context: Context, workspace: Workspace?, layoutFile: F
 
         val applied =
             ProjectTextResourcePreview.apply(this.view, attr.name, attr.value, context, fileToUse) ||
+                ProjectDimensionPreview.apply(this.view, attr.name, attr.value, context, fileToUse) ||
                 m3Renderer.applyM3Preview(this.view, attr.name, attr.value, context, fileToUse)
 
         // If M3 preview failed, fall back to normal attribute application
@@ -194,7 +195,8 @@ fun ViewImpl.applyPreview(context: Context, workspace: Workspace?, layoutFile: F
   this.attributes.forEach { attr ->
     if (attr.name !in handledAttributes) {
       try {
-        if (ProjectTextResourcePreview.apply(this.view, attr.name, attr.value, context, fileToUse)) {
+        if (ProjectTextResourcePreview.apply(this.view, attr.name, attr.value, context, fileToUse) ||
+            ProjectDimensionPreview.apply(this.view, attr.name, attr.value, context, fileToUse)) {
           handledAttributes.add(attr.name)
         } else {
           this.applyAttribute(attr)
@@ -310,6 +312,12 @@ fun ViewImpl.applyAttributePreview(
               attributeValue,
               context,
               fileToUse,
+          ) || ProjectDimensionPreview.apply(
+              this.view,
+              attributeName,
+              attributeValue,
+              context,
+              fileToUse,
           ) || m3Renderer.applyM3Preview(this.view, attributeName, attributeValue, context, fileToUse)
 
       // If M3 preview failed, try normal attribute application
@@ -335,7 +343,8 @@ fun ViewImpl.applyAttributePreview(
     }
     else -> {
       // Resolve project string resources before the generic inflater consults IDE resources.
-      if (ProjectTextResourcePreview.apply(this.view, attributeName, attributeValue, context, fileToUse)) {
+      if (ProjectTextResourcePreview.apply(this.view, attributeName, attributeValue, context, fileToUse) ||
+          ProjectDimensionPreview.apply(this.view, attributeName, attributeValue, context, fileToUse)) {
         return true
       }
       // For other attributes, apply them normally
