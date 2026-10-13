@@ -182,6 +182,30 @@ object RootModelBuilder :
         // build as a separately namespaced set of IDE modules.
         val toolingBuild = controller.getModel(ToolingGradleBuild::class.java)
         val includedBuilds = collectIncludedBuilds(toolingBuild)
+        val includedBuildNamesById =
+          includedBuilds.flatMap { includedBuild ->
+            val directory = includedBuild.rootProject.projectDirectory
+            val name = directory.name
+            listOf(
+              ":$name" to name,
+              name to name,
+              (runCatching { directory.canonicalPath }.getOrNull() ?: directory.absolutePath) to name,
+            )
+          }.toMap()
+
+        if (rootGradleProject.build().hasAndroidProject()) {
+          rootGradleProject.setAndroidProject(
+            namespaceRootBuildProjectDependencies(
+              rootGradleProject.build(),
+              includedBuildNamesById,
+            ).androidProject,
+          )
+        }
+        projects.indices.forEach { index ->
+          projects[index] =
+            namespaceRootBuildProjectDependencies(projects[index], includedBuildNamesById)
+        }
+
         includedBuilds.forEach { includedBuild ->
           val includedIdeaProject =
             controller.getModel(includedBuild.rootProject, IdeaProject::class.java)
