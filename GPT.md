@@ -616,3 +616,19 @@ The user's latest instruction was to finish the two remaining Phase 5 gaps, then
 - Added a source test that verifies clearing all cached diagnostic results.
 - Source commits: a4968892db009ff0685b9ab1c1d8e66006372f43 and 68d22c9bc0dcb1b77bb0d8097e367fd3fc3f50fd; test: 23c2a3c788f4a6aa8e060b2204540367856e9a75. Roadmap record: a277ba6e82cfebc0108b3b046979dc092bcdab72.
 - No tests/builds/Actions/device checks were run.
+
+
+
+## Phase 6 source closure and Phase 7 kickoff — 2026-10-13
+
+- Java diagnostics are explicitly invalidated on document edits so unsaved-buffer changes cannot reuse results merely because disk mtime is unchanged.
+- Java completion cache resets on workspace/classpath replacement.
+- JavaLanguageServer now cancels current diagnostic work and increments a workspace generation during setup; an asynchronous result from an older workspace is discarded before it reaches the editor.
+- Source commits: `8fc635b04cf00ee989c3bed7eaa410c90d93ffba`, `4395a17eec50dd9475de304964a080339c2f619b`.
+- Phase 6 cache/context fixes are source-implemented, but the entire acceptance matrix (Kotlin/XML, code actions, indexing responsiveness and runtime behavior) is not verified. Do not run tests/builds/Actions/device checks until the user authorizes them.
+
+### Phase 7 started: XML designer input and preview safety
+- `UIDesignerActivity` now handles absent or invalid/unreadable layout-file paths by returning `RESULT_CANCELED` through its existing error path rather than leaving a half-initialized activity or crashing.
+- Existing inflation-error handling continues to refuse generated XML when the preview is invalid.
+- Source commit: `f852a40bf4df457b82529e1dc6180fda22135385`.
+- This begins Phase 7; it does not establish that XML designer round-tripping, resource resolution, drag/drop constraints, custom views/includes or Compose preview are complete. No executable verification was run.
