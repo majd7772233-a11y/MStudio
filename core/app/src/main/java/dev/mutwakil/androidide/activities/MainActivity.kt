@@ -286,8 +286,8 @@ class MainActivity : EdgeToEdgeIDEActivity() {
         project: RecentProject? = null,
         hasTemplateIssues: Boolean = false,
     ) {
-        ProjectManagerImpl.getInstance().projectPath = root.absolutePath
-        GeneralPreferences.lastOpenedProject = root.absolutePath
+        ProjectManagerImpl.getInstance().prepareForProject(root)
+        GeneralPreferences.lastOpenedProject = root.canonicalPath
 
         lifecycleScope.launch(Dispatchers.IO) {
             val location = root.absolutePath
@@ -308,7 +308,7 @@ class MainActivity : EdgeToEdgeIDEActivity() {
 
         val intent =
             Intent(this, EditorActivityKt::class.java).apply {
-                putExtra("PROJECT_PATH", root.absolutePath)
+                putExtra("PROJECT_PATH", root.canonicalPath)
                 if (hasTemplateIssues) {
                     putExtra("HAS_TEMPLATE_ISSUES", true)
                 }
