@@ -764,3 +764,6 @@ The user's latest instruction to finish Phase 8 fully supersedes the earlier sou
 - During verification, review merged-manifest exposure for exported crash handler, launcher, DocumentsProvider and permission-protected log service; verify the explicit PackageInstaller PendingIntent still reaches the now-private receiver.
 - Profile real device memory and low-storage behavior. Root source-build settings still request a 5096 MiB Gradle heap and 4096 MiB Kotlin daemon heap; do not call these measured IDE runtime requirements or change them without evidence.
 - Roadmap and NIDE feature matrix must remain synchronized with this status. Do not dispatch workflows until the user confirms source work is complete.
+
+
+Phase 10 runbook: see PHASE10_VERIFICATION.md for manual workflow order, device matrix, evidence requirements, and the current unverified status.
