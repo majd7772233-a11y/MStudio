@@ -40,7 +40,13 @@ internal class XmlResourceReferenceDiagnosticProvider {
 
   fun invalidate(file: Path, workspace: Workspace?) {
     val module = workspace?.findModuleForFile(file)?.let { it as? AndroidModule } ?: return
-    sourceResourceCache.remove(module.delegate.projectDir.absolutePath)
+    val moduleRoot = module.delegate.projectDir
+    // Editing a layout does not change the module's resource-name index. Only edits beneath an
+    // Android source-set res directory invalidate it; this avoids a full module tree walk on each
+    // keystroke while still refreshing diagnostics after resources are added, renamed or removed.
+    if (isSourceResourcePath(file, moduleRoot)) {
+      sourceResourceCache.remove(moduleRoot.absolutePath)
+    }
   }
 
   fun analyze(file: Path, workspace: Workspace?): DiagnosticResult {
@@ -207,6 +213,17 @@ internal class XmlResourceReferenceDiagnosticProvider {
   }
 
   companion object {
+    internal fun isSourceResourcePath(file: Path, moduleRoot: File): Boolean {
+      val root = moduleRoot.toPath().toAbsolutePath().normalize()
+      val candidate = file.toAbsolutePath().normalize()
+      if (!candidate.startsWith(root)) return false
+      val relative = root.relativize(candidate)
+      val segments = (0 until relative.nameCount).map { relative.getName(it).toString() }
+      return segments.indices.any { index ->
+        segments[index] == "res" && index >= 2 && segments[index - 2] == "src"
+      }
+    }
+
     private val LOG = LoggerFactory.getLogger(XmlResourceReferenceDiagnosticProvider::class.java)
     private val RESOURCE_REFERENCE =
         Regex("@(?:(?<package>[A-Za-z0-9_.]+):)?(?<type>[A-Za-z][A-Za-z0-9_]*)/(?<name>[A-Za-z0-9_.]+)")
