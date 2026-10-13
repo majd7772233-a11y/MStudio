@@ -114,8 +114,7 @@ object ViewToXml {
         if (event == XmlPullParser.START_TAG) {
           val tag = parser.name
           val unsupported =
-              tag.equals("include", ignoreCase = true) ||
-                  tag.equals("merge", ignoreCase = true) ||
+              tag.equals("merge", ignoreCase = true) ||
                   tag.equals("requestFocus", ignoreCase = true) ||
                   tag.equals("tag", ignoreCase = true) ||
                   tag.equals("fragment", ignoreCase = true) ||
