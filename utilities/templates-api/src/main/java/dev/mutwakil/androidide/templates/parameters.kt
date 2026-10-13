@@ -56,6 +56,11 @@ enum class ParameterConstraint {
   MODULE_NAME,
 
   /**
+   * Value must be safe as a single project directory name.
+   */
+  PROJECT_NAME,
+
+  /**
    * Value must not be empty or blank.
    */
   NONEMPTY,
@@ -367,7 +372,7 @@ inline fun projectNameParameter(crossinline configure: StringParameterBuilder.()
     name = string.project_app_name
     default = "My Application"
     startIcon = { R.drawable.ic_android }
-    constraints = listOf(NONEMPTY)
+    constraints = listOf(NONEMPTY, PROJECT_NAME)
 
     configure()
   }
