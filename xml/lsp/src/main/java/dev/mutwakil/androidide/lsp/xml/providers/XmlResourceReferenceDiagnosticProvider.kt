@@ -21,6 +21,8 @@ import dev.mutwakil.androidide.xml.res.IResourceTable
 import java.io.File
 import java.nio.file.Path
 import org.slf4j.LoggerFactory
+import org.xmlpull.v1.XmlPullParser
+import org.xmlpull.v1.XmlPullParserFactory
 
 /**
  * Finds references absent from the opened module's source sets and loaded compile-scope tables.
@@ -50,6 +52,7 @@ internal class XmlResourceReferenceDiagnosticProvider {
         }
     val diagnostics = mutableListOf<DiagnosticItem>()
     val comments = xmlCommentRanges(source)
+    val sourceResources = collectSourceResources(module.delegate.projectDir)
 
     for (match in RESOURCE_REFERENCE.findAll(source)) {
       if (comments.any { match.range.first >= it.first && match.range.first <= it.last }) continue
@@ -59,7 +62,7 @@ internal class XmlResourceReferenceDiagnosticProvider {
       if (packageName == "android" || typeName == "id" || typeName == "attr") continue
       val type = runCatching { AaptResourceType.valueOf(typeName.uppercase()) }.getOrNull() ?: continue
 
-      if (hasSourceResource(module.delegate.projectDir, typeName, resourceName) ||
+      if ("$typeName/$resourceName" in sourceResources ||
           existsInTables(tables, type, resourceName, packageName)
       ) {
         continue
@@ -98,51 +101,62 @@ internal class XmlResourceReferenceDiagnosticProvider {
         }
       }
 
-  private fun hasSourceResource(
-      moduleRoot: File,
-      resourceType: String,
-      resourceName: String,
-  ): Boolean {
-    if (!moduleRoot.isDirectory) return false
+  /** Scans the module's source resources once per XML analysis, avoiding a tree walk per ref. */
+  private fun collectSourceResources(moduleRoot: File): Set<String> {
+    if (!moduleRoot.isDirectory) return emptySet()
+    val resources = mutableSetOf<String>()
     val resourceDirectories =
         moduleRoot
             .walkTopDown()
             .maxDepth(MAX_SCAN_DEPTH)
             .onEnter { it == moduleRoot || it.name !in IGNORED_DIRS }
-            .filter {
-              it.isDirectory &&
-                  it.parentFile?.name == "res" &&
-                  (it.name == resourceType || it.name.startsWith("$resourceType-"))
+            .filter { directory ->
+              directory.isDirectory &&
+                  directory.parentFile?.name == "res" &&
+                  (directory.name == "values" || directory.name.startsWith("values-") ||
+                      directory.name.matches(Regex("[A-Za-z][A-Za-z0-9_]*(?:-[A-Za-z0-9_+.-]+)?")))
             }
-    val extensions = listOf("xml", "png", "webp", "jpg", "jpeg", "gif", "9.png")
-    if (resourceDirectories.any { directory ->
-      extensions.any { extension -> File(directory, "$resourceName.$extension").isFile }
-    }) {
-      return true
-    }
+    val parserFactory = runCatching { XmlPullParserFactory.newInstance() }.getOrNull()
 
-    if (resourceType !in VALUE_RESOURCE_TYPES) return false
-    val valuesDirectories =
-        moduleRoot
-            .walkTopDown()
-            .maxDepth(MAX_SCAN_DEPTH)
-            .onEnter { it == moduleRoot || it.name !in IGNORED_DIRS }
-            .filter {
-              it.isDirectory &&
-                  it.parentFile?.name == "res" &&
-                  (it.name == "values" || it.name.startsWith("values-"))
+    for (directory in resourceDirectories) {
+      val directoryType = directory.name.substringBefore('-')
+      val files = directory.listFiles()?.filter { it.isFile } ?: continue
+      if (directoryType == "values") {
+        if (parserFactory == null) continue
+        for (file in files.filter { it.extension == "xml" }) {
+          runCatching {
+            file.inputStream().buffered().use { input ->
+              val parser = parserFactory.newPullParser()
+              parser.setInput(input, "UTF-8")
+              var event = parser.eventType
+              while (event != XmlPullParser.END_DOCUMENT) {
+                if (event == XmlPullParser.START_TAG) {
+                  val type =
+                      if (parser.name == "item") parser.getAttributeValue(null, "type")
+                      else parser.name
+                  val name = parser.getAttributeValue(null, "name")
+                  if (!type.isNullOrBlank() && !name.isNullOrBlank()) {
+                    resources.add("$type/$name")
+                  }
+                }
+                event = parser.next()
+              }
             }
-    val pattern =
-        Regex(
-            """<(?:$resourceType|item\b[^>]*\btype\s*=\s*["']$resourceType["'])\b[^>]*\bname\s*=\s*["']$resourceName["']""",
-            RegexOption.IGNORE_CASE,
-        )
-    return valuesDirectories.any { directory ->
-      directory.listFiles()?.any { candidate ->
-        candidate.isFile && candidate.extension == "xml" &&
-            runCatching { pattern.containsMatchIn(candidate.readText()) }.getOrDefault(false)
-      } == true
+          }
+        }
+      } else {
+        for (file in files) {
+          val filename = when {
+            file.name.endsWith(".9.png") -> file.name.removeSuffix(".9.png")
+            else -> file.nameWithoutExtension
+          }
+          if (file.extension in RESOURCE_FILE_EXTENSIONS) {
+            resources.add("$directoryType/$filename")
+          }
+        }
+      }
     }
+    return resources
   }
 
   private fun positionAt(source: String, offset: Int): Position {
@@ -181,8 +195,8 @@ internal class XmlResourceReferenceDiagnosticProvider {
         Regex("@(?:(?<package>[A-Za-z0-9_.]+):)?(?<type>[A-Za-z][A-Za-z0-9_]*)/(?<name>[A-Za-z0-9_.]+)")
     private val IGNORED_DIRS =
         setOf(".git", ".gradle", ".idea", ".kotlin", "build", "node_modules", ".cxx", "out", "target")
-    private val VALUE_RESOURCE_TYPES =
-        setOf("string", "color", "dimen", "style", "integer", "bool", "fraction", "array", "plurals")
+    private val RESOURCE_FILE_EXTENSIONS =
+        setOf("xml", "png", "webp", "jpg", "jpeg", "gif", "bmp", "avif")
     private const val MAX_SCAN_DEPTH = 8
   }
 }
