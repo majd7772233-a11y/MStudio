@@ -64,17 +64,21 @@ internal object ProjectResourceLocator {
 
   fun findProjectRoot(layoutFile: File?): File? {
     var current = layoutFile?.absoluteFile?.parentFile ?: return null
+    var outermostGradleRoot: File? = null
+
     repeat(MAX_PROJECT_ROOT_DEPTH) {
-      if (File(current, "build.gradle").isFile ||
-          File(current, "build.gradle.kts").isFile ||
-          File(current, "settings.gradle").isFile ||
-          File(current, "settings.gradle.kts").isFile
-      ) {
-        return current
-      }
-      current = current.parentFile ?: return null
+      val hasSettings =
+          File(current, "settings.gradle").isFile || File(current, "settings.gradle.kts").isFile
+      val hasBuild =
+          File(current, "build.gradle").isFile || File(current, "build.gradle.kts").isFile
+
+      // A settings file defines the build boundary and takes precedence over a module build file.
+      if (hasSettings) return current
+      if (hasBuild) outermostGradleRoot = current
+
+      current = current.parentFile ?: return outermostGradleRoot
     }
-    return null
+    return outermostGradleRoot
   }
 
   /** Resolves simple project value resources and aliases without pretending to be AAPT. */
