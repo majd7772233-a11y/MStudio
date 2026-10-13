@@ -724,3 +724,10 @@ No build, tests, workflow dispatch, Actions run or device validation is authoriz
 - The process-wait coroutine now captures the actual `Process.waitFor()` exit code and calls `Observer.onServerExited(exitCode)` before releasing its process reference. This connects the existing observer callback to normal process termination and lets `GradleBuildService` clear foreground-service state when the managed Tooling API process exits.
 - This callback reports only process termination; it does not imply a Gradle task succeeded. Startup failures before the process-wait coroutine is established, full cancellation behavior, concurrent build lifecycle and actual Android runtime behavior remain unverified.
 - No build, tests, workflow dispatch, GitHub Actions run or device validation was performed, per user instruction. Phase 1.4/1.5 evidence gate remains pending.
+
+
+### Phase 4 source-audit finding — wrapper presence is mistaken for wrapper validity (2026-10-13)
+
+- `GradleBuildService.isGradleWrapperAvailable` currently treats the wrapper as usable when three paths merely `exists()`. Empty files, directories at those paths, a corrupt wrapper JAR, or properties without a usable `distributionUrl` therefore bypass the repair path and fail later during build startup.
+- Strengthen the preflight to require regular, non-empty wrapper files, a readable properties file with a non-empty `distributionUrl`, and a wrapper JAR that can be opened as a ZIP. Keep this a focused local wrapper check; do not replace the real Gradle wrapper or Tooling API.
+- Source correction only; no builds, tests, Actions or device validation.
