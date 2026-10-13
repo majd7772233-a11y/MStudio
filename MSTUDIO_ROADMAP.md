@@ -764,3 +764,13 @@ Source review at branch `dev` HEAD `c994bcc567f63b16b5456bc240de75e9675bc31c` fo
 
 Implementation order: fix process/RPC terminal-state propagation and retryable runner state; make wrapper repair verify the resulting wrapper and avoid clobbering valid user files; inspect the Build Scan preference/UI and require an explicit consent state; then record precise source completion. Phase 4 runtime acceptance remains deferred per user instruction: do not run tests, builds, Actions or device checks in this pass. Never mark runtime acceptance complete without evidence.
 
+### Phase 4 source implementation — 2026-10-13
+
+Implemented on `dev` after the lifecycle-gap record above:
+- `ToolingServerRunner` now resets started/PID state on startup exceptions, destroys a process that was spawned before startup completed, reports startup failure through `Observer.onServerStartFailed`, and interrupts the blocking RPC listener after the child process exits.
+- `GradleBuildService` now handles both process exit and startup failure through a common unavailable-state path. It clears the server/build state, fails registered metadata/sync/task/cancellation RPC futures instead of leaving callers blocked, stops the stderr reader and removes the foreground notification.
+- Gradle wrapper repair now re-runs the strict wrapper preflight after extraction and reports failure when the extracted result is still incomplete or unreadable.
+- The Build Scan preference summary now explicitly warns in English and Arabic that `--scan` may upload build data to a remote service and should only be enabled with explicit agreement.
+
+Source-level boundary: this closes the identified implementation gaps in process/RPC termination, startup failure propagation, wrapper post-repair validation and visible Build Scan disclosure. It does **not** prove runtime acceptance. Per the current instruction, no tests, Gradle builds, GitHub Actions, or device checks were run. Phase 4 acceptance items that require executable/device evidence remain unchecked until the planned verification batch; do not describe Phase 4 as runtime-verified.
+
