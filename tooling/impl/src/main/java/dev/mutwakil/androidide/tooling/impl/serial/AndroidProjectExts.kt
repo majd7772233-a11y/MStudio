@@ -171,10 +171,10 @@ fun AgpViewBindingOptions.asProtoModel() =
     )
 
 fun AgpVariant.asProtoModel(
-    basicAndroidProject: BasicAndroidProject,
-    androidProject: AndroidProject,
-    androidDsl: AndroidDsl,
-    versions: Versions,
+    basicAndroidProject: AgpBasicAndroidProject,
+    androidProject: AgpAndroidProject,
+    androidDsl: AgpAndroidDsl,
+    versions: AgpVersions,
 ) = AndroidVariant(
     name = this.name,
     mainArtifact =
@@ -191,10 +191,10 @@ fun AgpVariant.asProtoModel(
 fun AgpAndroidArtifact.asProtoModel(
     artifactName: String,
     variantName: String,
-    basicAndroidProject: BasicAndroidProject,
-    androidProject: AndroidProject,
-    androidDsl: AndroidDsl,
-    versions: Versions,
+    basicAndroidProject: AgpBasicAndroidProject,
+    androidProject: AgpAndroidProject,
+    androidDsl: AgpAndroidDsl,
+    versions: AgpVersions,
 ) = AndroidArtifact(
     name = artifactName,
     applicationId =
@@ -227,10 +227,10 @@ fun AgpAndroidArtifact.asProtoModel(
 
 private fun AgpAndroidArtifact.computeApplicationId(
     variantName: String,
-    basicAndroidProject: BasicAndroidProject,
-    androidProject: AndroidProject,
-    androidDsl: AndroidDsl,
-    versions: Versions,
+    basicAndroidProject: AgpBasicAndroidProject,
+    androidProject: AgpAndroidProject,
+    androidDsl: AgpAndroidDsl,
+    versions: AgpVersions,
 ): String? {
     val minAgpForAppId = AndroidPluginVersion(7, 4, 0)
     return if (minAgpForAppId <= AndroidPluginVersion.parse(versions.agp)) {
@@ -246,9 +246,9 @@ private fun AgpAndroidArtifact.computeApplicationId(
 
 private fun computeApplicationIdLegacy(
     variantName: String,
-    basicAndroidProject: BasicAndroidProject,
-    androidProject: AndroidProject,
-    androidDsl: AndroidDsl,
+    basicAndroidProject: AgpBasicAndroidProject,
+    androidProject: AgpAndroidProject,
+    androidDsl: AgpAndroidDsl,
 ): String {
     val basicVariant = basicAndroidProject.variants.firstOrNull { it.name == variantName }
     val buildType =
@@ -299,8 +299,8 @@ private fun computeApplicationIdLegacy(
 private fun computeApplicationIdSuffix(
     variantName: String,
     buildType: AgpBuildType,
-    basicAndroidProject: BasicAndroidProject,
-    androidDsl: AndroidDsl,
+    basicAndroidProject: AgpBasicAndroidProject,
+    androidDsl: AgpAndroidDsl,
 ): String {
     // for the suffix we combine the suffix from all the flavors. However, we're going to
     // want the higher priority one to be last.
