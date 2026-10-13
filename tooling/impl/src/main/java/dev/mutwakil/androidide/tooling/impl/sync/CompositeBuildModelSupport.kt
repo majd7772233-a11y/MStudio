@@ -1,6 +1,8 @@
 package dev.mutwakil.androidide.tooling.impl.sync
 
 import dev.mutwakil.androidide.project.GradleModels
+import dev.mutwakil.androidide.tooling.api.messages.AndroidInitializationParams
+import dev.mutwakil.androidide.tooling.api.messages.InitializeProjectParams
 import org.gradle.tooling.model.gradle.GradleBuild as ToolingGradleBuild
 
 /**
@@ -41,6 +43,35 @@ internal fun compositeBuildProjectPath(
   val namespace = includedBuildName.trim().trim(':').ifBlank { "included" }
   val childPath = projectPath.trim().removePrefix(":").trimEnd(':')
   return if (childPath.isBlank()) ":$namespace" else ":$namespace:$childPath"
+}
+
+/**
+ * Rewrites only this included build's saved variant selections to the local project paths
+ * expected by AGP's model. Root-build selections are deliberately excluded because paths such as
+ * ":app" may exist in more than one build.
+ */
+internal fun initializeParamsForIncludedBuild(
+  params: InitializeProjectParams,
+  includedBuildName: String,
+): InitializeProjectParams {
+  val namespace = compositeBuildProjectPath(includedBuildName, ":")
+  val localSelections =
+    params.androidParams.variantSelections.mapNotNull { (path, variant) ->
+      when {
+        path == namespace -> ":" to variant
+        path.startsWith("$namespace:") -> path.removePrefix(namespace) to variant
+        else -> null
+      }
+    }.toMap()
+
+  return InitializeProjectParams(
+    directory = params.directory,
+    gradleDistribution = params.gradleDistribution,
+    androidParams = AndroidInitializationParams(localSelections),
+    needsGradleSync = params.needsGradleSync,
+    gradleArgs = params.gradleArgs,
+    jvmArgs = params.jvmArgs,
+  )
 }
 
 /**
