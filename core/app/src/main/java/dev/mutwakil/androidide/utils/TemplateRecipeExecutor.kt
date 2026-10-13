@@ -23,6 +23,7 @@ import dev.mutwakil.androidide.templates.TemplateRecipeResult
 import java.io.File
 import java.io.InputStream
 import java.util.LinkedHashSet
+import java.util.concurrent.CancellationException
 
 /**
  * [RecipeExecutor] implementation used for creating projects.
@@ -37,6 +38,10 @@ class TemplateRecipeExecutor : RecipeExecutor {
   private val createdPaths = LinkedHashSet<File>()
   private var projectRoot: File? = null
   private var finished = false
+  @Volatile private var cancelled = false
+
+  val isCancelled: Boolean
+    get() = cancelled
 
   override fun beginProjectCreation(projectDir: File) {
     checkActive()
@@ -60,6 +65,7 @@ class TemplateRecipeExecutor : RecipeExecutor {
     checkActive()
     return try {
       val result = recipe(this)
+      checkActive()
       if (result == null) rollback() else commit()
       result
     } catch (error: Throwable) {
@@ -118,6 +124,13 @@ class TemplateRecipeExecutor : RecipeExecutor {
     val normalizedPath = normalizeAssetPath(path)
     ensureDestinationAllowed(destDir)
     copyAssetTree(normalizedPath, destDir)
+  }
+
+  /** Request cancellation; the next recipe operation rolls back owned output. */
+  fun cancel() {
+    if (!finished) {
+      cancelled = true
+    }
   }
 
   /** Keep newly created files after a successful recipe. */
@@ -236,5 +249,8 @@ class TemplateRecipeExecutor : RecipeExecutor {
 
   private fun checkActive() {
     check(!finished) { "This template recipe executor has already been completed" }
+    if (cancelled) {
+      throw CancellationException("Project creation cancelled")
+    }
   }
 }
