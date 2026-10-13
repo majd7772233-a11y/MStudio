@@ -60,6 +60,7 @@ class XMLLanguageServer : ILanguageServer {
     private set
 
   private var settings: IServerSettings? = null
+  private val syntaxDiagnosticProvider = dev.mutwakil.androidide.lsp.xml.providers.XmlSyntaxDiagnosticProvider()
 
   override val serverId: String = SERVER_ID
 
@@ -115,7 +116,10 @@ class XMLLanguageServer : ILanguageServer {
   }
 
   override suspend fun analyze(file: Path): DiagnosticResult {
-    return DiagnosticResult.NO_UPDATE
+    if (!DocumentUtils.isXmlFile(file)) {
+      return DiagnosticResult.NO_UPDATE
+    }
+    return syntaxDiagnosticProvider.analyze(file)
   }
 
   override fun formatCode(params: FormatCodeParams?): CodeFormatResult {
