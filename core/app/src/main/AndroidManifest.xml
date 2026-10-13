@@ -102,15 +102,11 @@
         android:resource="@xml/ide_file_provider_paths" />
     </provider>
 
+    <!-- Installation status is delivered through an explicit, app-created PendingIntent. -->
     <receiver
       android:enabled="true"
-      android:exported="true"
-      android:name=".services.InstallationResultReceiver"
-      tools:ignore="ExportedReceiver">
-      <intent-filter>
-        <action android:name="dev.mutwakil.androidide.installer.INSTALL_PACKAGE" />
-      </intent-filter>
-    </receiver>
+      android:exported="false"
+      android:name=".services.InstallationResultReceiver" />
 
     <service
       android:exported="false"
