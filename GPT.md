@@ -518,3 +518,10 @@ Read `MSTUDIO_ROADMAP.md` first; its latest handoff checkpoint was committed in 
 - Roadmap-first finding recorded in `cc80e688359c63498b3c037345e8d9426b985157`. The live `GradleBuildService.isGradleWrapperAvailable` only used `exists()`, allowing empty files, directories, corrupt wrapper archives and missing distribution URLs to bypass repair.
 - Source fix: `62b333c644694d033f750a70d0d41e753d9c7aee`. Preflight now checks regular/non-empty wrapper files, readable properties with a non-empty `distributionUrl`, and a wrapper JAR that opens as a non-empty ZIP archive. Roadmap execution record: `c21e44bd6790284650038403ac5087992cff1364`.
 - This is source-level only. Validate later that the existing extraction path behaves safely for partial/read-only projects and preserves valid user wrapper files. Do not run builds/tests/Actions/device checks until the user-authorized verification batch.
+
+
+## Phase 4 continuation — reset dead Tooling process state (2026-10-13)
+
+- Roadmap-first follow-up finding: commit `467a3b4f9c5421094712f0a37e1978156ef9d5f1`. The first exit-callback fix revealed the runner's `isStarted` flag and PID stayed stale after the child JVM exited, while `GradleBuildService` retained its server proxy and started flag.
+- `ToolingServerRunner` now resets `isStarted` and `pid` on process exit (commit `4ea24fb29278ec07bd53738e8436685a27ada168`); `GradleBuildService.onServerExited` clears the server proxy and started flag (commit `d5ece4b74fc0d66c03bbb0dd05cbf45ef87fef1d`). Roadmap execution record: `5649445631050df23474f474c691207ce5edc850`.
+- Remaining risk: process exit may leave outstanding Tooling API RPC futures or a build marked in progress; verify restart, failure and cancellation flows later. No build/test/Actions/device run was performed.
