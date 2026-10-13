@@ -987,3 +987,30 @@ The Phase 7 closeout gate above remains in force: do not claim full acceptance o
 - `<merge>`, `<requestFocus>`, `<tag>`, `<fragment>`, and `<view class="...">` remain guarded against lossy edited saves; `<include>` is represented by the existing include model. Full lossless visual editing of those special nodes remains unsupported.
 - No tests, Gradle builds, GitHub Actions, or device checks were run, per the verification hold. Static review only; source tests are authored but unexecuted.
 - **Do not start Phase 8.** Keep Phase 8 locked until the user explicitly says `يلا الان إبدأ بالمرحلة الثامنة`.
+
+
+## Phase 7 source implementation closeout — 2026-10-13
+
+### Final changes in this closeout pass
+
+- XML resource-name index invalidation now runs only when a changed file is inside an Android source-set `res` directory. Editing an ordinary layout/source document no longer triggers a full resource-tree scan on each keystroke; resource additions, renames and removals still invalidate the index.
+- Resource indexing now includes `@+id/name` declarations found in layout and other XML resource files, not only resource filenames and `values` entries. XML resource diagnostics no longer blanket-ignore `@id/name` and custom `@attr/name` references; IDs declared in the current unsaved document are excluded from missing-reference warnings, and ID declarations inside XML comments are ignored.
+- Added source tests for source-set resource cache invalidation, generated/non-resource path exclusion, and declared-ID indexing with comments.
+- The existing project-aware preview path covers module/source-set/qualifier preference, common project strings/dimensions/colors/styles, and real custom vector rendering. Unsupported complex drawable XML is refused instead of being shown as a fake successful preview.
+- Existing source protections remain in force: malformed XML produces a navigable diagnostic; unchanged visual sessions return the original source; namespace serialization refuses unsafe output; and edits to XML constructs not faithfully represented by the visual model are blocked rather than destructively saved.
+- Compose preview source fixes cover initial ready-state, stale compilation suppression, and renderer/class-loader recreation after memory-pressure cleanup.
+
+### Closeout classification
+
+- **Phase 7 source implementation: completed for the current safe-support boundary.** The XML designer/resource/preview/LSP source work and regression tests have been committed, and the source-level cache/ID diagnostic gaps found in the final review are fixed.
+- **Runtime acceptance: pending.** Per the user's standing instruction, no unit tests, Gradle builds, GitHub Actions or device checks were run. Do not report that the project compiles, tests pass, or preview behavior is runtime-proven.
+- **Explicit limitations (not silently accepted as full Android parity):** the filesystem preview is not a substitute for Gradle/AAPT's complete merged resource table (especially dependency/product-flavor overlays and theme semantics); edited layouts containing `<merge>`, `<requestFocus>`, `<tag>`, `<fragment>`, or legacy `<view class="...">` are safely refused rather than losslessly edited; complex selector/layer-list/ripple/animated drawables are refused rather than fabricated; style/plural/styled-string/theme semantics remain partial. These paths preserve source safety and must remain visible as limitations.
+- Keep visual language, labels, typography, string-resource usage and existing RTL/LTR behavior unchanged. Do not introduce a parallel UI style in any follow-up.
+- **Phase 8 remains locked.** Do not edit Phase 8 implementation files or begin it until the user explicitly says: `يلا الان إبدأ بالمرحلة الثامنة`.
+
+### Latest closeout commits
+
+- Resource-index invalidation: `2fafe43e1dbe6f23755c5898f10ecd5f5dc25f01`.
+- Missing ID/custom attribute diagnostics: `8578c155139a19dc03b8fd624c0db8ec784eae54`.
+- Declared-ID extraction helper: `b41850269cebbfe680635aa81bd58c68329dbcde`.
+- Regression tests for invalidation and ID declarations: `f59dfea1d241bde70b4ab9df06dcabfc320b4d68`, `2ea65c264a7c43a15a52b080ca0f6191a9e8020a`.
