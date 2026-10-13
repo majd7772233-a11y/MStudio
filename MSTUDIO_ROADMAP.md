@@ -859,3 +859,10 @@ Source-level boundary: this closes the identified implementation gaps in process
 - Added source tests for per-file diagnostic isolation/clearing and exact workspace path containment.
 - Source commits: f118137e, 8f9f1123, cde81243, 968e766c, 20bcc3c2; tests: d3a5e486, 915250a4.
 - Phase 6 is in progress, not complete. Continue auditing classpath/sync recovery, stale diagnostic clearing, Java/Kotlin/XML language features, formatting/code actions and indexing responsiveness. No tests/builds/Actions/device checks were run.
+
+
+### Phase 5 compatibility follow-up — older Gradle Tooling API (2026-10-13)
+
+- The included-build traversal now treats access to the Tooling API's includedBuilds property as optional. This property was added after older Gradle versions; failure to expose it must leave an ordinary build syncable instead of aborting the whole model build.
+- Source commit: e9a48859bdea06bcba990f0fd2bc6346b00b512c.
+- Source inspection only; no test/build/Actions/device verification was run.
