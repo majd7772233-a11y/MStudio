@@ -133,10 +133,10 @@ internal class ToolingServerRunner(
 								)
 
 								if (exitCode != null) {
-								isStarted = false
-								pid = null
-								observer?.onServerExited(exitCode)
-							}
+									isStarted = false
+									pid = null
+									observer?.onServerExited(exitCode)
+								}
 
 								process = null
 							} finally {
