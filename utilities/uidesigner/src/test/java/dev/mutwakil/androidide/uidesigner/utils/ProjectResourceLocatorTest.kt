@@ -60,6 +60,15 @@ class ProjectResourceLocatorTest {
         ),
     )
     assertEquals(
+        "@color/accent",
+        ProjectResourceLocator.findValueResource(
+            projectRoot,
+            "color",
+            "accent_alias",
+            baseContext.createConfigurationContext(nightConfiguration),
+        ),
+    )
+    assertEquals(
         "#AABBCC",
         ProjectResourceLocator.findValueResource(
             projectRoot,
