@@ -709,3 +709,10 @@ No build, tests, workflow dispatch, Actions run or device validation is authoriz
 ### Correction to raster icon scope — 2026-10-12
 
 - This correction supersedes the preceding Phase 2 raster-asset finding only as to phase assignment. The live adaptive launcher XML uses the MStudio vector foreground/background, and the configured minimum SDK is 26; density PNGs are pre-adaptive fallback resources outside the supported API floor. The Fastlane and Play Store PNGs are release metadata, not the active in-app launcher. These inherited raster files remain unchanged and must be updated in Phase 12 before publishing. Do not claim that all release artwork has already been rebranded.
+
+
+### Phase 4 source-audit finding — Tooling process exit is not propagated (2026-10-13)
+
+- Live source review of `core/app/src/main/java/dev/mutwakil/androidide/services/builder/ToolingServerRunner.kt` found that the process-wait coroutine logs the managed Java process exit code but never calls `Observer.onServerExited(exitCode)`, although `GradleBuildService` implements that callback to clear foreground-service state. This leaves the declared lifecycle callback disconnected on normal process termination.
+- Implement a minimal lifecycle correction in the process-wait path: capture the actual exit code and notify the observer exactly when the process exits, without replacing Gradle Tooling API or conflating a process exit with a successful build result.
+- This is a source correction only. Do not run build/tests/Actions/device validation; the user will run verification after the code batch.
