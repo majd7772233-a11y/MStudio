@@ -42,6 +42,7 @@ internal object ProjectResourceLocator {
       resourceType: String,
       context: Context,
       preferredModuleRoot: File? = null,
+      preferredSourceSet: String? = null,
   ): List<File> {
     if (!projectRoot.isDirectory) return emptyList()
 
@@ -57,15 +58,15 @@ internal object ProjectResourceLocator {
         .toList()
         .distinctBy { it.absolutePath }
         .sortedWith(
-            compareByDescending<File> { qualifierScore(it.name, resourceType, context) }
-                .thenByDescending {
-                  preferredModuleRoot != null &&
-                      (it.absolutePath == preferredModuleRoot.absolutePath ||
-                          it.absolutePath.startsWith(
-                              preferredModuleRoot.absolutePath + File.separator
-                          ))
-                }
-                .thenByDescending { if (it.path.contains("/src/main/res/")) 1 else 0 }
+            compareByDescending<File> {
+              preferredModuleRoot != null &&
+                  (it.absolutePath == preferredModuleRoot.absolutePath ||
+                      it.absolutePath.startsWith(
+                          preferredModuleRoot.absolutePath + File.separator
+                      ))
+            }
+                .thenByDescending { sourceSetScore(it, preferredSourceSet) }
+                .thenByDescending { qualifierScore(it.name, resourceType, context) }
                 .thenBy { it.absolutePath }
         )
   }
@@ -87,6 +88,29 @@ internal object ProjectResourceLocator {
       current = current.parentFile ?: return outermostGradleRoot
     }
     return outermostGradleRoot
+  }
+
+  /** Finds the source set (for example, main, debug or a flavor) containing the layout. */
+  fun findSourceSet(layoutFile: File?, moduleRoot: File? = findModuleRoot(layoutFile)): String? {
+    if (layoutFile == null || moduleRoot == null) return null
+    val modulePath = moduleRoot.absoluteFile.toPath().normalize()
+    val filePath = layoutFile.absoluteFile.toPath().normalize()
+    if (!filePath.startsWith(modulePath)) return null
+    val relative = modulePath.relativize(filePath).toString().replace(File.separatorChar, '/')
+    val segments = relative.split('/')
+    val srcIndex = segments.indexOf("src")
+    return segments.getOrNull(srcIndex + 1)?.takeIf { srcIndex >= 0 }
+  }
+
+  private fun sourceSetScore(directory: File, preferredSourceSet: String?): Int {
+    val path = directory.absolutePath.replace(File.separatorChar, '/')
+    return when {
+      preferredSourceSet == null -> if (path.contains("/src/main/res/")) 1 else 0
+      path.contains("/src/$preferredSourceSet/res/") -> 3
+      path.contains("/src/main/res/") -> 2
+      path.contains("/src/") -> 1
+      else -> 0
+    }
   }
 
   /** Returns the nearest Android module root containing the opened layout. */
@@ -248,6 +272,26 @@ internal object ProjectResourceLocator {
               if (height != null) {
                 score += if (configuration.screenHeightDp >= height) 10 else -100
               }
+            }
+            qualifier.startsWith("b+") -> {
+              val localeParts = qualifier.removePrefix("b+").split('+')
+              val language =
+                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    configuration.locales[0]?.language.orEmpty()
+                  } else {
+                    @Suppress("DEPRECATION") configuration.locale?.language.orEmpty()
+                  }
+              val region =
+                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    configuration.locales[0]?.country.orEmpty()
+                  } else {
+                    @Suppress("DEPRECATION") configuration.locale?.country.orEmpty()
+                  }
+              val languageMatches =
+                  localeParts.firstOrNull().equals(language, ignoreCase = true)
+              val regionMatches =
+                  localeParts.getOrNull(1)?.equals(region, ignoreCase = true) ?: true
+              score += if (languageMatches && regionMatches) 80 else -100
             }
             qualifier.length in 2..3 && qualifier.all { it.isLetter() } -> {
               val language =
