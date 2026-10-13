@@ -254,9 +254,13 @@ internal object ProjectResourceLocator {
         ) ?: return null
     val result = linkedMapOf<String, String>()
     val parentName =
-        definition.parent?.removePrefix("@style/")?.takeIf { it != definition.parent }
-            ?: definition.parent?.takeIf { !it.startsWith("@") && !it.startsWith("?") }
-            ?: styleName.takeIf { it.contains('.') }?.substringBeforeLast('.')
+        when {
+          definition.parent?.startsWith("@style/") == true ->
+              definition.parent.removePrefix("@style/")
+          definition.parent != null -> definition.parent.takeIf { !it.startsWith("@") && !it.startsWith("?") }
+          styleName.contains('.') -> styleName.substringBeforeLast('.')
+          else -> null
+        }
     if (!parentName.isNullOrBlank()) {
       resolveStyleItems(
               projectRoot,
