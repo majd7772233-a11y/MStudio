@@ -667,3 +667,14 @@ Phase 7 is not to be described as fully accepted until the source-level remainin
 ### Phase 7 latest source handoff — 2026-10-13
 
 Resource APIs now accept a preferred module root, and preview callers derive it from the opened layout. Module-local drawable/mipmap/vector and values resources are preferred when names collide. Shape color/dimension references and custom vector fill/stroke colors use project-aware resolution. Unsupported generic selector/layer-list/ripple/animated XML no longer displays a fake placeholder as a successful preview. Tests for module precedence and failure behavior were added but not run. Latest source/test commits are recorded in MSTUDIO_ROADMAP.md. Phase 7 remains not runtime-accepted; full style/theme/AAPT merge and lossless editing of blocked XML constructs remain gaps. Phase 8 stays locked until the exact user authorization `يلا الان إبدأ بالمرحلة الثامنة`.
+
+
+## Phase 7 latest source handoff — 2026-10-13
+
+- Resource selection order is now owning Android module → opened layout's source set → configuration qualifier. This is applied to project drawable/mipmap/vector and values lookup. Common locale qualifiers and locale-list handling are present.
+- Project text preview resolves simple `@string` references for text/hint/title/contentDescription; project dimension preview handles common text size, size, padding, margin and elevation attributes from `@dimen`; project style preview handles common style items plus parent inheritance. This is a preview-only subset, not AAPT/theme parity.
+- XML LSP now reports malformed XML with a navigable range and clears the diagnostic when corrected. Comprehensive missing-resource reference diagnostics are still open.
+- Source tests added for source-set precedence, project strings/dimensions/style inheritance, and XML syntax diagnostic lifecycle.
+- No tests/builds/Actions/device checks were run. Do not claim runtime acceptance.
+- Phase 7 still has explicit limitations: AAPT dependency/product-flavor/theme merging, full style/plural/styled-string support, missing-resource diagnostics across all types, and lossless editing of `<merge>`, `<requestFocus>`, `<tag>`, `<fragment>`, and class-qualified `<view>` nodes (currently refused on edited save). Complex drawable XML is refused rather than faked.
+- Do not begin Phase 8 until the exact authorization `يلا الان إبدأ بالمرحلة الثامنة`.
