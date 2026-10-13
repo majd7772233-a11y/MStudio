@@ -47,6 +47,7 @@ internal class WorkspaceViewAttrHandler : dev.mutwakil.androidide.inflater.IView
       attribute: dev.mutwakil.androidide.inflater.IAttribute,
   ) {
     val frag = this.fragment ?: return
+    if (!frag.isInflating) frag.viewModel.markWorkspaceChanged()
     frag.undoManager.push(AttrAddedAction(view = view, attr = attribute as UiAttribute))
   }
 
@@ -55,6 +56,7 @@ internal class WorkspaceViewAttrHandler : dev.mutwakil.androidide.inflater.IView
       attribute: dev.mutwakil.androidide.inflater.IAttribute,
   ) {
     val frag = this.fragment ?: return
+    if (!frag.isInflating) frag.viewModel.markWorkspaceChanged()
     frag.undoManager.push(AttrRemovedAction(view = view, attr = attribute as UiAttribute))
   }
 
@@ -64,6 +66,7 @@ internal class WorkspaceViewAttrHandler : dev.mutwakil.androidide.inflater.IView
       oldValue: String,
   ) {
     val frag = this.fragment ?: return
+    if (!frag.isInflating) frag.viewModel.markWorkspaceChanged()
 
     // if (attribute.name.equals("background", ignoreCase = true) && view is ViewImpl) {
     // // Get the layout file from the fragment's viewModel
