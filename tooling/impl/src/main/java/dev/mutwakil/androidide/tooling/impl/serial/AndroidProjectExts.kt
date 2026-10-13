@@ -83,6 +83,15 @@ fun VariantDependencies.asProtoModel() =
         name = this.name,
         mainArtifact = this.mainArtifact.asProtoModel(),
         librariesMap = this.libraries.mapValues { entry -> entry.value.asProtoModel() },
+        androidTestArtifact = this.androidTestArtifact?.asProtoModel(),
+        unitTestArtifact = this.unitTestArtifact?.asProtoModel(),
+        testFixturesArtifact = this.testFixturesArtifact?.asProtoModel(),
+        deviceTestArtifactsMap = this.deviceTestArtifacts.mapValues { entry ->
+            entry.value.asProtoModel()
+        },
+        hostTestArtifactsMap = this.hostTestArtifacts.mapValues { entry ->
+            entry.value.asProtoModel()
+        },
     )
 
 fun Library.asProtoModel() =
