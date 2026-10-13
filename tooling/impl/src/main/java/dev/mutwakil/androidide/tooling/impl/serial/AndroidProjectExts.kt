@@ -6,7 +6,7 @@ import com.android.builder.model.v2.ide.AndroidLibraryData as AgpAndroidLibraryD
 import com.android.builder.model.v2.ide.ArtifactDependencies as AgpArtifactDependencies
 import com.android.builder.model.v2.ide.GraphItem as AgpGraphItem
 import com.android.builder.model.v2.ide.JavaCompileOptions as AgpJavaCompileOptions
-import com.android.builder.model.v2.ide.Library
+import com.android.builder.model.v2.ide.Library as AgpLibrary
 import com.android.builder.model.v2.ide.LibraryInfo as AgpLibraryInfo
 import com.android.builder.model.v2.ide.LibraryType as AgpLibraryType
 import com.android.builder.model.v2.ide.ProjectInfo as AgpProjectInfo
