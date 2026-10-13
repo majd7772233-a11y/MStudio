@@ -511,3 +511,10 @@ Read `MSTUDIO_ROADMAP.md` first; its latest handoff checkpoint was committed in 
 - Roadmap-first finding recorded in commit `54dbf798ebb45cce1e88c7d81861d6a3d4c8f00f`. The source correction is commit `48b12cd2972e7c70ff6be0a8c7cef7065e192b59`: the process waiter now captures the `waitFor()` result and notifies the observer when an exit code is available. This is process-exit reporting only, not a build-success signal.
 - Roadmap execution record: `d9efa0a0c95f9ceffc22414e5abee9cbe5e66a44`.
 - Remaining lifecycle risks: startup failure before the waiter exists, cancellation actually terminating the child process, and concurrent build/service recreation behavior. Continue the Phase 4 source audit while preserving the actual Gradle Tooling API. Do not run builds, tests, Actions or device validation; the user will handle verification after the code batch.
+
+
+## Phase 4 continuation — wrapper preflight hardening (2026-10-13)
+
+- Roadmap-first finding recorded in `cc80e688359c63498b3c037345e8d9426b985157`. The live `GradleBuildService.isGradleWrapperAvailable` only used `exists()`, allowing empty files, directories, corrupt wrapper archives and missing distribution URLs to bypass repair.
+- Source fix: `62b333c644694d033f750a70d0d41e753d9c7aee`. Preflight now checks regular/non-empty wrapper files, readable properties with a non-empty `distributionUrl`, and a wrapper JAR that opens as a non-empty ZIP archive. Roadmap execution record: `c21e44bd6790284650038403ac5087992cff1364`.
+- This is source-level only. Validate later that the existing extraction path behaves safely for partial/read-only projects and preserves valid user wrapper files. Do not run builds/tests/Actions/device checks until the user-authorized verification batch.
