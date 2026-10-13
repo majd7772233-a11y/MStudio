@@ -28,6 +28,7 @@ import dev.mutwakil.androidide.templates.ParameterConstraint.LAYOUT
 import dev.mutwakil.androidide.templates.ParameterConstraint.MODULE_NAME
 import dev.mutwakil.androidide.templates.ParameterConstraint.NONEMPTY
 import dev.mutwakil.androidide.templates.ParameterConstraint.PACKAGE
+import dev.mutwakil.androidide.templates.ParameterConstraint.PROJECT_NAME
 import dev.mutwakil.androidide.templates.base.util.isValidModuleName
 import dev.mutwakil.androidide.templates.base.util.isValidProjectName
 import dev.mutwakil.androidide.templates.base.util.moduleNameToDirName
@@ -107,6 +108,11 @@ class UtilTest {
 
       assertThat(isValid("", listOf(NONEMPTY))).isFalse()
       assertThat(isValid("something", listOf(NONEMPTY))).isTrue()
+      assertThat(isValid("My Application 2", listOf(PROJECT_NAME))).isTrue()
+      assertThat(isValid("تطبيق تجريبي", listOf(PROJECT_NAME))).isTrue()
+      assertThat(isValid("../outside", listOf(PROJECT_NAME))).isFalse()
+      assertThat(isValid("name\\child", listOf(PROJECT_NAME))).isFalse()
+      assertThat(isValid("..", listOf(PROJECT_NAME))).isFalse()
 
       assertThat(isValid("activity_main", listOf(LAYOUT))).isTrue()
       assertThat(isValid("2activity_main", listOf(LAYOUT))).isFalse()
