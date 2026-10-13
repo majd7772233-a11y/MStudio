@@ -47,6 +47,24 @@ import java.io.File
 class UtilTest {
 
   @Test
+  fun `before and after view callbacks remain independent`() {
+    val parameter = stringParameter {
+      name = R.string.project_app_name
+      default = "Callback test"
+    }
+    var beforeCalls = 0
+    var afterCalls = 0
+    parameter.doBeforeCreateView { beforeCalls++ }
+    parameter.doAfterCreateView { afterCalls++ }
+
+    parameter.beforeCreateView()
+    parameter.afterCreateView()
+
+    assertThat(beforeCalls).isEqualTo(1)
+    assertThat(afterCalls).isEqualTo(1)
+  }
+
+  @Test
   fun `project names allow unicode and spaces but reject path traversal`() {
     assertThat(isValidProjectName("My Application")).isTrue()
     assertThat(isValidProjectName("تطبيق تجريبي 2")).isTrue()
