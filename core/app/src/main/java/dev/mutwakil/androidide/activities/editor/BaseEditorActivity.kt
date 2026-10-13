@@ -344,7 +344,7 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
         ?: GeneralPreferences.lastOpenedProject
           .takeIf { it.isNotBlank() && it != GeneralPreferences.NO_OPENED_PROJECT }
     if (restoredProjectPath != null) {
-      ProjectManagerImpl.getInstance().projectPath = restoredProjectPath
+      ProjectManagerImpl.getInstance().prepareForProject(File(restoredProjectPath))
     }
     super.onCreate(savedInstanceState)
 
