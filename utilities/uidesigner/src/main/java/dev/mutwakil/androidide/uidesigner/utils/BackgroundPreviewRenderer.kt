@@ -169,6 +169,7 @@ class BackgroundPreviewRenderer {
             "drawable",
             context,
             ProjectResourceLocator.findModuleRoot(layoutFile),
+            ProjectResourceLocator.findSourceSet(layoutFile),
         )
 
     return loadImageFromFolders(view, drawableName, drawableFolders, context, layoutFile)
@@ -559,6 +560,7 @@ class BackgroundPreviewRenderer {
                   colorString.substringAfter("@color/"),
                   context,
                   ProjectResourceLocator.findModuleRoot(layoutFile),
+                  ProjectResourceLocator.findSourceSet(layoutFile),
               )
             }
         when {
@@ -596,6 +598,7 @@ class BackgroundPreviewRenderer {
                 dimensionString.substringAfter("@dimen/"),
                 context,
                 ProjectResourceLocator.findModuleRoot(layoutFile),
+                ProjectResourceLocator.findSourceSet(layoutFile),
             )
           } ?: throw IllegalArgumentException("Unresolved dimension resource: $dimensionString")
         } else {
@@ -698,10 +701,17 @@ class BackgroundPreviewRenderer {
     val colorName = resourceName.substringAfter("@color/")
 
     // Resolve the opened project's values first, avoiding collisions with the IDE's own resources.
-    val projectRoot = findProjectRoot(layoutFile)
+    val projectRoot = ProjectResourceLocator.findProjectRoot(layoutFile)
     val projectColor =
         projectRoot?.let {
-          resolveProjectColor(it, colorName, context, mutableSetOf())
+          ProjectResourceLocator.resolveValueResource(
+              it,
+              "color",
+              colorName,
+              context,
+              ProjectResourceLocator.findModuleRoot(layoutFile),
+              ProjectResourceLocator.findSourceSet(layoutFile),
+          )
         }
     if (projectColor != null) {
       return try {
