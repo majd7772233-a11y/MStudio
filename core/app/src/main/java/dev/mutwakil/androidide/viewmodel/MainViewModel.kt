@@ -109,6 +109,10 @@ class MainViewModel(
 				owner,
 				object : Observer<Boolean> {
 					override fun onChanged(t: Boolean) {
+						// LiveData immediately emits its current value when observed. Keep
+						// waiting while the transition is still active; run the action only
+						// after the transition-end callback publishes false.
+						if (t) return
 						_isTransitionInProgress.removeObserver(this)
 						action.run()
 					}
