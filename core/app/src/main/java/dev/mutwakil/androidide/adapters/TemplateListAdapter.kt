@@ -60,8 +60,10 @@ class TemplateListAdapter(
       val template = templates[position]
       if (template == Template.EMPTY) {
         root.visibility = View.INVISIBLE
+        root.setOnClickListener(null)
         return@apply
       }
+      root.visibility = View.VISIBLE
       templateName.setText(template.templateName)
       templateIcon.setImageResource(template.thumb)
       templateIcon.shapeAppearanceModel =
