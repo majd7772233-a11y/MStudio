@@ -76,6 +76,6 @@ class ViewToXmlRoundTripTest {
   }
 
   private fun layout(contents: String): File {
-    return temporaryFolder.newFile("layout.xml").apply { writeText(contents) }
+    return temporaryFolder.newFile("layout-${System.nanoTime()}.xml").apply { writeText(contents) }
   }
 }
