@@ -1,6 +1,8 @@
 package dev.mutwakil.androidide.tooling.impl.sync
 
 import com.google.common.truth.Truth.assertThat
+import dev.mutwakil.androidide.project.GradleModels
+import dev.mutwakil.androidide.project.JavaModels
 import dev.mutwakil.androidide.tooling.api.messages.AndroidInitializationParams
 import dev.mutwakil.androidide.tooling.api.messages.InitializeProjectParams
 import org.junit.Test
@@ -16,6 +18,42 @@ class CompositeBuildModelSupportTest {
       .isEqualTo(":shared")
     assertThat(compositeBuildProjectPath("shared", ":core:utils"))
       .isEqualTo(":shared:core:utils")
+  }
+
+  @Test
+  fun namespacesIncludedBuildTasksAndJavaModuleDependencies() {
+    val dependency =
+      JavaModels.JavaDependency.newBuilder()
+        .setModule(
+          JavaModels.JavaModuleDependency.newBuilder()
+            .setModuleName("lib")
+            .setProjectPath(":lib")
+            .build(),
+        ).build()
+    val project =
+      GradleModels.GradleProject.newBuilder()
+        .setName("core")
+        .setPath(":core")
+        .setProjectDirPath("/workspace/shared/core")
+        .setBuildDirPath("/workspace/shared/core/build")
+        .setBuildScriptPath("/workspace/shared/core/build.gradle.kts")
+        .addTask(
+          GradleModels.GradleTask.newBuilder()
+            .setName("compileJava")
+            .setPath(":core:compileJava")
+            .setProjectPath(":core")
+            .build(),
+        )
+        .setJavaProject(JavaModels.JavaProject.newBuilder().addDependency(dependency).build())
+        .build()
+
+    val mapped = namespaceIncludedBuildProject(project, "shared")
+
+    assertThat(mapped.path).isEqualTo(":shared:core")
+    assertThat(mapped.taskList.single().path).isEqualTo(":shared:core:compileJava")
+    assertThat(mapped.taskList.single().projectPath).isEqualTo(":shared:core")
+    assertThat(mapped.javaProject.dependencyList.single().module.projectPath)
+      .isEqualTo(":shared:lib")
   }
 
   @Test
