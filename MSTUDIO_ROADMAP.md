@@ -1075,3 +1075,15 @@ The live `TemplateProviderImpl` registers eight project templates: No Activity, 
 - **Autocomplete/type resolution:** MStudio already has Java LSP, javac services, project classpaths and indexing. NIDE parser/type resolver is reference material for targeted regression cases only; no competing completion engine is approved.
 - **Legacy Android builder/dx/FastGradleParser/AAR resolver:** rejected for the core build path because they duplicate or bypass Gradle/AGP semantics and have documented incomplete tasks. Do not port them into Tooling API builds.
 - Phase 9 is **investigating**, not complete. Next candidate decision must identify a unique user-visible gap and a source/license/testable boundary before any bulk code import.
+
+
+### Phase 8 follow-up — cancellation and generated contract coverage — 2026-10-13
+
+- The template details screen now exposes cancellation through its existing Previous button while creation is active. The activity-scoped ViewModel retains the executor reference across rotation; executor cancellation is checked between writes and immediately before commit, and the existing ownership-aware rollback removes only generated files/empty directories while preserving unrelated content.
+- Cancellation is not surfaced as an ordinary failure. Added unit tests for cancellation between writes and just before commit. Generated-project tests also assert the actual Gradle module include syntax `include(":app")`, along with wrapper, script, SDK, package and manifest contracts.
+- Relevant commits: `5b1f18b4ef9e04724fc79954845d56a51dd6731f`, `3f132d13a487f5cee1f06ab1503265e19d99982c`, `65968b3a2c4133fd4819ec7f70e5a286a4712fef`, `4af5db54e3bf336b377a66b100a617962b2772b2`, `537a5e12670cd4b3635abade126d582e74e7d151`, `789ab1ae6d0ccf0927a5427ed7af785208a0e990`, `e6d9c1e16e6c72b55ab408450ff05dcd87178339`.
+- No tests/builds/Actions/device checks ran. Phase 8 source implementation is closed for this pass, but its runtime acceptance gate remains open and is deferred until the final verification stage as the user permitted. The project must not be described as runtime-accepted.
+
+### Phase 9 current disposition
+
+The NIDE audit remains investigative. No code has been imported. The formatter is already implemented through Google Java Format with AOSP/Google styles; Fernflower decompilation remains blocked until its Apache 2.0 license provenance is verified independently of the NIDE root GPL-3.0 license. See the live candidate table appended to `NIDE_FEATURE_MATRIX.md`.
