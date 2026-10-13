@@ -30,6 +30,7 @@ import dev.mutwakil.androidide.ui.CustomDividerItemDecoration
 import dev.mutwakil.androidide.ui.ProjectInfoBottomSheet
 import dev.mutwakil.androidide.utils.Environment.PROJECTS_DIR
 import dev.mutwakil.androidide.utils.findValidProjects
+import dev.mutwakil.androidide.utils.findValidProjectsInContainer
 import dev.mutwakil.androidide.utils.flashError
 import dev.mutwakil.androidide.utils.flashSuccess
 import dev.mutwakil.androidide.utils.isProjectCandidateDir
@@ -360,47 +361,24 @@ class RecentProjectsFragment : BaseFragment() {
             return
         }
 
-        // Is the current folder a valid android project?
-        // Yes: Then open it.
+        // Open the selected directory directly when it is a project root.
         if (isValidProjectDirectory(directory)) {
             openProject(root = directory)
             return
         }
 
-        // No, the current folder is a container of Android Projects: Then open the first valid one.
-        val subFolders = directory.listFiles()
-
-        if (subFolders == null) {
-            flashError(getString(R.string.msg_cannot_access_folder, directory.name))
+        // A selected parent may contain projects several folders deep. Register all discovered
+        // roots, then open the first deterministic result; never open the container as a project.
+        val validProjects = findValidProjectsInContainer(directory)
+        if (validProjects.isEmpty()) {
+            flashError(getString(R.string.msg_no_valid_projects, directory.name))
             return
-        }
-        if (subFolders.isEmpty()) {
-            flashError(getString(R.string.msg_no_subfolders, directory.name))
-            return
-        }
-
-        val validSubDirs = subFolders.filter { it.isProjectCandidateDir() }
-
-        val validProjects = validSubDirs.filter { isValidProjectDirectory(it) }
-        val invalidProjects = validSubDirs - validProjects.toSet()
-
-        when {
-            validProjects.isEmpty() -> {
-                flashError(getString(R.string.msg_no_valid_projects, directory.name))
-                return
-            }
-
-            invalidProjects.isNotEmpty() -> {
-                flashError(getString(R.string.msg_skipped_invalid_projects))
-            }
-        }
-
-
-        val jobs = validProjects.map { sub ->
-            viewModel.insertProjectFromFolder(sub.name, sub.absolutePath)
         }
 
         viewLifecycleScope.launch {
+            val jobs = validProjects.map { project ->
+                viewModel.insertProjectFromFolder(project.name, project.absolutePath)
+            }
             jobs.joinAll()
             openProject(root = validProjects.first())
         }
