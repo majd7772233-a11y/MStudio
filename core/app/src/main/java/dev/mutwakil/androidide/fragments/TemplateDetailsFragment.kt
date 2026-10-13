@@ -20,11 +20,11 @@ package dev.mutwakil.androidide.fragments
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
-import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
 import dev.mutwakil.androidide.R
 import dev.mutwakil.androidide.R.string
+import dev.mutwakil.androidide.roomData.recentproject.RecentProject
 import dev.mutwakil.androidide.adapters.TemplateWidgetsListAdapter
 import dev.mutwakil.androidide.databinding.FragmentTemplateDetailsBinding
 import dev.mutwakil.androidide.tasks.executeAsyncProvideError
@@ -37,7 +37,6 @@ import dev.mutwakil.androidide.utils.TemplateRecipeExecutor
 import dev.mutwakil.androidide.utils.flashError
 import dev.mutwakil.androidide.viewmodel.MainViewModel
 import org.slf4j.LoggerFactory
-import dev.mutwakil.androidide.viewmodel.RecentProjectsViewModel
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 /**
@@ -106,6 +105,7 @@ class TemplateDetailsFragment :
       }
 
       val defaultFailureMessage = getString(string.project_creation_failed)
+      val templateName = getString(template.templateName)
       executeAsyncProvideError({
         TemplateRecipeExecutor().executeRecipe {
           template.recipe.execute(this) as? ProjectTemplateRecipeResult
@@ -135,7 +135,21 @@ class TemplateDetailsFragment :
           return@executeAsyncProvideError
         }
 
-        // MainActivity observes this value and owns the screen transition.
+        // Persist the successful result before navigating. If Android kills the process
+        // between generation and launch, the project is still discoverable in Saved Projects.
+        val now = System.currentTimeMillis().toString()
+        viewModel.saveProjectToRecents(
+          RecentProject(
+            location = result.data.projectDir.path,
+            name = result.data.name,
+            createdAt = now,
+            lastModified = now,
+            templateName = templateName,
+            language = result.data.language?.name ?: "unknown"
+          )
+        )
+
+        // MainActivity observes this value and owns the screen transition and launch.
         viewModel.pendingCreatedProject.value = result
       }
     }
