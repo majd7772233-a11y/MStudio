@@ -65,6 +65,11 @@ internal class PerFileDiagnosticCache {
     timestamps.remove(file)
     results.remove(file)
   }
+
+  fun clearAll() {
+    timestamps.clear()
+    results.clear()
+  }
 }
 
 /**
@@ -130,6 +135,11 @@ class JavaDiagnosticProvider {
 
   fun clearTimestamp(file: Path) {
     diagnosticCache.clear(file)
+  }
+
+  /** Discard diagnostics computed against a previous workspace/classpath. */
+  fun clearAllDiagnostics() {
+    diagnosticCache.clearAll()
   }
 
   private fun doAnalyze(file: Path, task: CompileTask): DiagnosticResult {
