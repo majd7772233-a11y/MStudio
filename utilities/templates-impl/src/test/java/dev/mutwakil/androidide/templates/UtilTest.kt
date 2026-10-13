@@ -29,6 +29,7 @@ import dev.mutwakil.androidide.templates.ParameterConstraint.MODULE_NAME
 import dev.mutwakil.androidide.templates.ParameterConstraint.NONEMPTY
 import dev.mutwakil.androidide.templates.ParameterConstraint.PACKAGE
 import dev.mutwakil.androidide.templates.base.util.isValidModuleName
+import dev.mutwakil.androidide.templates.base.util.isValidProjectName
 import dev.mutwakil.androidide.templates.base.util.moduleNameToDirName
 import dev.mutwakil.androidide.templates.impl.ConstraintVerifier
 import dev.mutwakil.androidide.utils.FileProvider
@@ -44,6 +45,19 @@ import java.io.File
 @RunWith(RobolectricTestRunner::class)
 @Config(application = BaseApplication::class)
 class UtilTest {
+
+  @Test
+  fun `project names allow unicode and spaces but reject path traversal`() {
+    assertThat(isValidProjectName("My Application")).isTrue()
+    assertThat(isValidProjectName("تطبيق تجريبي 2")).isTrue()
+    assertThat(isValidProjectName("my_app-v2.1")).isTrue()
+
+    listOf("", " ", ".", "..", "../outside", "name/child", "name\\child",
+      " leading", "trailing ", ".hidden", "name..suffix", "bad:name",
+      "name\u0000suffix", "x".repeat(81)).forEach { name ->
+      assertThat(isValidProjectName(name)).isFalse()
+    }
+  }
 
   @Test
   fun `test module name conversion`() {
