@@ -892,3 +892,31 @@ Source-level boundary: this closes the identified implementation gaps in process
 - This complements the existing guard that refuses to return generated XML when layout inflation has errors, so an invalid preview cannot be returned to the editor as replacement source.
 - Source commit: `f852a40bf4df457b82529e1dc6180fda22135385`.
 - This is the first targeted Phase 7 safety fix, not completion of the designer phase. Still inspect and implement resource resolution, XML source/preview round-tripping, attribute preservation, drag/drop IDs/constraints, includes/custom views, configuration-qualified resources, and Compose preview separately. No executable verification was performed.
+
+
+## Phase 7 source implementation checkpoint — 2026-10-13
+
+### Implemented in source
+
+- Designer startup rejects a missing, deleted, directory-valued, or unreadable layout path through the existing cancellation path.
+- Workspace dirty state is now based on actual user attribute/hierarchy/M3 edits. Loading XML no longer marks loaded Material components as user additions, and reopening the same path does not reset edit state across activity recreation.
+- If the designer has no user edits, it returns the original UTF-8 XML text rather than serializing the inflated view tree. This preserves comments, whitespace, data-binding wrappers, include directives, and XML-only details when the user only opens and exits the designer.
+- For edited layouts, the designer fails closed instead of silently dropping XML-only constructs it cannot faithfully represent: `<include>`, `<merge>`, `<requestFocus>`, `<tag>`, `<fragment>`, and `<view class="...">`. The designer remains open and reports the existing preview/save error; it does not return a destructive replacement. This is an explicit safety boundary, **not** full editing support for those constructs.
+- XML generation now emits a valid `xmlns` declaration for an empty/default namespace prefix and refuses to serialize a namespaced attribute whose prefix is unavailable, rather than emitting invalid XML or silently changing its namespace.
+- The custom Material component registry is mutable by design, so runtime registration no longer relies on casting a `mapOf` implementation to `MutableMap`.
+- Compose preview now sets its initialized flag after successful first initialization, discards compile results/errors from stale source generations, and recreates its class loader/renderers after memory-pressure cleanup in both Activity and Fragment flows.
+- Added source tests for XML-only construct guards, default namespace serialization, dirty-state reset when switching files, and retaining dirty state when the same file is reopened.
+
+### Source commits
+
+- Dirty-state tracking: `3d21ae47202d54096403ec2eca4be3be05201c25`, `db7a36822a8c1fd905eaed2ac3ff391930883cb2`, `6ceffa55290efd66256e02be04bbbed4047d8795`, `7993d25bc786d7d7c0b9963172a085b486121cc3`, `32c1a3ecef0a1d7864a915c081061f8ed8bafb22`.
+- XML safety/serialization and component registry: `77b947ba88a613fdfb772f329d5c9c1eaf1ea70e`, `c2bfebc00c0202b798dd830ab8a4598f0f0c3ef1`, `27a35ecdd201e8d204a1a2ceef243b99b7a5802b`.
+- Tests: `5552ec19b90b05ac51b97738aad3f1b93e61d190`, `69a2c383555d1f5ae78b97946bf85d1796ce693f`, `e89bb975add0fc5866d26f67ddfa1fb588faa089`, `9deaf6b289b03cd987b768c2fc5b1aab3e51b18f`, `8d3c5f6af507b4747ccf879ba93ef954675b40f8`.
+- Compose preview fixes: `7a6cc2d84d938f628937a218f3afa3d192795904`, `44c53b374267236950e8b439d9acbeaed3cad74d`, `41edcea10623917ab0d9d339f0304ce1e2be8198`, `761acb8d0bd10938a77ec3c82c851ab90178edcb`.
+
+### Scope and acceptance boundary
+
+- XML open/parse failure safety, source preservation when untouched, attribute/hierarchy dirty tracking, namespace serialization safety, and Compose preview initialization/stale-result/memory recovery now have source changes and source tests where applicable.
+- **Phase 7 is not runtime-accepted.** Per the user's standing instruction, no tests, Gradle builds, GitHub Actions, or device checks were run.
+- The fail-closed guard deliberately prevents editing/saving layouts containing the XML-only constructs listed above; full tree-preserving editing for those constructs remains a functional gap. Configuration-qualified resource resolution, missing-resource diagnostics across all resource types, and end-to-end resource/preview round-tripping still require a dedicated source audit and acceptance coverage. Do not mark those as proven merely because the existing inflater/completion pipeline is present.
+- Keep Phase 8 locked. Do not change Phase 8 implementation files or begin Phase 8 until the user explicitly says: **«يلا الان إبدأ بالمرحلة الثامنة»**.
