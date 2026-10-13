@@ -10,6 +10,8 @@
 package dev.mutwakil.androidide.uidesigner.utils
 
 import android.widget.TextView
+import dev.mutwakil.androidide.inflater.INamespace
+import dev.mutwakil.androidide.inflater.internal.AttributeImpl
 import dev.mutwakil.androidide.inflater.internal.LayoutFile
 import dev.mutwakil.androidide.inflater.internal.NamespaceImpl
 import dev.mutwakil.androidide.inflater.internal.ViewImpl
@@ -59,6 +61,26 @@ class ViewToXmlRoundTripTest {
 
     assertTrue(xml.contains("xmlns=\"urn:default\""))
     assertFalse(xml.contains("xmlns:="))
+  }
+
+  @Test
+  fun serializingEditedViewPreservesExistingUnrelatedAttributes() {
+    val file = temporaryFolder.newFile("attributes.xml")
+    val view =
+        ViewImpl(
+            LayoutFile(file, "attributes"),
+            "TextView",
+            TextView(RuntimeEnvironment.getApplication()),
+        )
+    view.addAttribute(AttributeImpl(INamespace.ANDROID, "text", "Keep this text"), apply = false)
+    view.addAttribute(AttributeImpl(INamespace.ANDROID, "contentDescription", "Keep accessibility"), apply = false)
+    view.addAttribute(AttributeImpl(INamespace.APP, "layout_constraintStart_toStartOf", "parent"), apply = false)
+
+    val xml = ViewToXml.generateXml(view)
+
+    assertTrue(xml.contains("android:text=\"Keep this text\""))
+    assertTrue(xml.contains("android:contentDescription=\"Keep accessibility\""))
+    assertTrue(xml.contains("app:layout_constraintStart_toStartOf=\"parent\""))
   }
 
   @Test
