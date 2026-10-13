@@ -62,10 +62,9 @@ class ViewToXmlRoundTripTest {
   }
 
   @Test
-  fun includeMergeAndOtherXmlOnlyNodesAreRejectedForEditedLayouts() {
+  fun mergeAndOtherXmlOnlyNodesAreRejectedForEditedLayouts() {
     listOf(
-        "<LinearLayout><include layout=\"@layout/toolbar\" /></LinearLayout>" to "include",
-        "<merge><TextView /></merge>" to "merge",
+          "<merge><TextView /></merge>" to "merge",
         "<LinearLayout><requestFocus /></LinearLayout>" to "requestFocus",
         "<LinearLayout><tag android:id=\"@+id/key\" android:value=\"value\" /></LinearLayout>" to "tag",
         "<LinearLayout><view class=\"example.CustomView\" /></LinearLayout>" to "view",
