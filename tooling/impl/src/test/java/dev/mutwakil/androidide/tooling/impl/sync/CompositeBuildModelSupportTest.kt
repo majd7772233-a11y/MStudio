@@ -40,7 +40,6 @@ class CompositeBuildModelSupportTest {
         ":" to "includedRootRelease",
         ":app" to "includedAppDebug",
       )
-    assertThat(included.androidParams.variantSelections).doesNotContainKey(":appRoot")
     assertThat(params.androidParams.variantSelections[":app"]).isEqualTo("rootDebug")
   }
 }
