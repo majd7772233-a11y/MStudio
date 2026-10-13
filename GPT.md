@@ -753,3 +753,14 @@ The user's latest instruction to finish Phase 8 fully supersedes the earlier sou
 
 - Vineflower is staged as an APK asset by a dedicated non-transitive Gradle configuration and is run with `Environment.JAVA` in a child JVM, not loaded into Android ART. The app copies the JAR into private files storage before first use.
 - Child JVM uses `-Xmx384m`, `-XX:ActiveProcessorCount=2`, a three-minute timeout, merged/drained output, and forced termination on interruption/timeout. Input cap is 128 MiB; ZIP/JAR preflight limits 5,000 entries and 256 MiB declared expanded size; failure paths delete copied input/output. These are source-level guards and remain unverified on device.
+
+
+## Phase 10 handoff — 2026-10-13 (source changes; verification pending)
+
+- Latest Phase 10 source changes include archive size overflow/unknown-size rejection, active decompiler output monitoring (10,000 files / 256 MiB), tests for archive/output limits, private installation callback receiver, and corrected Android dialog resource constants.
+- Added `scripts/ci/phase10_static_checks.py`.
+- Prepared but did not dispatch `.github/workflows/phase10-verification.yml` (static audit, app unit tests, Tooling API build/tests, debug APK and SHA-256 artifacts) and `.github/workflows/phase10-codeql.yml` (Java/Kotlin CodeQL). Both are manual-only; no release signing or publishing is included.
+- **No tests/builds/Actions/CodeQL/device checks have been run.** Do not say they passed. Phase 9 and Phase 10 runtime acceptance still require final verification.
+- During verification, review merged-manifest exposure for exported crash handler, launcher, DocumentsProvider and permission-protected log service; verify the explicit PackageInstaller PendingIntent still reaches the now-private receiver.
+- Profile real device memory and low-storage behavior. Root source-build settings still request a 5096 MiB Gradle heap and 4096 MiB Kotlin daemon heap; do not call these measured IDE runtime requirements or change them without evidence.
+- Roadmap and NIDE feature matrix must remain synchronized with this status. Do not dispatch workflows until the user confirms source work is complete.
