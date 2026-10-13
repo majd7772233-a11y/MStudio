@@ -27,6 +27,50 @@ class ProjectResourceLocatorTest {
   val temporaryFolder = TemporaryFolder()
 
   @Test
+  fun resolvesValuesFromTheMatchingConfigurationDirectory() {
+    val projectRoot = temporaryFolder.newFolder("values-project")
+    File(projectRoot, "app/src/main/res/values/colors.xml").apply {
+      parentFile?.mkdirs()
+      writeText("<resources><color name=\"accent\">#112233</color></resources>")
+    }
+    File(projectRoot, "app/src/main/res/values-night/colors.xml").apply {
+      parentFile?.mkdirs()
+      writeText("<resources><color name=\"accent\">#AABBCC</color></resources>")
+    }
+
+    val baseContext = RuntimeEnvironment.getApplication()
+    val dayConfiguration =
+        Configuration(baseContext.resources.configuration).apply {
+          uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or
+              Configuration.UI_MODE_NIGHT_NO
+        }
+    val nightConfiguration =
+        Configuration(baseContext.resources.configuration).apply {
+          uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or
+              Configuration.UI_MODE_NIGHT_YES
+        }
+
+    assertEquals(
+        "#112233",
+        ProjectResourceLocator.findValueResource(
+            projectRoot,
+            "color",
+            "accent",
+            baseContext.createConfigurationContext(dayConfiguration),
+        ),
+    )
+    assertEquals(
+        "#AABBCC",
+        ProjectResourceLocator.findValueResource(
+            projectRoot,
+            "color",
+            "accent",
+            baseContext.createConfigurationContext(nightConfiguration),
+        ),
+    )
+  }
+
+  @Test
   fun discoversResourcesInNonAppModulesAndQualifiedDirectories() {
     val projectRoot = temporaryFolder.newFolder("project")
     File(projectRoot, "feature/profile/src/main/res/drawable").mkdirs()
