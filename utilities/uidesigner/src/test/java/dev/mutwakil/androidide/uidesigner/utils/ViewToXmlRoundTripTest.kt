@@ -9,14 +9,21 @@
 
 package dev.mutwakil.androidide.uidesigner.utils
 
+import android.widget.TextView
+import dev.mutwakil.androidide.inflater.internal.LayoutFile
+import dev.mutwakil.androidide.inflater.internal.NamespaceImpl
+import dev.mutwakil.androidide.inflater.internal.ViewImpl
 import java.io.File
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.rules.TemporaryFolder
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
 class ViewToXmlRoundTripTest {
@@ -35,6 +42,23 @@ class ViewToXmlRoundTripTest {
     )
 
     assertNull(ViewToXml.findUnsupportedRoundTripConstruct(file))
+  }
+
+  @Test
+  fun defaultNamespaceUsesValidXmlDeclarationName() {
+    val file = temporaryFolder.newFile("namespace.xml")
+    val view =
+        ViewImpl(
+            LayoutFile(file, "namespace"),
+            "TextView",
+            TextView(RuntimeEnvironment.getApplication()),
+        )
+    view.namespaces["urn:default"] = NamespaceImpl("", "urn:default")
+
+    val xml = ViewToXml.generateXml(view)
+
+    assertTrue(xml.contains("xmlns=\\"urn:default\\""))
+    assertFalse(xml.contains("xmlns:="))
   }
 
   @Test
