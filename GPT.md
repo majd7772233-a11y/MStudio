@@ -603,3 +603,9 @@ The user's latest instruction was to finish the two remaining Phase 5 gaps, then
 - Added PerFileDiagnosticCacheTest and WorkspacePathMatchingTest source tests.
 - Source commits: f118137ea85246ec9e614d117cceec5a8ffd3741, 8f9f11239ac36978227c101cb80c69990130f12b, cde81243d63c0829dab8eb9ba530f7cf07090ed6, 968e766c027071e16ee35db8c2326ca0d7382a98, 20bcc3c27af992bcef6b7667d3bfb0201e1eab36. Test commits: d3a5e4862c19fa6dfa13905a4c750e5e93093502 and 915250a45b1e4d108d1e5475bb86a47ce46cb952.
 - Phase 6 remains in progress. Continue source audit of classpath/sync recovery, stale diagnostics, Java/Kotlin/XML completion/navigation/references/formatting/code actions, and indexing responsiveness. Keep roadmap and GPT.md updated before/after meaningful batches. No executable verification has been performed.
+
+
+### Phase 5 compatibility follow-up — 2026-10-13
+- Composite-build discovery now wraps access to ToolingGradleBuild.includedBuilds because that model property was added after older Gradle versions. An older build without this optional API should continue as a regular project rather than failing sync.
+- Source commit: e9a48859bdea06bcba990f0fd2bc6346b00b512c. Roadmap record: ae649a8fea8b05135a51101913cea07082ee4e3b.
+- No executable verification was performed. Keep custom includeBuild name aliases as a known limitation until a supported way to retrieve their Gradle task-selector names is implemented.
