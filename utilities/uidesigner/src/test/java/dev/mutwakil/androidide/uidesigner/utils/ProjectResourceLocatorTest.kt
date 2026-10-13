@@ -27,6 +27,22 @@ class ProjectResourceLocatorTest {
   val temporaryFolder = TemporaryFolder()
 
   @Test
+  fun prefersSettingsRootOverAnAndroidModuleBuildFile() {
+    val projectRoot = temporaryFolder.newFolder("multi-module-root")
+    File(projectRoot, "settings.gradle").writeText("include(':app', ':feature')")
+    File(projectRoot, "app/build.gradle").apply {
+      parentFile?.mkdirs()
+      writeText("plugins {}")
+    }
+    val layout = File(projectRoot, "app/src/main/res/layout/main.xml").apply {
+      parentFile?.mkdirs()
+      writeText("<LinearLayout />")
+    }
+
+    assertEquals(projectRoot.absolutePath, ProjectResourceLocator.findProjectRoot(layout)?.absolutePath)
+  }
+
+  @Test
   fun resolvesValuesFromTheMatchingConfigurationDirectory() {
     val projectRoot = temporaryFolder.newFolder("values-project")
     File(projectRoot, "app/src/main/res/values/colors.xml").apply {
