@@ -13,6 +13,8 @@ import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
 import java.io.File
+import org.xmlpull.v1.XmlPullParser
+import org.xmlpull.v1.XmlPullParserFactory
 
 /**
  * Finds project resources across Android modules, source sets and qualifier folders.
@@ -58,6 +60,43 @@ internal object ProjectResourceLocator {
                 .thenByDescending { if (it.path.contains("/src/main/res/")) 1 else 0 }
                 .thenBy { it.absolutePath }
         )
+  }
+
+  fun findValueResource(
+      projectRoot: File,
+      resourceType: String,
+      resourceName: String,
+      context: Context,
+  ): String? {
+    val parserFactory = XmlPullParserFactory.newInstance()
+    val directories = findResourceDirectories(projectRoot, "values", context)
+    for (directory in directories) {
+      val files = directory.listFiles()?.filter { it.isFile && it.extension == "xml" } ?: continue
+      for (file in files.sortedBy { it.name }) {
+        try {
+          file.inputStream().buffered().use { input ->
+            val parser = parserFactory.newPullParser()
+            parser.setInput(input, "UTF-8")
+            var event = parser.eventType
+            while (event != XmlPullParser.END_DOCUMENT) {
+              if (event == XmlPullParser.START_TAG) {
+                val itemType = parser.getAttributeValue(null, "type")
+                val matchesType = parser.name == resourceType ||
+                    (parser.name == "item" && itemType == resourceType)
+                if (matchesType && parser.getAttributeValue(null, "name") == resourceName) {
+                  val value = runCatching { parser.nextText().trim() }.getOrNull()
+                  if (!value.isNullOrBlank()) return value
+                }
+              }
+              event = parser.next()
+            }
+          }
+        } catch (_: Exception) {
+          // One malformed/unrelated values file must not hide other matching resource files.
+        }
+      }
+    }
+    return null
   }
 
   private fun qualifierScore(folderName: String, resourceType: String, context: Context): Int {
