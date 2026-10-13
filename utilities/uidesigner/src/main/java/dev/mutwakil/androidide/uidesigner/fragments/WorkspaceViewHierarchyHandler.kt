@@ -64,6 +64,8 @@ internal class WorkspaceViewHierarchyHandler : IViewGroup.SingleOnHierarchyChang
       return
     }
 
+    if (!frag.isInflating) frag.viewModel.markWorkspaceChanged()
+
     val lastAction = frag.undoManager.peekUndo()
 
     val action =
