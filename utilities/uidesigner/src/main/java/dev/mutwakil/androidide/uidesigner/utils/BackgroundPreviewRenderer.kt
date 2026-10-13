@@ -164,7 +164,12 @@ class BackgroundPreviewRenderer {
     val projectRoot = findProjectRoot(layoutFile) ?: return false
 
     val drawableFolders =
-        ProjectResourceLocator.findResourceDirectories(projectRoot, "drawable", context)
+        ProjectResourceLocator.findResourceDirectories(
+            projectRoot,
+            "drawable",
+            context,
+            ProjectResourceLocator.findModuleRoot(layoutFile),
+        )
 
     return loadImageFromFolders(view, drawableName, drawableFolders, context, layoutFile)
   }
@@ -178,7 +183,12 @@ class BackgroundPreviewRenderer {
     val projectRoot = findProjectRoot(layoutFile) ?: return false
 
     val mipmapFolders =
-        ProjectResourceLocator.findResourceDirectories(projectRoot, "mipmap", context)
+        ProjectResourceLocator.findResourceDirectories(
+            projectRoot,
+            "mipmap",
+            context,
+            ProjectResourceLocator.findModuleRoot(layoutFile),
+        )
 
     return loadImageFromFolders(view, mipmapName, mipmapFolders, context, layoutFile)
   }
@@ -548,6 +558,7 @@ class BackgroundPreviewRenderer {
                   "color",
                   colorString.substringAfter("@color/"),
                   context,
+                  ProjectResourceLocator.findModuleRoot(layoutFile),
               )
             }
         when {
@@ -584,6 +595,7 @@ class BackgroundPreviewRenderer {
                 "dimen",
                 dimensionString.substringAfter("@dimen/"),
                 context,
+                ProjectResourceLocator.findModuleRoot(layoutFile),
             )
           } ?: throw IllegalArgumentException("Unresolved dimension resource: $dimensionString")
         } else {
