@@ -71,6 +71,7 @@ import java.util.Objects
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionException
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * A foreground service that handles interaction with the Gradle Tooling API.
@@ -97,6 +98,7 @@ class GradleBuildService : Service(), BuildService, IToolingApiClient,
   private var notificationManager: NotificationManager? = null
   private var server: IToolingApiServer? = null
   private var eventListener: EventListener? = null
+  private val pendingServerRequests = ConcurrentHashMap.newKeySet<CompletableFuture<*>>()
 
   private val buildServiceScope = CoroutineScope(
     Dispatchers.Default + CoroutineName("GradleBuildService"))
@@ -262,9 +264,33 @@ class GradleBuildService : Service(), BuildService, IToolingApiClient,
 
   override fun onServerExited(exitCode: Int) {
     log.warn("Tooling API process terminated with exit code: {}", exitCode)
+    markToolingServerUnavailable(IllegalStateException("Tooling API process exited with code $exitCode"))
+  }
+
+  override fun onServerStartFailed(error: Throwable) {
+    log.error("Tooling API server failed before becoming ready", error)
+    markToolingServerUnavailable(IllegalStateException("Unable to start the Tooling API server", error))
+  }
+
+  private fun markToolingServerUnavailable(cause: Throwable) {
     server = null
     isToolingServerStarted = false
+    isBuildInProgress = false
+    pendingServerRequests.forEach { request ->
+      request.completeExceptionally(cause)
+    }
+    pendingServerRequests.clear()
     stopForeground(STOP_FOREGROUND_REMOVE)
+  }
+
+  private fun <T> trackServerRequest(request: CompletableFuture<T>): CompletableFuture<T> {
+    pendingServerRequests.add(request)
+    request.whenComplete { _, _ -> pendingServerRequests.remove(request) }
+    // Close the race where the process dies immediately before the request is registered.
+    if (!isToolingServerStarted()) {
+      request.completeExceptionally(IllegalStateException("Tooling API server is not running"))
+    }
+    return request
   }
 
   override fun getClient(): IToolingApiClient {
@@ -402,24 +428,28 @@ class GradleBuildService : Service(), BuildService, IToolingApiClient,
 
   override fun metadata(): CompletableFuture<ToolingServerMetadata> {
     checkServerStarted()
-    return server!!.metadata()
+    val currentServer = server ?: throw ToolingServerNotStartedException()
+    return trackServerRequest(currentServer.metadata())
   }
 
   override fun initializeProject(
     params: InitializeProjectParams): CompletableFuture<InitializeResult> {
     checkServerStarted()
     Objects.requireNonNull(params)
-    return performBuildTasks(server!!.initialize(params))
+    val currentServer = server ?: throw ToolingServerNotStartedException()
+    return performBuildTasks(trackServerRequest(currentServer.initialize(params)))
   }
 
   override fun executeTasks(message: TaskExecutionMessage): CompletableFuture<TaskExecutionResult> {
     checkServerStarted()
-    return performBuildTasks(server!!.executeTasks(message))
+    val currentServer = server ?: throw ToolingServerNotStartedException()
+    return performBuildTasks(trackServerRequest(currentServer.executeTasks(message)))
   }
 
   override fun cancelCurrentBuild(): CompletableFuture<BuildCancellationRequestResult> {
     checkServerStarted()
-    return server!!.cancelCurrentBuild()
+    val currentServer = server ?: throw ToolingServerNotStartedException()
+    return trackServerRequest(currentServer.cancelCurrentBuild())
   }
 
   private fun <T> performBuildTasks(future: CompletableFuture<T>): CompletableFuture<T> {
