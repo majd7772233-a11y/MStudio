@@ -28,9 +28,12 @@ import dev.mutwakil.androidide.templates.ParameterConstraint.LAYOUT
 import dev.mutwakil.androidide.templates.ParameterConstraint.MODULE_NAME
 import dev.mutwakil.androidide.templates.ParameterConstraint.NONEMPTY
 import dev.mutwakil.androidide.templates.ParameterConstraint.PACKAGE
+import dev.mutwakil.androidide.templates.ParameterConstraint.PROJECT_NAME
 import dev.mutwakil.androidide.templates.base.util.isValidModuleName
+import dev.mutwakil.androidide.templates.base.util.isValidProjectName
 import dev.mutwakil.androidide.templates.impl.R.string
 import dev.mutwakil.androidide.templates.impl.R
+import dev.mutwakil.androidide.resources.R.string as sharedString
 import dev.mutwakil.androidide.utils.AndroidUtils
 import jdkx.lang.model.SourceVersion
 import java.io.File
@@ -66,6 +69,7 @@ object ConstraintVerifier {
         CLASS -> validateClassName(input)
         CLASS_NAME -> validateSimpleName(input)
         MODULE_NAME -> validateModuleName(input)
+        PROJECT_NAME -> validateProjectName(input)
         LAYOUT -> validateLayoutName(input)
         EXISTS -> checKFileExists(input)
         FILE -> checkIsFile(input)
@@ -156,6 +160,11 @@ object ConstraintVerifier {
 
     return BaseApplication.getBaseInstance()
       .getString(string.msg_invalid_module_name)
+  }
+
+  private fun validateProjectName(input: String): String? {
+    if (isValidProjectName(input)) return null
+    return BaseApplication.getBaseInstance().getString(sharedString.msg_invalid_project_name)
   }
 
   private fun validateClassName(name: String): String? {
