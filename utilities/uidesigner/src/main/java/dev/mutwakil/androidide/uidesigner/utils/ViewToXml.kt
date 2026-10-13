@@ -18,6 +18,7 @@
 package dev.mutwakil.androidide.uidesigner.utils
 
 import android.content.Context
+import android.util.Xml
 import com.blankj.utilcode.util.ThreadUtils
 import dev.mutwakil.androidide.inflater.IView
 import dev.mutwakil.androidide.inflater.IViewGroup
@@ -28,8 +29,10 @@ import dev.mutwakil.androidide.tasks.executeAsyncProvideError
 import dev.mutwakil.androidide.uidesigner.R
 import dev.mutwakil.androidide.utils.DialogUtils
 import java.util.concurrent.CompletableFuture
+import java.io.File
 import java.util.concurrent.CompletionException
 import org.slf4j.LoggerFactory
+import org.xmlpull.v1.XmlPullParser
 
 /**
  * Generates XML code for [IView].
@@ -94,6 +97,38 @@ object ViewToXml {
     }
   }
 
+  /**
+   * Returns the first XML construct that this visual view model cannot represent losslessly.
+   *
+   * These constructs must be left untouched until the designer can preserve their source nodes;
+   * serializing the inflated view tree would otherwise silently remove their original semantics.
+   */
+  @JvmStatic
+  fun findUnsupportedRoundTripConstruct(file: File): String? {
+    val parser = Xml.newPullParser()
+    parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true)
+    file.inputStream().buffered().use { input ->
+      parser.setInput(input, null)
+      var event = parser.eventType
+      while (event != XmlPullParser.END_DOCUMENT) {
+        if (event == XmlPullParser.START_TAG) {
+          val tag = parser.name
+          val unsupported =
+              tag.equals("include", ignoreCase = true) ||
+                  tag.equals("merge", ignoreCase = true) ||
+                  tag.equals("requestFocus", ignoreCase = true) ||
+                  tag.equals("tag", ignoreCase = true) ||
+                  tag.equals("fragment", ignoreCase = true) ||
+                  (tag.equals("view", ignoreCase = true) &&
+                      !parser.getAttributeValue(null, "class").isNullOrBlank())
+          if (unsupported) return tag
+        }
+        event = parser.next()
+      }
+    }
+    return null
+  }
+
   @JvmStatic
   fun generateXml(view: ViewImpl): String {
     val builder = XMLBuilder("", System.lineSeparator())
@@ -111,14 +146,23 @@ object ViewToXml {
     for (namespace in view.namespaceDecls) {
       linefeed()
       indent(indent)
-      addSingleAttribute("xmlns:${namespace.prefix}", namespace.uri, true)
+      val declarationName =
+          namespace.prefix.takeIf { it.isNotBlank() }?.let { "xmlns:$it" } ?: "xmlns"
+      addSingleAttribute(declarationName, namespace.uri, true)
     }
 
     for (attr in view.attributes) {
+      val namespace = attr.namespace
+      if (namespace != null && namespace.uri.isNotBlank() && namespace.prefix.isBlank()) {
+        throw IllegalStateException(
+            "Cannot safely serialize namespaced attribute '${attr.name}' without a namespace prefix"
+        )
+      }
+
       linefeed()
       indent(indent)
 
-      val ns = attr.namespace?.prefix?.let { "${it}:" } ?: ""
+      val ns = namespace?.prefix?.takeIf { it.isNotBlank() }?.let { "${it}:" } ?: ""
       addSingleAttribute("${ns}${attr.name}", attr.value, true)
     }
 
