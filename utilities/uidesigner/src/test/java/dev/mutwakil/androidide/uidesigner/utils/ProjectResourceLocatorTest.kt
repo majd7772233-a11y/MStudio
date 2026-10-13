@@ -106,6 +106,40 @@ class ProjectResourceLocatorTest {
   }
 
   @Test
+  fun matchingConfigurationQualifierOutranksBaseVariantResource() {
+    val projectRoot = temporaryFolder.newFolder("variant-qualifier-precedence")
+    val appRoot = File(projectRoot, "app").apply { mkdirs() }
+    File(appRoot, "build.gradle").writeText("plugins {}")
+    File(appRoot, "src/debug/res/values/colors.xml").apply {
+      parentFile?.mkdirs()
+      writeText("<resources><color name=\"accent\">#111111</color></resources>")
+    }
+    File(appRoot, "src/main/res/values-night/colors.xml").apply {
+      parentFile?.mkdirs()
+      writeText("<resources><color name=\"accent\">#222222</color></resources>")
+    }
+
+    val baseContext = RuntimeEnvironment.getApplication()
+    val nightConfiguration =
+        Configuration(baseContext.resources.configuration).apply {
+          uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or
+              Configuration.UI_MODE_NIGHT_YES
+        }
+
+    assertEquals(
+        "#222222",
+        ProjectResourceLocator.resolveValueResource(
+            projectRoot,
+            "color",
+            "accent",
+            baseContext.createConfigurationContext(nightConfiguration),
+            appRoot,
+            "debug",
+        ),
+    )
+  }
+
+  @Test
   fun resolvesValuesFromTheMatchingConfigurationDirectory() {
     val projectRoot = temporaryFolder.newFolder("values-project")
     File(projectRoot, "app/src/main/res/values/colors.xml").apply {
