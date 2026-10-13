@@ -535,3 +535,13 @@ Read `MSTUDIO_ROADMAP.md` first; its latest handoff checkpoint was committed in 
 - Latest implementation commits include `307c981`, `03156b0`, `9d5d65b`, `672cff7`, `b4e056b`, `1738863`, `b61ef8a`, and `2f227a5`; the roadmap implementation record is `31cb1bf`.
 - No tests/builds/Actions/device verification were run, as instructed. Phase 4 source fixes are implemented, but runtime acceptance is not proven; keep all evidence checklist items unchecked until the user's later verification batch. Do not claim a verified APK build or installation.
 
+
+## Mandatory execution style — user instruction, 2026-10-13
+
+- Do not pad responses with philosophy, repeated status narration, or unnecessary explanations. When the user gives a clear actionable instruction, execute it immediately and directly; prioritize implementation over talking about implementation. Ask only when a genuinely blocking ambiguity prevents safe progress.
+- Continue to respect the user's explicit constraint for the current MStudio batch: do not run tests, builds, GitHub Actions, or device checks until the user requests that verification batch. Do not claim runtime acceptance without evidence.
+
+## Phase 4 wrapper-repair follow-up — 2026-10-13
+
+- GradleBuildService.doInstallWrapper() now extracts the bundled archive into a staging directory and repairs only missing/invalid gradlew, gradle-wrapper.jar, and gradle-wrapper.properties. Existing valid components are preserved, including a valid project-specific distributionUrl; repaired files are checked before replacement, gradlew is marked executable, and strict wrapper preflight runs afterward. Staging is cleaned in finally.
+- Commit: d1f7581017e2f3f4fc14a7384af5c907595fd4ca. This was source-only work; no tests/builds/Actions/device checks were run. Continue auditing Phase 4 source requirements and documentation, without misrepresenting the deferred runtime acceptance as verified.
