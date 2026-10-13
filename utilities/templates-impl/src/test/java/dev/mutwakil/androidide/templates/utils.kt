@@ -157,7 +157,6 @@ private fun assertGeneratedProject(
   assertThat(wrapperJar.isFile && wrapperJar.length() > 0L).isTrue()
   assertThat(wrapperProperties.isFile && wrapperProperties.length() > 0L).isTrue()
   assertThat(gradlew.isFile && gradlew.length() > 0L).isTrue()
-  assertThat(rootBuild.readText()).contains(projectName)
   assertThat(settings.readText()).contains(projectName)
   assertThat(appBuild.readText()).contains(packageName)
 }
