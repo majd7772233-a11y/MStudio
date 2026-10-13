@@ -40,7 +40,9 @@ import dev.mutwakil.androidide.resources.R.string
 import dev.mutwakil.androidide.roomData.recentproject.RecentProject
 import dev.mutwakil.androidide.templates.ITemplateProvider
 import dev.mutwakil.androidide.utils.DialogUtils
+import dev.mutwakil.androidide.utils.flashError
 import dev.mutwakil.androidide.utils.flashInfo
+import dev.mutwakil.androidide.utils.flashSuccess
 import dev.mutwakil.androidide.utils.getCreatedTime
 import dev.mutwakil.androidide.utils.getLastModifiedTime
 import dev.mutwakil.androidide.utils.readProjectLanguage
@@ -103,7 +105,44 @@ class MainActivity : EdgeToEdgeIDEActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ToolsManager.addInitResultListener(runtimeSetupResultListener)
-        openLastProject()
+        val hasPendingCreatedProject = viewModel.pendingCreatedProject.value != null
+
+        viewModel.pendingTemplateCreationError.observe(this) { message ->
+            if (!message.isNullOrBlank()) {
+                viewModel.pendingTemplateCreationError.value = null
+                flashError(message)
+            }
+        }
+
+        viewModel.pendingCreatedProject.observe(this) { result ->
+            if (result == null) return@observe
+
+            // Delay consuming the result until the screen transition completes. If this activity
+            // is recreated during the transition, the new instance can safely resume this event.
+            viewModel.setScreen(SCREEN_MAIN)
+            viewModel.postTransition(this) {
+                val pending = viewModel.pendingCreatedProject.value ?: return@postTransition
+                viewModel.pendingCreatedProject.value = null
+
+                val templateName = viewModel.template.value?.templateName
+                    ?.let { getString(it) } ?: getString(string.app_name)
+                val now = System.currentTimeMillis().toString()
+                val project = RecentProject(
+                    location = pending.data.projectDir.path,
+                    name = pending.data.name,
+                    createdAt = now,
+                    lastModified = now,
+                    templateName = templateName,
+                    language = pending.data.language?.name ?: "unknown"
+                )
+                flashSuccess(string.project_created_successfully)
+                openProject(pending.data.projectDir, project = project)
+            }
+        }
+
+        if (!hasPendingCreatedProject) {
+            openLastProject()
+        }
 
         viewModel.currentScreen.observe(this) { screen ->
             if (screen == -1) {
