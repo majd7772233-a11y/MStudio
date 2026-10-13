@@ -573,3 +573,8 @@ Read `MSTUDIO_ROADMAP.md` first; its latest handoff checkpoint was committed in 
 - Main implementation commits include `2ca624bc`, `2ce0a049`, `a2ec66a9`, `3889a0c5`, `f990dd36`, `611732a4`, `317684d6`, `6cba6176`, `3176e7e5`, `32b157c8`, `67943d72`, `5d7ca255`, `fc077795`, `84e96c64`, `e734e824`, `45ca3b99` and associated test commits. Consult the live branch history for full SHAs.
 - **No tests, builds, Actions, or device checks were run** due to the user's explicit sequencing constraint. Phase 5 source implementation is ready for the next source phase, but its runtime acceptance remains pending.
 - Known constraints to retain honestly: SAF selection currently supports the app's document provider and primary shared storage only; composite/included builds have not been independently verified as separate IDE modules. Do not claim acceptance or runtime success until the deferred verification batch is authorized and run.
+
+
+### نص المستخدم الإلزامي بخصوص المرحلة الخامسة
+
+عندما يقول المستخدم «يلا المرحلة الخامسة»، يجب تنفيذ المرحلة الخامسة من خريطة الطريق بشكل شامل وكامل، بجميع أجزائها الفرعية ووحداتها وتحسيناتها وإصلاحاتها وكل ما يتعلق بها، بحيث يكون المشروع مستعدًا للانتقال مباشرة إلى المرحلة التالية. ممنوع الاكتفاء بإصلاح جزئي أو بخطة أو بتحديث توثيق فقط. يظل منع تشغيل الاختبارات والبناء وGitHub Actions وفحوصات الجهاز قائمًا حتى يأذن المستخدم بها؛ لا تستخدم تأجيل التحقق ذريعة لترك أعمال المصدر القابلة للتنفيذ ناقصة، ولا تدّعِ نجاح تحقق لم يُنفّذ.
