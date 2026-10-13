@@ -874,3 +874,21 @@ Source-level boundary: this closes the identified implementation gaps in process
 - Added a clear-all cache test alongside the per-file cache tests.
 - Source commits: a4968892db009ff0685b9ab1c1d8e66006372f43 and 68d22c9bc0dcb1b77bb0d8097e367fd3fc3f50fd; test commit: 23c2a3c788f4a6aa8e060b2204540367856e9a75.
 - Source-level only; tests/builds/Actions/device checks remain deferred.
+
+
+
+## Phase 6 source closure and Phase 7 kickoff — 2026-10-13
+
+### Phase 6 — editor/LSP diagnostics and module routing
+- Invalidated cached Java diagnostics on every Java document change, because unsaved buffer edits can leave the on-disk modification timestamp unchanged.
+- Reset cached Java completions when the workspace/classpath changes, avoiding reuse of completion context from the previous project.
+- Added a workspace-generation guard to Java diagnostics: project setup cancels current analysis and increments a generation; asynchronous results started against an older workspace are discarded before publishing.
+- These changes complement the per-file diagnostic cache, post-sync cache invalidation, captured-file analysis, and segment-aware deepest-module path matching already recorded above.
+- Source commits: `8fc635b04cf00ee989c3bed7eaa410c90d93ffba` and `4395a17eec50dd9475de304964a080339c2f619b`.
+- Phase 6 source fixes are implemented for the identified cache/context/routing defects, but broad acceptance for Kotlin/XML features, responsiveness, and all editor actions is **not** claimed. No tests, builds, Actions, or device checks were run. Keep the acceptance gate pending.
+
+### Phase 7 — XML designer/resource preview safety (started)
+- In `UIDesignerActivity.onCreate`, missing layout-file extras, directories, deleted files, and unreadable layout files now exit through the existing cancelled-result path with an explicit logged reason instead of leaving a half-initialized activity or throwing an avoidable exception.
+- This complements the existing guard that refuses to return generated XML when layout inflation has errors, so an invalid preview cannot be returned to the editor as replacement source.
+- Source commit: `f852a40bf4df457b82529e1dc6180fda22135385`.
+- This is the first targeted Phase 7 safety fix, not completion of the designer phase. Still inspect and implement resource resolution, XML source/preview round-tripping, attribute preservation, drag/drop IDs/constraints, includes/custom views, configuration-qualified resources, and Compose preview separately. No executable verification was performed.
