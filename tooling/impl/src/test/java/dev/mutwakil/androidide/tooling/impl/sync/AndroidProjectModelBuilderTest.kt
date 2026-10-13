@@ -4,6 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import java.io.File
+import java.nio.file.Files
 
 @RunWith(JUnit4::class)
 class AndroidProjectModelBuilderTest {
@@ -59,4 +61,51 @@ class AndroidProjectModelBuilderTest {
     assertThat(error).hasMessageThat().contains("No build variants were reported")
     assertThat(error).hasMessageThat().contains(":mobile")
   }
+  @Test
+  fun findsNestedClassesJarInsideTheExactFlavoredVariantDirectory() {
+    val buildDirectory = Files.createTempDirectory("mstudio-classes-jar-").toFile()
+    try {
+      val selectedJar = File(
+        buildDirectory,
+        "intermediates/compile_library_classes_jar/freeMinApiDebug/output/classes.jar",
+      )
+      selectedJar.parentFile.mkdirs()
+      selectedJar.writeBytes(byteArrayOf(1))
+      val otherVariantJar = File(
+        buildDirectory,
+        "intermediates/compile_library_classes_jar/paidDebug/classes.jar",
+      )
+      otherVariantJar.parentFile.mkdirs()
+      otherVariantJar.writeBytes(byteArrayOf(2))
+
+      assertThat(findClassesJarForVariant(buildDirectory, "freeMinApiDebug"))
+        .isEqualTo(selectedJar)
+    } finally {
+      buildDirectory.deleteRecursively()
+    }
+  }
+
+  @Test
+  fun doesNotBorrowAnotherVariantsJarWhenSelectedVariantHasNotBeenBuilt() {
+    val buildDirectory = Files.createTempDirectory("mstudio-classes-jar-").toFile()
+    try {
+      val otherVariantJar = File(
+        buildDirectory,
+        "intermediates/compile_library_classes_jar/paidDebug/classes.jar",
+      )
+      otherVariantJar.parentFile.mkdirs()
+      otherVariantJar.writeBytes(byteArrayOf(2))
+
+      assertThat(findClassesJarForVariant(buildDirectory, "freeDebug"))
+        .isEqualTo(
+          File(
+            buildDirectory,
+            "intermediates/compile_library_classes_jar/freeDebug/classes.jar",
+          ),
+        )
+    } finally {
+      buildDirectory.deleteRecursively()
+    }
+  }
+
 }
