@@ -202,6 +202,7 @@ $modified"""
             "drawable",
             context,
             ProjectResourceLocator.findModuleRoot(layoutFile),
+            ProjectResourceLocator.findSourceSet(layoutFile),
         )
         .asSequence()
         .map { File(it, "$drawableName.xml") }
@@ -461,6 +462,7 @@ $modified"""
                 colorString.substringAfter("@color/"),
                 context,
                 ProjectResourceLocator.findModuleRoot(layoutFile),
+                ProjectResourceLocator.findSourceSet(layoutFile),
             )
           }
       if (projectValue != null) return Color.parseColor(projectValue)
@@ -482,56 +484,8 @@ $modified"""
   }
 
   /** Find project root (reused from existing logic) */
-  private fun findProjectRoot(layoutFile: File?): File? {
-    if (layoutFile == null) return null
-
-    var current = layoutFile.parentFile
-
-    for (i in 0..10) {
-      if (current == null) break
-
-      val hasGradleBuild =
-          File(current, "build.gradle").exists() || File(current, "build.gradle.kts").exists()
-      val hasAppModule = File(current, "app").exists()
-      val hasSrcMain = File(current, "src/main").exists()
-      val hasSettings =
-          File(current, "settings.gradle").exists() || File(current, "settings.gradle.kts").exists()
-
-      if (hasSrcMain && !hasAppModule && !hasSettings) {
-        current = current.parentFile
-        continue
-      }
-
-      if (hasGradleBuild || hasAppModule || hasSettings) {
-        log.debug("Found project root: {}", current.absolutePath)
-        return current
-      }
-
-      current = current.parentFile
-    }
-
-    current = layoutFile.parentFile
-    for (i in 0..10) {
-      if (current == null) break
-
-      if (current.name == "layout" && current.parentFile?.name == "res") {
-        val resDir = current.parentFile
-        val mainDir = resDir?.parentFile
-        val srcDir = mainDir?.parentFile
-        val moduleRoot = srcDir?.parentFile
-
-        if (moduleRoot != null) {
-          log.debug("Found module root via res/layout path: {}", moduleRoot.absolutePath)
-          return moduleRoot
-        }
-      }
-
-      current = current.parentFile
-    }
-
-    log.warn("Could not find project root for layout file: {}", layoutFile.absolutePath)
-    return null
-  }
+  private fun findProjectRoot(layoutFile: File?): File? =
+      ProjectResourceLocator.findProjectRoot(layoutFile)
 }
 
 /** Enhanced data classes for vector parsing with group support */
