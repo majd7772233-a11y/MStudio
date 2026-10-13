@@ -73,6 +73,38 @@ class UIDesignerActivity : BaseIDEActivity() {
             return
           }
 
+          // Never reserialize a source document when the user has not edited the visual tree.
+          // Returning the original bytes preserves comments, formatting, data-binding wrappers,
+          // include directives, and any XML constructs not represented by the preview model.
+          if (!viewModel.hasWorkspaceChanges) {
+            try {
+              onXmlGenerated(viewModel.file.readText(Charsets.UTF_8))
+            } catch (error: Exception) {
+              onFailedToReturnXml("Unable to read the original layout: ${error.message}")
+            }
+            return
+          }
+
+          // The preview inflater expands or omits some XML-only constructs. Until those nodes are
+          // represented in the designer model, refuse a lossy save rather than silently deleting
+          // their semantics from the user's layout.
+          val unsupportedConstruct =
+              try {
+                ViewToXml.findUnsupportedRoundTripConstruct(viewModel.file)
+              } catch (error: Exception) {
+                log.error("Unable to validate XML round-trip safety", error)
+                flashError(R.string.msg_generate_xml_failed)
+                return
+              }
+          if (unsupportedConstruct != null) {
+            log.error(
+                "Refusing lossy XML round-trip because layout contains <{}>",
+                unsupportedConstruct,
+            )
+            flashError(R.string.msg_generate_xml_failed)
+            return
+          }
+
           if (frag.workspaceView.childCount <= 0) {
             onFailedToReturnXml("No views have been added")
             return
