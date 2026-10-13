@@ -262,6 +262,8 @@ class GradleBuildService : Service(), BuildService, IToolingApiClient,
 
   override fun onServerExited(exitCode: Int) {
     log.warn("Tooling API process terminated with exit code: {}", exitCode)
+    server = null
+    isToolingServerStarted = false
     stopForeground(STOP_FOREGROUND_REMOVE)
   }
 
