@@ -19,6 +19,7 @@ package dev.mutwakil.androidide.utils
 
 import dev.mutwakil.androidide.app.IDEApplication
 import dev.mutwakil.androidide.templates.RecipeExecutor
+import dev.mutwakil.androidide.templates.TemplateRecipeResult
 import java.io.File
 import java.io.InputStream
 import java.util.LinkedHashSet
@@ -34,7 +35,38 @@ class TemplateRecipeExecutor : RecipeExecutor {
     get() = IDEApplication.instance
 
   private val createdPaths = LinkedHashSet<File>()
+  private var projectRoot: File? = null
   private var finished = false
+
+  override fun beginProjectCreation(projectDir: File) {
+    checkActive()
+    val root = projectDir.canonicalFile
+    check(!root.exists()) { "Project directory already exists: '$root'" }
+    val parent = root.parentFile
+    require(parent != null && parent.isDirectory && parent.canRead() && parent.canWrite()) {
+      "Project save location is not a readable, writable directory: '$parent'"
+    }
+    check(projectRoot == null) { "A project creation transaction is already active" }
+    projectRoot = root
+  }
+
+  /**
+   * Execute a complete recipe as one transaction. A missing result or any thrown failure rolls
+   * back only paths created by this executor; a successful result commits the generated files.
+   */
+  fun <T : TemplateRecipeResult> executeRecipe(
+      recipe: RecipeExecutor.() -> T?,
+  ): T? {
+    checkActive()
+    return try {
+      val result = recipe(this)
+      if (result == null) rollback() else commit()
+      result
+    } catch (error: Throwable) {
+      rollback()
+      throw error
+    }
+  }
 
   override fun copy(source: File, dest: File) {
     checkActive()
@@ -80,6 +112,7 @@ class TemplateRecipeExecutor : RecipeExecutor {
     if (finished) return
     finished = true
     createdPaths.clear()
+    projectRoot = null
   }
 
   /**
@@ -90,6 +123,15 @@ class TemplateRecipeExecutor : RecipeExecutor {
     if (finished) return
     createdPaths.toList().asReversed().forEach { path -> runCatching { path.delete() } }
     createdPaths.clear()
+
+    // Template builders also create source/resource directories directly. Remove only empty
+    // directories beneath a destination proven absent at transaction start. Unknown files are
+    // never recursively deleted; any directory containing them is retained.
+    projectRoot?.takeIf { it.isDirectory }?.walkBottomUp()
+        ?.filter { it.isDirectory && it.list()?.isEmpty() == true }
+        ?.forEach { directory -> runCatching { directory.delete() } }
+
+    projectRoot = null
     finished = true
   }
 
@@ -151,7 +193,14 @@ class TemplateRecipeExecutor : RecipeExecutor {
   }
 
   private fun registerNewFile(file: File) {
-    if (!file.exists()) createdPaths.add(file.absoluteFile)
+    val path = file.canonicalFile
+    if (path.exists()) {
+      check(path.isFile && path in createdPaths) {
+        "Refusing to overwrite an existing template destination: '$path'"
+      }
+    } else {
+      createdPaths.add(path)
+    }
   }
 
   private fun checkActive() {
