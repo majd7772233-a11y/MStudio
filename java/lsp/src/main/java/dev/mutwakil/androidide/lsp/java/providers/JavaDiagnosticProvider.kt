@@ -28,6 +28,7 @@ import dev.mutwakil.androidide.projects.IProjectManager
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
 import java.time.Instant
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -37,8 +38,8 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 class JavaDiagnosticProvider {
 
-  private val analyzeTimestamps = mutableMapOf<Path, Instant>()
-  private var cachedDiagnostics = DiagnosticResult.NO_UPDATE
+  private val analyzeTimestamps = ConcurrentHashMap<Path, Instant>()
+  private val cachedDiagnostics = ConcurrentHashMap<Path, DiagnosticResult>()
   private var analyzing = AtomicBoolean(false)
   private var analyzingThread: AnalyzingThread? = null
 
@@ -61,8 +62,12 @@ class JavaDiagnosticProvider {
     val analyzedAt = analyzeTimestamps[file]
 
     if (analyzedAt?.isAfter(modifiedAt) == true) {
-      log.debug("Using cached analyze results...")
-      return cachedDiagnostics
+      cachedDiagnostics[file]?.let {
+        log.debug("Using cached analyze results for {}", file)
+        return it
+      }
+      // A timestamp without its matching result must never make another file's diagnostics reusable.
+      analyzeTimestamps.remove(file)
     }
 
     analyzingThread?.let { analyzingThread ->
@@ -96,6 +101,7 @@ class JavaDiagnosticProvider {
 
   fun clearTimestamp(file: Path) {
     analyzeTimestamps.remove(file)
+    cachedDiagnostics.remove(file)
   }
 
   private fun doAnalyze(file: Path, task: CompileTask): DiagnosticResult {
@@ -104,8 +110,8 @@ class JavaDiagnosticProvider {
         // Do not use Collections.emptyList ()
         // The returned list is accessed and the list returned by Collections.emptyList()
         // throws exception when trying to access.
-        log.info("Using cached diagnostics")
-        cachedDiagnostics
+        log.info("Using cached diagnostics for {}", file)
+        cachedDiagnostics[file] ?: DiagnosticResult.NO_UPDATE
       } else
         DiagnosticResult(
           file,
@@ -147,9 +153,14 @@ class JavaDiagnosticProvider {
           compiler.destroy()
           analyzing.set(false)
         }
-          .also {
-            cachedDiagnostics = it
-            analyzeTimestamps[file] = Instant.now()
+          .also { result ->
+            if (result.file == file) {
+              cachedDiagnostics[file] = result
+              analyzeTimestamps[file] = Instant.now()
+            } else {
+              // NO_UPDATE and failures have no fresh diagnostics for this file.
+              analyzeTimestamps.remove(file)
+            }
           }
     }
   }
