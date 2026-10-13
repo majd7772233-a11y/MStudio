@@ -20,6 +20,7 @@ import dev.mutwakil.androidide.projects.api.Workspace
 import dev.mutwakil.androidide.xml.res.IResourceTable
 import java.io.File
 import java.nio.file.Path
+import java.util.concurrent.ConcurrentHashMap
 import org.slf4j.LoggerFactory
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
@@ -30,6 +31,17 @@ import org.xmlpull.v1.XmlPullParserFactory
  * missing.
  */
 internal class XmlResourceReferenceDiagnosticProvider {
+
+  private val sourceResourceCache = ConcurrentHashMap<String, Set<String>>()
+
+  fun clearCache() {
+    sourceResourceCache.clear()
+  }
+
+  fun invalidate(file: Path, workspace: Workspace?) {
+    val module = workspace?.findModuleForFile(file)?.let { it as? AndroidModule } ?: return
+    sourceResourceCache.remove(module.delegate.projectDir.absolutePath)
+  }
 
   fun analyze(file: Path, workspace: Workspace?): DiagnosticResult {
     val module = workspace?.findModuleForFile(file)?.let { it as? AndroidModule }
@@ -52,7 +64,11 @@ internal class XmlResourceReferenceDiagnosticProvider {
         }
     val diagnostics = mutableListOf<DiagnosticItem>()
     val comments = xmlCommentRanges(source)
-    val sourceResources = collectSourceResources(module.delegate.projectDir)
+    val moduleRoot = module.delegate.projectDir
+    val sourceResources =
+        sourceResourceCache.computeIfAbsent(moduleRoot.absolutePath) {
+          collectSourceResources(moduleRoot)
+        }
 
     for (match in RESOURCE_REFERENCE.findAll(source)) {
       if (comments.any { match.range.first >= it.first && match.range.first <= it.last }) continue
@@ -62,7 +78,8 @@ internal class XmlResourceReferenceDiagnosticProvider {
       if (packageName == "android" || typeName == "id" || typeName == "attr") continue
       val type = runCatching { AaptResourceType.valueOf(typeName.uppercase()) }.getOrNull() ?: continue
 
-      if ("$typeName/$resourceName" in sourceResources ||
+      val isModulePackage = packageName == null || packageName == module.namespace
+      if ((isModulePackage && "$typeName/$resourceName" in sourceResources) ||
           existsInTables(tables, type, resourceName, packageName)
       ) {
         continue
