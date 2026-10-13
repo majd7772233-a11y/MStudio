@@ -125,6 +125,7 @@ class ComposePreviewViewModel(
                         is InitializationResult.Ready -> {
                             modulePath = result.projectContext.modulePath
                             variantName = result.projectContext.variantName
+                            isInitialized.set(true)
                             initializationDeferred.complete(Unit)
                             _previewState.value = PreviewState.Idle
                             LOG.info(
