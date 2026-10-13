@@ -105,7 +105,8 @@ class MainActivity : EdgeToEdgeIDEActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ToolsManager.addInitResultListener(runtimeSetupResultListener)
-        val hasPendingCreatedProject = viewModel.pendingCreatedProject.value != null
+        val hasPendingCreatedProject =
+            viewModel.pendingCreatedProject.value != null || viewModel.creatingProject.value == true
 
         viewModel.pendingTemplateCreationError.observe(this) { message ->
             if (!message.isNullOrBlank()) {
