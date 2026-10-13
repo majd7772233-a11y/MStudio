@@ -11,11 +11,28 @@ package dev.mutwakil.androidide.lsp.xml.providers
 
 import java.nio.file.Paths
 import java.io.File
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class XmlResourceReferenceDiagnosticProviderTest {
+
+  @Test
+  fun declaredIdsAreIndexedButCommentedIdsAreIgnored() {
+    val source =
+        """<TextView android:id="@+id/real_id" /> <!-- @+id/comment_only -->"""
+    val commentStart = source.indexOf("<!--")
+    val commentEnd = source.indexOf("-->") + 3
+
+    val ids =
+        XmlResourceReferenceDiagnosticProvider.declaredIdsFromSource(
+            source,
+            listOf(commentStart until commentEnd),
+        )
+
+    assertEquals(setOf("real_id"), ids)
+  }
 
   @Test
   fun resourceEditsInvalidateTheModuleResourceIndex() {
