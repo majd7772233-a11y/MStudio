@@ -35,6 +35,10 @@ apply {
     plugin(AndroidIDEAssetsPlugin::class.java)
 }
 
+val vineflowerRuntime by configurations.creating {
+    isTransitive = false
+}
+
 buildscript {
     dependencies {
         classpath(libs.logging.logback.core)
@@ -136,7 +140,8 @@ dependencies {
     implementation(libs.common.charts)
     implementation(libs.common.hiddenApiBypass)
     implementation(libs.aapt2.common)
-    implementation(libs.vineflower)
+    vineflowerRuntime(libs.vineflower)
+    testImplementation(libs.vineflower)
 
     implementation(libs.google.auto.service.annotations)
     implementation(libs.google.gson)
@@ -232,4 +237,16 @@ dependencies {
 
     testImplementation(projects.testing.unitTest)
     androidTestImplementation(projects.testing.androidTest)
+}
+
+
+val stageVineflowerRuntime by tasks.registering(Copy::class) {
+    from(vineflowerRuntime)
+    into(layout.buildDirectory.dir("generated/vineflowerAssets"))
+    rename { "vineflower.jar" }
+}
+
+android.sourceSets.getByName("main").assets.srcDir(layout.buildDirectory.dir("generated/vineflowerAssets"))
+tasks.named("preBuild").configure {
+    dependsOn(stageVineflowerRuntime)
 }
