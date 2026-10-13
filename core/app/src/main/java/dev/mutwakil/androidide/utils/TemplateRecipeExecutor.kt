@@ -70,6 +70,7 @@ class TemplateRecipeExecutor : RecipeExecutor {
 
   override fun copy(source: File, dest: File) {
     checkActive()
+    ensureDestinationAllowed(dest)
     ensureParentDirectory(dest)
     registerNewFile(dest)
     source.copyTo(dest)
@@ -77,6 +78,7 @@ class TemplateRecipeExecutor : RecipeExecutor {
 
   override fun save(source: String, dest: File) {
     checkActive()
+    ensureDestinationAllowed(dest)
     ensureParentDirectory(dest)
     registerNewFile(dest)
     dest.writeText(source, Charsets.UTF_8)
@@ -84,6 +86,7 @@ class TemplateRecipeExecutor : RecipeExecutor {
 
   override fun saveBytes(source: ByteArray, dest: File) {
     checkActive()
+    ensureDestinationAllowed(dest)
     ensureParentDirectory(dest)
     registerNewFile(dest)
     dest.outputStream().buffered().use { output -> output.write(source) }
@@ -92,8 +95,9 @@ class TemplateRecipeExecutor : RecipeExecutor {
   override fun openAsset(path: String): InputStream {
     checkActive()
     require(path.isNotBlank()) { "Template asset path must not be blank" }
+    val normalizedPath = normalizeAssetPath(path)
     return try {
-      application.assets.open(path)
+      application.assets.open(normalizedPath)
     } catch (e: Exception) {
       throw IllegalStateException("Unable to open template asset '$path'", e)
     }
@@ -101,6 +105,7 @@ class TemplateRecipeExecutor : RecipeExecutor {
 
   override fun copyAsset(path: String, dest: File) {
     checkActive()
+    ensureDestinationAllowed(dest)
     ensureParentDirectory(dest)
     registerNewFile(dest)
     openAsset(path).use { input ->
@@ -110,8 +115,9 @@ class TemplateRecipeExecutor : RecipeExecutor {
 
   override fun copyAssetsRecursively(path: String, destDir: File) {
     checkActive()
-    require(path.isNotBlank()) { "Template asset path must not be blank" }
-    copyAssetTree(path.trim('/'), destDir)
+    val normalizedPath = normalizeAssetPath(path)
+    ensureDestinationAllowed(destDir)
+    copyAssetTree(normalizedPath, destDir)
   }
 
   /** Keep newly created files after a successful recipe. */
@@ -143,6 +149,7 @@ class TemplateRecipeExecutor : RecipeExecutor {
   }
 
   private fun copyAssetTree(assetPath: String, destination: File) {
+    ensureDestinationAllowed(destination)
     val children = try {
       application.assets.list(assetPath).orEmpty()
     } catch (e: Exception) {
@@ -160,12 +167,8 @@ class TemplateRecipeExecutor : RecipeExecutor {
     val input = try {
       application.assets.open(assetPath)
     } catch (openError: Exception) {
-      // AssetManager reports an empty list for both files and empty directories.
-      val listing = runCatching { application.assets.list(assetPath) }.getOrNull()
-      if (listing != null && listing.isEmpty()) {
-        ensureDirectory(destination)
-        return
-      }
+      // An empty listing cannot distinguish an empty directory from a missing asset. Empty
+      // directories have no payload to copy, so fail closed instead of hiding a bad asset path.
       throw IllegalStateException("Unable to read template asset '$assetPath'", openError)
     }
 
@@ -173,6 +176,27 @@ class TemplateRecipeExecutor : RecipeExecutor {
     registerNewFile(destination)
     input.use { source ->
       destination.outputStream().buffered().use { output -> source.copyTo(output) }
+    }
+  }
+
+  private fun normalizeAssetPath(path: String): String {
+    require(path.isNotBlank()) { "Template asset path must not be blank" }
+    require('\\' !in path) { "Template asset path must use '/' separators" }
+    val normalized = path.trim('/')
+    require(
+        normalized.isNotBlank() &&
+            normalized.split('/').none { it.isBlank() || it == "." || it == ".." }
+    ) {
+      "Invalid template asset path '$path'"
+    }
+    return normalized
+  }
+
+  private fun ensureDestinationAllowed(destination: File) {
+    val root = projectRoot ?: return
+    val target = destination.canonicalFile
+    check(target == root || target.path.startsWith(root.path + File.separator)) {
+      "Template destination escapes the new project directory: '$target'"
     }
   }
 
