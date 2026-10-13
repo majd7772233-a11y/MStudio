@@ -52,7 +52,6 @@ class TemplateDetailsFragment :
     R.layout.fragment_template_details, FragmentTemplateDetailsBinding::bind) {
 
   private val viewModel by activityViewModel<MainViewModel>()
-  @Volatile private var activeRecipeExecutor: TemplateRecipeExecutor? = null
   companion object {
 
     private val log = LoggerFactory.getLogger(TemplateDetailsFragment::class.java)
@@ -77,7 +76,7 @@ class TemplateDetailsFragment :
     binding.previous.setOnClickListener {
       if (viewModel.creatingProject.value == true) {
         // The executor checks this flag between generated files and rolls back its own output.
-        activeRecipeExecutor?.cancel()
+        viewModel.activeTemplateRecipeExecutor?.cancel()
         binding.previous.isEnabled = false
         return@setOnClickListener
       }
@@ -118,13 +117,15 @@ class TemplateDetailsFragment :
       val defaultFailureMessage = getString(string.project_creation_failed)
       val templateName = getString(template.templateName)
       val recipeExecutor = TemplateRecipeExecutor()
-      activeRecipeExecutor = recipeExecutor
+      viewModel.activeTemplateRecipeExecutor = recipeExecutor
       executeAsyncProvideError({
         recipeExecutor.executeRecipe {
           template.recipe.execute(this) as? ProjectTemplateRecipeResult
         }
       }) { result, err ->
-        activeRecipeExecutor = null
+        if (viewModel.activeTemplateRecipeExecutor === recipeExecutor) {
+          viewModel.activeTemplateRecipeExecutor = null
+        }
         viewModel.creatingProject.value = false
 
         if (recipeExecutor.isCancelled || err?.hasCancellationCause() == true) {
