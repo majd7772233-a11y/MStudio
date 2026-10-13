@@ -25,6 +25,28 @@ class DecompilerActivity : AppCompatActivity() {
     private var running = false
     private var generatedSources: List<File> = emptyList()
     private var outputRoot: File? = null
+    private var exportTarget: File? = null
+
+    private val createExport = registerForActivityResult(ActivityResultContracts.CreateDocument("text/x-java")) { uri ->
+        val source = exportTarget
+        exportTarget = null
+        if (uri != null && source != null) {
+            lifecycleScope.launch(Dispatchers.IO) {
+                try {
+                    contentResolver.openOutputStream(uri)?.use { output ->
+                        source.inputStream().use { it.copyTo(output) }
+                    } ?: throw IOException("Cannot open export destination")
+                    withContext(Dispatchers.Main) {
+                        status.text = getString(R.string.decompiler_export_success, source.name)
+                    }
+                } catch (error: Exception) {
+                    withContext(Dispatchers.Main) {
+                        status.text = getString(R.string.decompiler_export_failed, error.message ?: "")
+                    }
+                }
+            }
+        }
+    }
 
     private val pickInput = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null && !running) decompile(uri)
@@ -153,6 +175,10 @@ class DecompilerActivity : AppCompatActivity() {
             .setTitle(file.name)
             .setView(scroll)
             .setPositiveButton(android.R.string.ok, null)
+            .setNeutralButton(R.string.decompiler_export) { _, _ ->
+                exportTarget = file
+                createExport.launch(file.name)
+            }
             .show()
     }
 }
