@@ -62,6 +62,20 @@ class ViewToXmlRoundTripTest {
   }
 
   @Test
+  fun includeNodesRemainRoundTrippable() {
+    val file =
+        layout(
+            """
+            <LinearLayout>
+                <include layout="@layout/toolbar" android:layout_width="match_parent" android:layout_height="wrap_content" />
+            </LinearLayout>
+            """.trimIndent()
+        )
+
+    assertNull(ViewToXml.findUnsupportedRoundTripConstruct(file))
+  }
+
+  @Test
   fun mergeAndOtherXmlOnlyNodesAreRejectedForEditedLayouts() {
     listOf(
           "<merge><TextView /></merge>" to "merge",
