@@ -24,12 +24,22 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: java-kotlin
-      - name: Build for analysis
-        uses: github/codeql-action/autobuild@v3
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+      - name: Build debug app and Tooling API for analysis
+        run: ./gradlew :core:app:assembleDebug :tooling:impl:build --continue --stacktrace
+        env:
+          ANDROIDIDE_TEST: 'true'
+          TEST_TOOLING_API_IMPL: 'true'
       - name: Upload CodeQL results
         uses: github/codeql-action/analyze@v3
         with:
