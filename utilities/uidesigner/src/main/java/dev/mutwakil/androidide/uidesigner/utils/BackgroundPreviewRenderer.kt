@@ -550,22 +550,20 @@ class BackgroundPreviewRenderer {
     }
   }
 
-  /** Try to load generic XML drawable using Android's inflation system */
+  /**
+   * Unknown drawable XML must not be represented by a fake solid color. Returning false keeps the
+   * preview honest and lets the designer surface an unsupported-resource state instead.
+   *
+   * AAPT-linked resources are required to inflate layer-list, selector, ripple and animated
+   * drawables with their real theme and resource references; parsing them as plain XML here would
+   * silently produce a preview different from the app.
+   */
   private fun loadGenericXmlDrawable(view: View, xmlFile: File, context: Context): Boolean {
-    try {
-      // Try to create a temporary resource and inflate it
-      // This is a fallback for other drawable types like layer-list, selector, etc.
-
-      // For now, we'll create a placeholder drawable to indicate XML was found
-      // but not fully parsed - this can be enhanced based on specific needs
-      val placeholder = ColorDrawable(Color.parseColor("#E0E0E0"))
-      view.background = placeholder
-      log.debug("Loaded placeholder for XML drawable: {}", xmlFile.absolutePath)
-      return true
-    } catch (e: Exception) {
-      log.debug("Failed to load generic XML drawable {}: {}", xmlFile.absolutePath, e.message)
-      return false
-    }
+    log.debug(
+        "Cannot faithfully preview this XML drawable without linked resources: {}",
+        xmlFile.absolutePath,
+    )
+    return false
   }
 
   /** Find project root based on the layout file path */
