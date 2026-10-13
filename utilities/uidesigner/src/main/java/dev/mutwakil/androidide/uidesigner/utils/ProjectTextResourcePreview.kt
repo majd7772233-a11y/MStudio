@@ -65,7 +65,10 @@ internal object ProjectTextResourcePreview {
 
     return try {
       when (name) {
-        "text" -> (view as? TextView)?.text = resolved
+        "text" -> {
+          val textView = view as? TextView ?: return false
+          textView.text = resolved
+        }
         "hint" -> {
           when (view) {
             is TextInputLayout -> view.hint = resolved
