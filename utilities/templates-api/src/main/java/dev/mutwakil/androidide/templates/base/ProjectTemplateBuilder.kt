@@ -163,6 +163,10 @@ class ProjectTemplateBuilder :
     }
 
     gradleWrapperProps()
+    val wrapperProperties = File(data.projectDir, "gradle/wrapper/gradle-wrapper.properties")
+    check(wrapperProperties.isFile && wrapperProperties.length() > 0L) {
+      "Gradle wrapper properties '$wrapperProperties' are missing or empty"
+    }
   }
 
   /**
