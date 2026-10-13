@@ -646,3 +646,19 @@ Latest source work is on branch `dev`. Re-fetch live files and this note before 
 - Compose preview sets its initialization-ready flag after successful initial setup, guards against stale source compilation results, and can recreate preview resources after low-memory cleanup.
 - Source tests were added for XML round-trip guards/default namespace serialization, qualified resource-directory discovery, configuration-specific color values and dirty-state lifecycle. **No tests/builds/Actions/device checks were run**; do not claim runtime success.
 - Remaining Phase 7 functional gaps: safe refusal (rather than full editing) for `<merge>`, `<requestFocus>`, `<tag>`, `<fragment>`, and `<view class="...">`; selected flavor/source-set resource precedence; project `@dimen`/`@string`/`@style` value resolution; and broad missing-resource/resource-preview acceptance coverage. Continue Phase 7 only; Phase 8 must not start until the exact user authorization `يلا الان إبدأ بالمرحلة الثامنة`.
+
+
+## Phase 7 source follow-up — 2026-10-13
+
+Recent follow-up commits:
+- `96607d39438a06257fc475baa5ad7a2aa20d1dec`: unsupported generic background XML no longer reports fake placeholder success.
+- `d8f83996540d093995cdc10b1ac7a8d9d61370ac`: same behavior for ImageView generic XML drawables; unknown shapes no longer invent a default color.
+- `0680600ae031f40555095c89b3f1f26064d23b74`, `94cd63903e7767ac149835321bbc8869448b2ed1`: project color/dimension aliases are resolved in shape previews and layout file context is threaded into the renderer.
+- `09e40c450824421157807912aa0e7ad7d7d74a34`: custom vector path fill/stroke colors resolve from the project and unknown references fail instead of silently rendering black.
+- `6b112903b6e2cfd2e3503b22f68fea33762d925f`, `e3a93bfe635be76de790342fd64905f53e0a324e`: resource resolver prefers settings root and owning module.
+- `3b4a02e6eff38f483ad9b0e62a779e5539f3dec6`, `2bd32a851e16a25ae012e56cdf2db4d45b01c71c`, `6faddd97d3e9636bc14c21b4e9bb26441f79ec25`, `568d6e05530c39d08134f814318dc8da807c7f26`: module-local drawable/mipmap/vector preference.
+- Tests added for settings-root/module resource precedence, value aliases/cycles, shape color resolution and no fake XML drawable placeholders.
+
+No tests/builds/Actions/device checks were run. Do not claim runtime success.
+
+Phase 7 is not to be described as fully accepted until the source-level remaining gaps are addressed: lossless editing of merge/requestFocus/tag/fragment/class-qualified view nodes (currently safely blocked when dirty), actual Gradle/AAPT variant/dependency resource merging and style/theme application, broad XML resource completion/missing-reference diagnostics, and Compose runtime acceptance. Phase 8 is strictly locked until the exact user authorization `يلا الان إبدأ بالمرحلة الثامنة`.
