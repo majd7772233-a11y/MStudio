@@ -101,10 +101,14 @@ private fun generateTemplateProject(name: String, languages: Array<Language>,
 
       // Test with language without Kotlin Script
       mockTemplateDatas(useKts = false)
-      template.setupRootProjectParams(name = projectName,
-        packageName = packageName, language = language)
-      template.executeRecipe()
-      unmockTemplateDatas()
+      try {
+        template.setupRootProjectParams(name = projectName,
+          packageName = packageName, language = language)
+        template.executeRecipe()
+        assertGeneratedProject(projectName, useKts = false, packageName)
+      } finally {
+        unmockTemplateDatas()
+      }
     }
 
     run {
@@ -116,12 +120,46 @@ private fun generateTemplateProject(name: String, languages: Array<Language>,
 
       // Test with language + Kotlin Script
       mockTemplateDatas(useKts = true)
-      template.setupRootProjectParams(name = projectName,
-        packageName = "${packageName}.kts", language = language)
-      template.executeRecipe()
-      unmockTemplateDatas()
+      try {
+        val ktsPackageName = "${packageName}.kts"
+        template.setupRootProjectParams(name = projectName,
+          packageName = ktsPackageName, language = language)
+        template.executeRecipe()
+        assertGeneratedProject(projectName, useKts = true, ktsPackageName)
+      } finally {
+        unmockTemplateDatas()
+      }
     }
   }
+}
+
+private fun assertGeneratedProject(
+  projectName: String,
+  useKts: Boolean,
+  packageName: String,
+) {
+  val projectDir = File(testProjectsDir, projectName)
+  val rootBuild = File(projectDir, if (useKts) "build.gradle.kts" else "build.gradle")
+  val settings = File(projectDir, if (useKts) "settings.gradle.kts" else "settings.gradle")
+  val appDir = File(projectDir, "app")
+  val appBuild = File(appDir, if (useKts) "build.gradle.kts" else "build.gradle")
+  val manifest = File(appDir, "src/main/AndroidManifest.xml")
+  val wrapperJar = File(projectDir, "gradle/wrapper/gradle-wrapper.jar")
+  val wrapperProperties = File(projectDir, "gradle/wrapper/gradle-wrapper.properties")
+  val gradlew = File(projectDir, "gradlew")
+
+  assertThat(rootBuild.isFile).isTrue()
+  assertThat(settings.isFile).isTrue()
+  assertThat(File(projectDir, "gradle.properties").isFile).isTrue()
+  assertThat(File(projectDir, ".gitignore").isFile).isTrue()
+  assertThat(appBuild.isFile).isTrue()
+  assertThat(manifest.isFile).isTrue()
+  assertThat(wrapperJar.isFile && wrapperJar.length() > 0L).isTrue()
+  assertThat(wrapperProperties.isFile && wrapperProperties.length() > 0L).isTrue()
+  assertThat(gradlew.isFile && gradlew.length() > 0L).isTrue()
+  assertThat(rootBuild.readText()).contains(projectName)
+  assertThat(settings.readText()).contains(projectName)
+  assertThat(appBuild.readText()).contains(packageName)
 }
 
 fun Template<*>.setupRootProjectParams(name: String = "TestTemplate",
