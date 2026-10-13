@@ -321,35 +321,28 @@ class ImageViewSrcRenderer {
         return ColorDrawable(color)
       }
 
-      // Default shape color if no color found
-      return ColorDrawable(Color.parseColor("#9E9E9E"))
+      // No reliable color was resolved; report unsupported rather than inventing one.
+      return null
     } catch (e: Exception) {
       log.debug("Error parsing simple shape: {}", e.message)
       return null
     }
   }
 
-  /** Try to load generic XML drawable for ImageView */
+  /**
+   * Do not claim success by substituting an unrelated orange rectangle for an unsupported drawable.
+   * These XML resources need the project's linked AAPT resources and theme to render faithfully.
+   */
   private fun loadGenericXmlDrawable(
       imageView: ImageView,
       xmlFile: File,
       context: Context,
   ): Boolean {
-    try {
-      // Create a placeholder drawable to indicate XML was found
-      val placeholder =
-          ColorDrawable(Color.parseColor("#FF9800")) // Orange placeholder for other XMLs
-      imageView.setImageDrawable(placeholder)
-      log.debug("Loaded generic XML placeholder for ImageView: {}", xmlFile.absolutePath)
-      return true
-    } catch (e: Exception) {
-      log.debug(
-          "Failed to load generic XML drawable for ImageView {}: {}",
-          xmlFile.absolutePath,
-          e.message,
-      )
-      return false
-    }
+    log.debug(
+        "Cannot faithfully preview this XML drawable for ImageView without linked resources: {}",
+        xmlFile.absolutePath,
+    )
+    return false
   }
 
   /**
