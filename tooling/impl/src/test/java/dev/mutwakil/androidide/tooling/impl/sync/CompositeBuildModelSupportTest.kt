@@ -1,6 +1,7 @@
 package dev.mutwakil.androidide.tooling.impl.sync
 
 import com.google.common.truth.Truth.assertThat
+import dev.mutwakil.androidide.project.AndroidModels
 import dev.mutwakil.androidide.project.GradleModels
 import dev.mutwakil.androidide.project.JavaModels
 import dev.mutwakil.androidide.tooling.api.messages.AndroidInitializationParams
@@ -54,6 +55,40 @@ class CompositeBuildModelSupportTest {
     assertThat(mapped.taskList.single().projectPath).isEqualTo(":shared:core")
     assertThat(mapped.javaProject.dependencyList.single().module.projectPath)
       .isEqualTo(":shared:lib")
+  }
+
+  @Test
+  fun mapsRootAndroidProjectDependenciesToIncludedBuildPaths() {
+    val library =
+      AndroidModels.Library.newBuilder()
+        .setKey("included-library")
+        .setType(AndroidModels.LibraryType.Project)
+        .setProjectInfo(
+          AndroidModels.ProjectInfo.newBuilder()
+            .setBuildId(":shared")
+            .setProjectPath(":lib")
+            .build(),
+        ).build()
+    val androidProject =
+      AndroidModels.AndroidProject.newBuilder()
+        .setVariantDependencies(
+          AndroidModels.VariantDependencies.newBuilder()
+            .putLibraries("included-library", library)
+            .build(),
+        ).build()
+    val project =
+      GradleModels.GradleProject.newBuilder()
+        .setName("app")
+        .setPath(":app")
+        .setAndroidProject(androidProject)
+        .build()
+
+    val mapped = namespaceRootBuildProjectDependencies(project, mapOf(":shared" to "shared"))
+
+    assertThat(
+      mapped.androidProject.variantDependencies.librariesMap["included-library"]!!
+        .projectInfo.projectPath,
+    ).isEqualTo(":shared:lib")
   }
 
   @Test
