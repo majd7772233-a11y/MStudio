@@ -151,4 +151,5 @@ object AndroidProjectModelBuilder :
   private fun getClassesJar(
     gradleProject: GradleProject,
     configuredVariant: String,
-  ): File = findClassesJarForVariant(gradleProject.buildDirectory, configuredVariant)}
+  ): File = findClassesJarForVariant(gradleProject.buildDirectory, configuredVariant)
+}
