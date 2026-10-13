@@ -190,9 +190,7 @@ object RootModelBuilder :
           val includedInitializeParams = initializeParamsForIncludedBuild(initializeParams, buildName)
           val includedModulePaths =
             uniqueModuleNameToPath(
-              includedModules.map { module ->
-                module.name to compositeBuildProjectPath(buildName, module.gradleProject.path)
-              },
+              includedModules.map { module -> module.name to module.gradleProject.path },
             )
 
           includedModules.forEach { includedModule ->
