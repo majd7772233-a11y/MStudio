@@ -4,6 +4,9 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import com.android.builder.model.v2.ide.SyncIssue as AndroidSyncIssue
+import io.mockk.every
+import io.mockk.mockk
 import java.io.File
 import java.nio.file.Files
 
@@ -119,6 +122,26 @@ class AndroidProjectModelBuilderTest {
         ),
       ),
     ).containsExactly("app", ":app")
+  }
+
+  @Test
+  fun preservesActionableSyncIssueDetailsInTheProjectModel() {
+    val issue = mockk<AndroidSyncIssue>()
+    every { issue.data } returns "dependency"
+    every { issue.message } returns "Could not resolve dependency"
+    every { issue.multiLineMessage } returns listOf("Check the repository URL", null)
+    every { issue.type } returns 77
+    every { issue.severity } returns AndroidSyncIssue.SEVERITY_ERROR
+
+    val mapped = issue.toProjectSyncIssue()
+
+    assertThat(mapped.message).isEqualTo("Could not resolve dependency")
+    assertThat(mapped.data).isEqualTo("dependency")
+    assertThat(mapped.multilineMessageList).containsExactly("Check the repository URL")
+    assertThat(mapped.type).isEqualTo(77)
+    assertThat(mapped.severity).isEqualTo(
+      dev.mutwakil.androidide.project.GradleModels.SyncIssueSeverity.SeverityError,
+    )
   }
 
 }
