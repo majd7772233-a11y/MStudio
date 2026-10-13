@@ -745,3 +745,10 @@ No build, tests, workflow dispatch, Actions run or device validation is authoriz
 - Follow-up review after connecting `onServerExited` found `ToolingServerRunner.isStarted` is set to true after the RPC listener starts but was never reset when the child JVM exits; the PID also remains stale. `GradleBuildService` likewise retains the old server reference and started flag. A subsequent build request can therefore treat a dead process as running and route calls to a dead proxy.
 - Reset the runner's started/PID state when its child process exits, and clear the service's server/started state in the existing exit callback. This makes a later start eligible to create a fresh runner and avoids stale server references.
 - Source correction only; no build, tests, Actions or device validation.
+
+
+### Phase 4 execution — clear stale Tooling process state (2026-10-13)
+
+- Runner state reset committed as `4ea24fb29278ec07bd53738e8436685a27ada168`: on a real child-process exit, `ToolingServerRunner` now clears `isStarted` and `pid` before notifying its observer.
+- Service state reset committed as `d5ece4b74fc0d66c03bbb0dd05cbf45ef87fef1d`: `GradleBuildService.onServerExited` now clears its server proxy and started flag before removing the foreground notification.
+- These changes allow a later start attempt to recognize that the old process is gone instead of retaining a stale PID/server. Full restart, RPC future completion, cancellation and build-in-progress recovery remain runtime verification items; no build/tests/Actions/device validation was run.
