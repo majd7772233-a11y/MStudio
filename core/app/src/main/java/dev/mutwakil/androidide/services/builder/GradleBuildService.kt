@@ -117,7 +117,39 @@ class GradleBuildService : Service(), BuildService, IToolingApiClient,
       val gradlew = File(projectRoot, "gradlew")
       val gradleWrapperJar = File(projectRoot, "gradle/wrapper/gradle-wrapper.jar")
       val gradleWrapperProps = File(projectRoot, "gradle/wrapper/gradle-wrapper.properties")
-      return gradlew.exists() && gradleWrapperJar.exists() && gradleWrapperProps.exists()
+
+      if (!gradlew.isFile || gradlew.length() == 0L ||
+        !gradleWrapperJar.isFile || gradleWrapperJar.length() == 0L ||
+        !gradleWrapperProps.isFile || !gradleWrapperProps.canRead() ||
+        gradleWrapperProps.length() == 0L
+      ) {
+        return false
+      }
+
+      val hasDistributionUrl = try {
+        gradleWrapperProps.useLines { lines ->
+          lines.any { line ->
+            val entry = line.trim()
+            entry.startsWith("distributionUrl=") &&
+              entry.substringAfter('=').trim().isNotEmpty()
+          }
+        }
+      } catch (error: IOException) {
+        log.warn("Unable to read Gradle wrapper properties", error)
+        false
+      }
+      if (!hasDistributionUrl) {
+        return false
+      }
+
+      return try {
+        java.util.zip.ZipFile(gradleWrapperJar).use { zip ->
+          zip.entries().hasMoreElements()
+        }
+      } catch (error: IOException) {
+        log.warn("Gradle wrapper JAR is not a readable ZIP archive: {}", gradleWrapperJar, error)
+        false
+      }
     }
 
   companion object {
