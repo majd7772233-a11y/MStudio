@@ -49,9 +49,12 @@ class XmlSyntaxDiagnosticProviderTest {
   @Test
   fun validXmlClearsPreviouslyReportedSyntaxErrors() {
     val file: Path = temporaryFolder.newFile("layout.xml").toPath()
-    file.toFile().writeText("<LinearLayout><TextView /></LinearLayout>")
+    file.toFile().writeText("<LinearLayout><TextView></LinearLayout>")
+    val provider = XmlSyntaxDiagnosticProvider()
+    assertFalse(provider.analyze(file).diagnostics.isEmpty())
 
-    val result = XmlSyntaxDiagnosticProvider().analyze(file)
+    file.toFile().writeText("<LinearLayout><TextView /></LinearLayout>")
+    val result = provider.analyze(file)
 
     assertEquals(file, result.file)
     assertTrue(result.diagnostics.isEmpty())
