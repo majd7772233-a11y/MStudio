@@ -127,6 +127,7 @@ class TemplateRecipeExecutor : RecipeExecutor {
   }
 
   /** Request cancellation; the next recipe operation rolls back owned output. */
+  @Synchronized
   fun cancel() {
     if (!finished) {
       cancelled = true
@@ -134,8 +135,13 @@ class TemplateRecipeExecutor : RecipeExecutor {
   }
 
   /** Keep newly created files after a successful recipe. */
+  @Synchronized
   fun commit() {
     if (finished) return
+    if (cancelled) {
+      rollback()
+      throw CancellationException("Project creation cancelled")
+    }
     finished = true
     createdPaths.clear()
     projectRoot = null
@@ -145,6 +151,7 @@ class TemplateRecipeExecutor : RecipeExecutor {
    * Remove only paths created during this recipe. Existing files and directories are never deleted.
    * A directory that acquired unrelated content is retained because delete() is non-recursive.
    */
+  @Synchronized
   fun rollback() {
     if (finished) return
     createdPaths.toList().asReversed().forEach { path -> runCatching { path.delete() } }
