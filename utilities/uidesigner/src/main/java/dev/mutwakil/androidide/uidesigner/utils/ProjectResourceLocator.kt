@@ -41,6 +41,7 @@ internal object ProjectResourceLocator {
       projectRoot: File,
       resourceType: String,
       context: Context,
+      preferredModuleRoot: File? = null,
   ): List<File> {
     if (!projectRoot.isDirectory) return emptyList()
 
@@ -57,6 +58,13 @@ internal object ProjectResourceLocator {
         .distinctBy { it.absolutePath }
         .sortedWith(
             compareByDescending<File> { qualifierScore(it.name, resourceType, context) }
+                .thenByDescending {
+                  preferredModuleRoot != null &&
+                      (it.absolutePath == preferredModuleRoot.absolutePath ||
+                          it.absolutePath.startsWith(
+                              preferredModuleRoot.absolutePath + File.separator
+                          ))
+                }
                 .thenByDescending { if (it.path.contains("/src/main/res/")) 1 else 0 }
                 .thenBy { it.absolutePath }
         )
@@ -81,29 +89,60 @@ internal object ProjectResourceLocator {
     return outermostGradleRoot
   }
 
+  /** Returns the nearest Android module root containing the opened layout. */
+  fun findModuleRoot(layoutFile: File?): File? {
+    var current = layoutFile?.absoluteFile?.parentFile ?: return null
+    repeat(MAX_PROJECT_ROOT_DEPTH) {
+      if (File(current, "build.gradle").isFile || File(current, "build.gradle.kts").isFile) {
+        return current
+      }
+      current = current.parentFile ?: return null
+    }
+    return null
+  }
+
   /** Resolves simple project value resources and aliases without pretending to be AAPT. */
   fun resolveValueResource(
       projectRoot: File,
       resourceType: String,
       resourceName: String,
       context: Context,
-  ): String? = resolveValueResource(projectRoot, resourceType, resourceName, context, mutableSetOf())
+      preferredModuleRoot: File? = null,
+  ): String? =
+      resolveValueResource(
+          projectRoot,
+          resourceType,
+          resourceName,
+          context,
+          preferredModuleRoot,
+          mutableSetOf(),
+      )
 
   private fun resolveValueResource(
       projectRoot: File,
       resourceType: String,
       resourceName: String,
       context: Context,
+      preferredModuleRoot: File?,
       visited: MutableSet<String>,
   ): String? {
     val key = "$resourceType/$resourceName"
     if (visited.size >= MAX_VALUE_ALIAS_DEPTH || !visited.add(key)) return null
-    val value = findValueResource(projectRoot, resourceType, resourceName, context) ?: return null
+    val value =
+        findValueResource(projectRoot, resourceType, resourceName, context, preferredModuleRoot)
+            ?: return null
     val alias = Regex("^@($SUPPORTED_VALUE_TYPES)/([A-Za-z_][A-Za-z0-9_.]*)$").matchEntire(value)
     if (alias != null) {
       val targetType = alias.groupValues[1]
       val targetName = alias.groupValues[2]
-      return resolveValueResource(projectRoot, targetType, targetName, context, visited)
+      return resolveValueResource(
+          projectRoot,
+          targetType,
+          targetName,
+          context,
+          preferredModuleRoot,
+          visited,
+      )
     }
     return value.takeIf { !it.startsWith("?") && !it.startsWith("@") }
   }
@@ -113,9 +152,11 @@ internal object ProjectResourceLocator {
       resourceType: String,
       resourceName: String,
       context: Context,
+      preferredModuleRoot: File? = null,
   ): String? {
     val parserFactory = XmlPullParserFactory.newInstance()
-    val directories = findResourceDirectories(projectRoot, "values", context)
+    val directories =
+        findResourceDirectories(projectRoot, "values", context, preferredModuleRoot)
     for (directory in directories) {
       val files = directory.listFiles()?.filter { it.isFile && it.extension == "xml" } ?: continue
       for (file in files.sortedBy { it.name }) {
