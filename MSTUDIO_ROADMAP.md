@@ -774,3 +774,9 @@ Implemented on `dev` after the lifecycle-gap record above:
 
 Source-level boundary: this closes the identified implementation gaps in process/RPC termination, startup failure propagation, wrapper post-repair validation and visible Build Scan disclosure. It does **not** prove runtime acceptance. Per the current instruction, no tests, Gradle builds, GitHub Actions, or device checks were run. Phase 4 acceptance items that require executable/device evidence remain unchecked until the planned verification batch; do not describe Phase 4 as runtime-verified.
 
+
+### Phase 4 follow-up — wrapper repair safety and execution rule — 2026-10-13
+
+- Closed the remaining identified source-level wrapper-repair gap: the bundled archive is extracted to staging, then only missing/invalid wrapper components are copied into the project. Valid existing wrapper files and project-specific distribution settings are preserved; each replacement is checked and strict post-repair validation remains required.
+- Source commit: d1f7581017e2f3f4fc14a7384af5c907595fd4ca. The persistent assistant handoff now also records the user's mandatory instruction to execute clear requests directly without padding responses with unnecessary philosophy/status narration.
+- Verification remains intentionally deferred: no tests, Gradle builds, GitHub Actions, or device checks were run. Therefore this closes the identified implementation task, not the runtime acceptance checklist; leave evidence-dependent items unchecked.
