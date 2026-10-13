@@ -224,16 +224,21 @@ class BackgroundPreviewRenderer {
   }
 
   /** Load XML drawable files (vectors, shapes, gradients, etc.) */
-  private fun loadXmlDrawable(view: View, xmlFile: File, context: Context): Boolean {
+  private fun loadXmlDrawable(
+      view: View,
+      xmlFile: File,
+      context: Context,
+      layoutFile: File?,
+  ): Boolean {
     try {
       // First, try using VectorDrawableCompat for vector drawables
       if (isVectorDrawable(xmlFile)) {
-        return loadVectorDrawable(view, xmlFile, context)
+        return loadVectorDrawable(view, xmlFile, context, layoutFile)
       }
 
       // Try parsing as shape drawable
       if (isShapeDrawable(xmlFile)) {
-        return loadShapeDrawable(view, xmlFile, context)
+        return loadShapeDrawable(view, xmlFile, context, layoutFile)
       }
 
       // Try parsing as layer-list or other drawable types
@@ -285,7 +290,12 @@ class BackgroundPreviewRenderer {
   }
 
   /** Load vector drawable using VectorDrawableCompat */
-  private fun loadVectorDrawable(view: View, xmlFile: File, context: Context): Boolean {
+  private fun loadVectorDrawable(
+      view: View,
+      xmlFile: File,
+      context: Context,
+      layoutFile: File?,
+  ): Boolean {
     return try {
       // XML vectors are not image streams. Parse their vector/path data using the same renderer
       // used by ImageView src previews, and never report a fake placeholder as a successful render.
@@ -293,7 +303,7 @@ class BackgroundPreviewRenderer {
           view = view,
           vectorValue = xmlFile.nameWithoutExtension,
           context = context,
-          layoutFile = xmlFile,
+          layoutFile = layoutFile ?: xmlFile,
           isBackground = true,
       )
     } catch (e: Exception) {
@@ -398,7 +408,11 @@ class BackgroundPreviewRenderer {
   }
 
   /** Parse shape drawable from XML file */
-  private fun parseShapeDrawable(xmlFile: File): GradientDrawable? {
+  private fun parseShapeDrawable(
+      xmlFile: File,
+      context: Context,
+      layoutFile: File?,
+  ): GradientDrawable? {
     try {
       val factory = XmlPullParserFactory.newInstance()
       val parser = factory.newPullParser()
@@ -426,16 +440,16 @@ class BackgroundPreviewRenderer {
               "solid" -> {
                 val color = parser.getAttributeValue(null, "android:color")
                 if (color != null) {
-                  drawable.setColor(parseColor(color))
+                  drawable.setColor(parseColor(color, context, layoutFile))
                 }
               }
               "gradient" -> {
-                parseGradient(parser, drawable)
+                parseGradient(parser, drawable, context, layoutFile)
               }
               "corners" -> {
                 val radius = parser.getAttributeValue(null, "android:radius")
                 if (radius != null) {
-                  val radiusValue = parseDimension(radius)
+                  val radiusValue = parseDimension(radius, context, layoutFile)
                   drawable.cornerRadius = radiusValue
                 }
               }
@@ -443,7 +457,7 @@ class BackgroundPreviewRenderer {
                 val width = parser.getAttributeValue(null, "android:width")
                 val color = parser.getAttributeValue(null, "android:color")
                 if (width != null && color != null) {
-                  drawable.setStroke(parseDimension(width).toInt(), parseColor(color))
+                  drawable.setStroke(parseDimension(width, context, layoutFile).toInt(), parseColor(color, context, layoutFile))
                 }
               }
             }
@@ -460,7 +474,12 @@ class BackgroundPreviewRenderer {
   }
 
   /** Parse gradient attributes */
-  private fun parseGradient(parser: XmlPullParser, drawable: GradientDrawable) {
+  private fun parseGradient(
+      parser: XmlPullParser,
+      drawable: GradientDrawable,
+      context: Context,
+      layoutFile: File?,
+  ) {
     try {
       val startColor = parser.getAttributeValue(null, "android:startColor")
       val endColor = parser.getAttributeValue(null, "android:endColor")
@@ -471,13 +490,13 @@ class BackgroundPreviewRenderer {
       val colors = mutableListOf<Int>()
 
       if (startColor != null) {
-        colors.add(parseColor(startColor))
+        colors.add(parseColor(startColor, context, layoutFile))
       }
       if (centerColor != null) {
-        colors.add(parseColor(centerColor))
+        colors.add(parseColor(centerColor, context, layoutFile))
       }
       if (endColor != null) {
-        colors.add(parseColor(endColor))
+        colors.add(parseColor(endColor, context, layoutFile))
       }
 
       if (colors.isNotEmpty()) {
@@ -516,37 +535,70 @@ class BackgroundPreviewRenderer {
     }
   }
 
-  /** Parse color string to int */
-  private fun parseColor(colorString: String): Int {
-    return try {
-      if (colorString.startsWith("@color/")) {
-        // For now, return a default color for resource references
-        // In a full implementation, you'd resolve this from colors.xml
-        Color.GRAY
-      } else {
-        Color.parseColor(colorString)
+  /** Resolve literal/project colors without silently substituting gray for missing values. */
+  private fun parseColor(colorString: String, context: Context, layoutFile: File?): Int {
+    return when {
+      colorString.startsWith("@color/") -> {
+        val projectRoot = ProjectResourceLocator.findProjectRoot(layoutFile)
+        val resolved =
+            projectRoot?.let {
+              ProjectResourceLocator.resolveValueResource(
+                  it,
+                  "color",
+                  colorString.substringAfter("@color/"),
+                  context,
+              )
+            }
+        when {
+          resolved != null -> runCatching { Color.parseColor(resolved) }.getOrNull()
+          else -> {
+            val name = colorString.substringAfter("@color/")
+            val id = context.resources.getIdentifier(name, "color", context.packageName)
+            if (id != 0) runCatching { ContextCompat.getColor(context, id) }.getOrNull() else null
+          }
+        } ?: throw IllegalArgumentException("Unresolved color resource: $colorString")
       }
-    } catch (e: Exception) {
-      Color.TRANSPARENT
+      colorString.startsWith("@android:color/") -> {
+        val name = colorString.substringAfter("@android:color/")
+        val id = context.resources.getIdentifier(name, "color", "android")
+        if (id == 0) throw IllegalArgumentException("Unresolved Android color: $colorString")
+        ContextCompat.getColor(context, id)
+      }
+      else -> Color.parseColor(colorString)
     }
   }
 
-  /** Parse dimension string to float (simplified) */
-  private fun parseDimension(dimensionString: String): Float {
-    return try {
-      when {
-        dimensionString.endsWith("dp") -> {
-          dimensionString.removeSuffix("dp").toFloat()
+  /** Resolve common Android dimension units and project @dimen aliases for shape previews. */
+  private fun parseDimension(
+      dimensionString: String,
+      context: Context,
+      layoutFile: File?,
+  ): Float {
+    val value =
+        if (dimensionString.startsWith("@dimen/")) {
+          val root = ProjectResourceLocator.findProjectRoot(layoutFile)
+          root?.let {
+            ProjectResourceLocator.resolveValueResource(
+                it,
+                "dimen",
+                dimensionString.substringAfter("@dimen/"),
+                context,
+            )
+          } ?: throw IllegalArgumentException("Unresolved dimension resource: $dimensionString")
+        } else {
+          dimensionString
         }
-        dimensionString.endsWith("px") -> {
-          dimensionString.removeSuffix("px").toFloat()
-        }
-        else -> {
-          dimensionString.toFloat()
-        }
-      }
-    } catch (e: Exception) {
-      0f
+    val number = Regex("^\\s*(-?(?:\\d+(?:\\.\\d*)?|\\.\\d+))\\s*(dp|dip|sp|px|pt|in|mm)?\\s*$")
+        .matchEntire(value)
+        ?: throw IllegalArgumentException("Unsupported dimension value: $value")
+    val amount = number.groupValues[1].toFloat()
+    return when (number.groupValues[2]) {
+      "dp", "dip" -> amount * context.resources.displayMetrics.density
+      "sp" -> amount * context.resources.displayMetrics.scaledDensity
+      "pt" -> amount * context.resources.displayMetrics.xdpi / 72f
+      "in" -> amount * context.resources.displayMetrics.xdpi
+      "mm" -> amount * context.resources.displayMetrics.xdpi / 25.4f
+      else -> amount
     }
   }
 
