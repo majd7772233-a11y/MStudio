@@ -130,7 +130,12 @@ class ImageViewSrcRenderer {
     val projectRoot = findProjectRoot(layoutFile) ?: return false
 
     val drawableFolders =
-        ProjectResourceLocator.findResourceDirectories(projectRoot, "drawable", context)
+        ProjectResourceLocator.findResourceDirectories(
+            projectRoot,
+            "drawable",
+            context,
+            ProjectResourceLocator.findModuleRoot(layoutFile),
+        )
 
     return loadImageFromFolders(imageView, drawableName, drawableFolders, context, layoutFile)
   }
@@ -144,7 +149,12 @@ class ImageViewSrcRenderer {
     val projectRoot = findProjectRoot(layoutFile) ?: return false
 
     val mipmapFolders =
-        ProjectResourceLocator.findResourceDirectories(projectRoot, "mipmap", context)
+        ProjectResourceLocator.findResourceDirectories(
+            projectRoot,
+            "mipmap",
+            context,
+            ProjectResourceLocator.findModuleRoot(layoutFile),
+        )
 
     return loadImageFromFolders(imageView, mipmapName, mipmapFolders, context, layoutFile)
   }
