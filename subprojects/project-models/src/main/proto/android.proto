@@ -151,6 +151,14 @@ message VariantDependencies {
   // The key for the map entries is the keys found via [com.android.builder.model.v2.ide.GraphItem.key]
   // and [Library.key]
   map<string, Library> libraries = 3;
+
+  // Compile dependency graphs for test artifacts, when exposed by the AGP model.
+  // Deprecated single-artifact fields are retained alongside modern test-suite maps for compatibility.
+  ArtifactDependencies androidTestArtifact = 4;
+  ArtifactDependencies unitTestArtifact = 5;
+  ArtifactDependencies testFixturesArtifact = 6;
+  map<string, ArtifactDependencies> deviceTestArtifacts = 7;
+  map<string, ArtifactDependencies> hostTestArtifacts = 8;
 }
 
 // A custom source directory.
