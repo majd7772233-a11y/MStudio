@@ -39,6 +39,7 @@ import dev.mutwakil.androidide.utils.flashError
 import dev.mutwakil.androidide.viewmodel.MainViewModel
 import org.slf4j.LoggerFactory
 import kotlinx.coroutines.launch
+import java.util.concurrent.CancellationException
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 /**
@@ -51,6 +52,7 @@ class TemplateDetailsFragment :
     R.layout.fragment_template_details, FragmentTemplateDetailsBinding::bind) {
 
   private val viewModel by activityViewModel<MainViewModel>()
+  @Volatile private var activeRecipeExecutor: TemplateRecipeExecutor? = null
   companion object {
 
     private val log = LoggerFactory.getLogger(TemplateDetailsFragment::class.java)
@@ -68,10 +70,17 @@ class TemplateDetailsFragment :
       TransitionManager.beginDelayedTransition(binding.root)
       binding.progress.isVisible = it
       binding.finish.isEnabled = !it
-      binding.previous.isEnabled = !it
+      binding.previous.isEnabled = true
+      binding.previous.setText(if (it) string.cancel else string.previous)
     }
 
     binding.previous.setOnClickListener {
+      if (viewModel.creatingProject.value == true) {
+        // The executor checks this flag between generated files and rolls back its own output.
+        activeRecipeExecutor?.cancel()
+        binding.previous.isEnabled = false
+        return@setOnClickListener
+      }
       viewModel.setScreen(MainViewModel.SCREEN_TEMPLATE_LIST)
     }
 
@@ -108,12 +117,20 @@ class TemplateDetailsFragment :
 
       val defaultFailureMessage = getString(string.project_creation_failed)
       val templateName = getString(template.templateName)
+      val recipeExecutor = TemplateRecipeExecutor()
+      activeRecipeExecutor = recipeExecutor
       executeAsyncProvideError({
-        TemplateRecipeExecutor().executeRecipe {
+        recipeExecutor.executeRecipe {
           template.recipe.execute(this) as? ProjectTemplateRecipeResult
         }
       }) { result, err ->
+        activeRecipeExecutor = null
         viewModel.creatingProject.value = false
+
+        if (recipeExecutor.isCancelled || err?.hasCancellationCause() == true) {
+          log.info("Project creation cancelled by user")
+          return@executeAsyncProvideError
+        }
 
         if (result !is ProjectTemplateRecipeResult || err != null) {
           if (err != null) {
@@ -161,6 +178,9 @@ class TemplateDetailsFragment :
 
     binding.widgets.layoutManager = LinearLayoutManager(requireContext())
   }
+
+  private fun Throwable.hasCancellationCause(): Boolean =
+    generateSequence(this) { it.cause }.any { it is CancellationException }
 
   private fun bindWithTemplate(template: Template<*>?) {
     template ?: return
