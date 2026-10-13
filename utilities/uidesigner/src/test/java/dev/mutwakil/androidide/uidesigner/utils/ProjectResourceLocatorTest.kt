@@ -43,6 +43,36 @@ class ProjectResourceLocatorTest {
   }
 
   @Test
+  fun prefersTheOpenedModuleWhenResourcesHaveTheSameName() {
+    val projectRoot = temporaryFolder.newFolder("module-precedence-project")
+    File(projectRoot, "settings.gradle").writeText("include(':app', ':feature')")
+    val appRoot = File(projectRoot, "app").apply { mkdirs() }
+    val featureRoot = File(projectRoot, "feature").apply { mkdirs() }
+    File(appRoot, "src/main/res/values/colors.xml").apply {
+      parentFile?.mkdirs()
+      writeText("<resources><color name=\"shared_accent\">#111111</color></resources>")
+    }
+    File(featureRoot, "src/main/res/values/colors.xml").apply {
+      parentFile?.mkdirs()
+      writeText("<resources><color name=\"shared_accent\">#222222</color></resources>")
+    }
+    File(appRoot, "build.gradle").writeText("plugins {}")
+    File(featureRoot, "build.gradle").writeText("plugins {}")
+
+    val context = RuntimeEnvironment.getApplication()
+    assertEquals(
+        "#222222",
+        ProjectResourceLocator.resolveValueResource(
+            projectRoot,
+            "color",
+            "shared_accent",
+            context,
+            featureRoot,
+        ),
+    )
+  }
+
+  @Test
   fun resolvesValuesFromTheMatchingConfigurationDirectory() {
     val projectRoot = temporaryFolder.newFolder("values-project")
     File(projectRoot, "app/src/main/res/values/colors.xml").apply {
