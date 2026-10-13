@@ -59,6 +59,14 @@ interface RecipeExecutor {
   fun save(source: String, dest: File)
 
   /**
+   * Save binary data to a destination. Implementations should preserve their normal safety rules.
+   */
+  fun saveBytes(source: ByteArray, dest: File) {
+    dest.parentFile?.mkdirs()
+    dest.writeBytes(source)
+  }
+
+  /**
    * Open the given asset path.
    *
    * @return The [InputStream] for the asset.
