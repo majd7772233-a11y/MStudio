@@ -182,6 +182,7 @@ inline fun baseAndroidModule(isLibrary: Boolean = false,
     val type = enumParameter<ModuleType> {
       name = R.string.wizard_module_type
       default = AndroidLibrary
+      filter = { it != ModuleType.JavaLibrary }
       startIcon = { R.drawable.ic_android }
       displayName = ModuleType::typeName
     }
