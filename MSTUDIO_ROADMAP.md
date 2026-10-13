@@ -925,3 +925,26 @@ Source-level boundary: this closes the identified implementation gaps in process
 - Configuration-aware filesystem discovery is implemented for drawable/mipmap previews, including qualifier folders and non-`app` modules. Simple project color values and aliases are now resolved from qualifier-matched `values*` XML before consulting MStudio's own resource table. This is not a full AAPT resource-merger: selected product-flavor/source-set precedence, project `@dimen`/`@string`/`@style` value resolution and references between other value types still need implementation and tests.
 - Missing-resource diagnostics across all resource types and end-to-end resource/preview round-tripping still require dedicated coverage. Do not mark them as proven merely because the existing inflater/completion pipeline is present.
 - Keep Phase 8 locked. Do not change Phase 8 implementation files or begin Phase 8 until the user explicitly says: **«يلا الان إبدأ بالمرحلة الثامنة»**.
+
+
+## Phase 7 follow-up — module-aware resources and truthful drawable previews (2026-10-13)
+
+- Resource discovery now prefers the owning Gradle settings root over a nested module build file, finds the layout's nearest module root, and prefers that module's matching resource when multiple modules define the same name. This is still a filesystem preview resolver, not Gradle/AAPT's merged resource model; dependency visibility, product flavors and source-set overlay ordering cannot be inferred perfectly by scanning directories.
+- Shape drawable previews resolve project `@color` aliases and `@dimen` aliases from qualifier-aware values XML, convert dp/dip/sp/px/pt/in/mm to preview pixels, and fail rather than inventing a color/dimension when a referenced value is missing or unsupported.
+- Custom vector path fallback resolves project `@color` aliases for fill/stroke and rejects unknown color values instead of silently painting them black.
+- Unknown generic drawable XML (for example selectors/layer lists/ripple/animated resources that require linked resources/theme) no longer displays a fake gray/orange placeholder while claiming success. The preview path returns failure so normal attribute handling can fall back; exact AAPT-linked rendering is still a limitation.
+- Added source tests for module-local resource precedence, settings-root discovery, dimension/color aliases and cycle detection, shape color resolution, and rejection of fake placeholders for unsupported drawable XML.
+- Source commits in this follow-up include: `96607d39438a06257fc475baa5ad7a2aa20d1dec`, `d8f83996540d093995cdc10b1ac7a8d9d61370ac`, `0680600ae031f40555095c89b3f1f26064d23b74`, `94cd63903e7767ac149835321bbc8869448b2ed1`, `6b112903b6e2cfd2e3503b22f68fea33762d925f`, `e3a93bfe635be76de790342fd64905f53e0a324e`, `3b4a02e6eff38f483ad9b0e62a779e5539f3dec6`, `2bd32a851e16a25ae012e56cdf2db4d45b01c71c`, `6faddd97d3e9636bc14c21b4e9bb26441f79ec25`, `568d6e05530c39d08134f814318dc8da807c7f26`, `09e40c450824421157807912aa0e7ad7d7d74a34`. Source-test commits include `1f7ad16f85e66a3b9dad2e3376b891b37e1c7772`, `62aef7f3886ebf859bcd08199f2fa8d4783c1ebc`, `b105ca2c4c1ee4aca2d2014c22baf6478ccb8244`, `d9c23a73b4aea78736cf720bfee24720e3a2ee18`, `43e00da3d780427f0c04a5c45d01911e3434c4d0`, `735c638eb2775d97e7fa1081ae6fde6acefa61f7`.
+- No tests, Gradle builds, Actions, or device checks were run, in accordance with the user's verification hold.
+
+### Phase 7 closeout gate — must remain honest
+
+Phase 7 has broad source changes, but **must not be marked fully accepted/closed yet** while these explicit gaps remain:
+
+1. Edited layouts containing `<merge>`, `<requestFocus>`, `<tag>`, `<fragment>`, or `<view class="...">` are safely refused rather than losslessly edited. `<include>` has model/serializer support.
+2. Resource preview discovery handles common qualifiers and module preference but is not a full Gradle/AAPT merge: product-flavor overlays, dependency graph visibility, full locale qualifiers and style/theme application are not guaranteed.
+3. Project `@string`, `@dimen`, simple `@color` aliases are available in the filesystem resolver; integration is not complete for every consumer/resource type. Drawable selectors, layer-lists, ripple/animated resources requiring linked resources are now refused rather than faked.
+4. XML completion is present in the XML LSP, but its project-resource completion coverage and diagnostics for all missing references still need explicit acceptance tests.
+5. Compose fixes have source-level changes only; no runtime confirmation exists.
+
+Do not begin Phase 8 or edit its implementation. Phase 8 remains locked until the user explicitly says: **«يلا الان إبدأ بالمرحلة الثامنة»**.
