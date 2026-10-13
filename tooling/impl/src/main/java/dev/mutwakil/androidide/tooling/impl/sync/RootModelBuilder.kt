@@ -17,12 +17,12 @@
 
 package dev.mutwakil.androidide.tooling.impl.sync
 
-import com.android.builder.model.v2.ide.SyncIssue
+import com.android.builder.model.v2.ide.SyncIssue as AndroidSyncIssue
 import dev.mutwakil.androidide.builder.model.shouldBeIgnored
 import dev.mutwakil.androidide.project.GradleBuild
 import dev.mutwakil.androidide.project.GradleModels
 import dev.mutwakil.androidide.project.ProjectModelInfo
-import dev.mutwakil.androidide.project.SyncIssue
+import dev.mutwakil.androidide.project.SyncIssue as ProjectSyncIssue
 import dev.mutwakil.androidide.projects.models.projectDir
 import dev.mutwakil.androidide.tooling.api.IAndroidProject
 import dev.mutwakil.androidide.tooling.api.messages.InitializeProjectParams
@@ -36,6 +36,21 @@ import org.gradle.tooling.model.idea.IdeaProject
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.Serializable
+
+/** Converts an AGP sync issue to the cached project-model representation. */
+internal fun AndroidSyncIssue.toProjectSyncIssue(): ProjectSyncIssue =
+  ProjectSyncIssue(
+    data = data,
+    message = message,
+    multilineMessageList = multiLineMessage?.filterNotNull() ?: emptyList(),
+    type = type,
+    severity =
+      when (severity) {
+        AndroidSyncIssue.SEVERITY_ERROR -> GradleModels.SyncIssueSeverity.SeverityError
+        AndroidSyncIssue.SEVERITY_WARNING -> GradleModels.SyncIssueSeverity.SeverityWarning
+        else -> throw IllegalArgumentException("Unknown sync issue severity: $severity")
+      },
+  )
 
 /**
  * Maps IDEA module names to paths only when the name is unique. IDEA module dependencies expose
@@ -91,7 +106,7 @@ object RootModelBuilder :
 
         val rootProjectVersions = getAndroidVersions(rootModule, controller)
 
-        val syncIssues = hashSetOf<SyncIssue>()
+        val syncIssues = hashSetOf<AndroidSyncIssue>()
         val syncIssueReporter =
           ISyncIssueReporter { syncIssue ->
             if (syncIssue.shouldBeIgnored()) {
@@ -165,23 +180,7 @@ object RootModelBuilder :
           GradleBuild(
             rootProject = rootGradleProject.build(),
             subProjectList = projects,
-            syncIssueList =
-              syncIssues.map { syncIssue ->
-                SyncIssue(
-                  data = syncIssue.data,
-                  message = syncIssue.message,
-                  multilineMessageList =
-                    syncIssue.multiLineMessage?.filterNotNull()
-                      ?: emptyList(),
-                  type = syncIssue.type,
-                  severity =
-                    when (syncIssue.severity) {
-                      SyncIssue.SEVERITY_ERROR -> GradleModels.SyncIssueSeverity.SeverityError
-                      SyncIssue.SEVERITY_WARNING -> GradleModels.SyncIssueSeverity.SeverityWarning
-                      else -> throw IllegalArgumentException("Unknown severity: ${syncIssue.severity}")
-                    },
-                )
-              },
+            syncIssueList = syncIssues.map { it.toProjectSyncIssue() },
           )
 
         // IF the IDE were running fully in a JVM environment, we would have
