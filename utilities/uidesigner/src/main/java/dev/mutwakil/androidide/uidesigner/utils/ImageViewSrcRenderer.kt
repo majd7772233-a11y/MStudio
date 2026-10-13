@@ -68,27 +68,27 @@ class ImageViewSrcRenderer {
   ): Boolean {
     val drawableName = resourceName.substringAfter("@drawable/")
 
-    // Try standard resource loading first
-    var resourceId = context.resources.getIdentifier(drawableName, "drawable", context.packageName)
-    if (resourceId == 0) {
-      resourceId =
-          context.applicationContext.resources.getIdentifier(
-              drawableName,
-              "drawable",
-              context.applicationContext.packageName,
-          )
-    }
+    // Resolve the opened project's own resource before consulting MStudio's installed resources;
+    // identical resource names across the two apps must not render the wrong image.
+    if (loadFromResDrawable(imageView, drawableName, context, layoutFile)) return true
 
-    if (resourceId != 0) {
-      val drawable = ContextCompat.getDrawable(context, resourceId)
-      if (drawable != null) {
-        imageView.setImageDrawable(drawable)
-        return true
-      }
+    return try {
+      val resourceId =
+          context.resources.getIdentifier(drawableName, "drawable", context.packageName)
+              .takeIf { it != 0 }
+              ?: context.applicationContext.resources.getIdentifier(
+                  drawableName,
+                  "drawable",
+                  context.applicationContext.packageName,
+              )
+      if (resourceId == 0) return false
+      val drawable = ContextCompat.getDrawable(context, resourceId) ?: return false
+      imageView.setImageDrawable(drawable)
+      true
+    } catch (e: Exception) {
+      log.debug("Unable to resolve drawable resource '{}': {}", drawableName, e.message)
+      false
     }
-
-    // Try loading from res/drawable folders directly
-    return loadFromResDrawable(imageView, drawableName, context, layoutFile)
   }
 
   private fun loadMipmapResource(
@@ -99,27 +99,26 @@ class ImageViewSrcRenderer {
   ): Boolean {
     val mipmapName = resourceName.substringAfter("@mipmap/")
 
-    // Try standard resource loading first
-    var resourceId = context.resources.getIdentifier(mipmapName, "mipmap", context.packageName)
-    if (resourceId == 0) {
-      resourceId =
-          context.applicationContext.resources.getIdentifier(
-              mipmapName,
-              "mipmap",
-              context.applicationContext.packageName,
-          )
-    }
+    // Prefer the opened project's mipmap, including qualifier-specific and non-app modules.
+    if (loadFromResMipmap(imageView, mipmapName, context, layoutFile)) return true
 
-    if (resourceId != 0) {
-      val drawable = ContextCompat.getDrawable(context, resourceId)
-      if (drawable != null) {
-        imageView.setImageDrawable(drawable)
-        return true
-      }
+    return try {
+      val resourceId =
+          context.resources.getIdentifier(mipmapName, "mipmap", context.packageName)
+              .takeIf { it != 0 }
+              ?: context.applicationContext.resources.getIdentifier(
+                  mipmapName,
+                  "mipmap",
+                  context.applicationContext.packageName,
+              )
+      if (resourceId == 0) return false
+      val drawable = ContextCompat.getDrawable(context, resourceId) ?: return false
+      imageView.setImageDrawable(drawable)
+      true
+    } catch (e: Exception) {
+      log.debug("Unable to resolve mipmap resource '{}': {}", mipmapName, e.message)
+      false
     }
-
-    // Try loading from res/mipmap folders directly
-    return loadFromResMipmap(imageView, mipmapName, context, layoutFile)
   }
 
   private fun loadFromResDrawable(
