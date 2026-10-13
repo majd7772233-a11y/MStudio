@@ -155,6 +155,7 @@ class ImageViewSrcRenderer {
             "mipmap",
             context,
             ProjectResourceLocator.findModuleRoot(layoutFile),
+            ProjectResourceLocator.findSourceSet(layoutFile),
         )
 
     return loadImageFromFolders(imageView, mipmapName, mipmapFolders, context, layoutFile)
@@ -359,62 +360,8 @@ class ImageViewSrcRenderer {
   /**
    * Find project root based on the layout file path (reused from BackgroundPreviewRenderer logic)
    */
-  private fun findProjectRoot(layoutFile: File?): File? {
-    if (layoutFile == null) return null
-
-    var current = layoutFile.parentFile
-
-    // Navigate up from the layout file to find project root
-    for (i in 0..10) {
-      if (current == null) break
-
-      // Look for typical Android project structure indicators
-      val hasGradleBuild =
-          File(current, "build.gradle").exists() || File(current, "build.gradle.kts").exists()
-      val hasAppModule = File(current, "app").exists()
-      val hasSrcMain = File(current, "src/main").exists()
-      val hasSettings =
-          File(current, "settings.gradle").exists() || File(current, "settings.gradle.kts").exists()
-
-      // If we're in a module directory (has src/main), go up one more level
-      if (hasSrcMain && !hasAppModule && !hasSettings) {
-        current = current.parentFile
-        continue
-      }
-
-      // Found project root
-      if (hasGradleBuild || hasAppModule || hasSettings) {
-        log.debug("Found project root: {}", current.absolutePath)
-        return current
-      }
-
-      current = current.parentFile
-    }
-
-    // Fallback: try to find based on common Android project patterns
-    current = layoutFile.parentFile
-    for (i in 0..10) {
-      if (current == null) break
-
-      // Check if we're in res/layout and navigate to module root
-      if (current.name == "layout" && current.parentFile?.name == "res") {
-        val resDir = current.parentFile
-        val mainDir = resDir?.parentFile
-        val srcDir = mainDir?.parentFile
-        val moduleRoot = srcDir?.parentFile
-
-        if (moduleRoot != null) {
-          log.debug("Found module root via res/layout path: {}", moduleRoot.absolutePath)
-          return moduleRoot
-        }
-      }
-
-      current = current.parentFile
-    }
-
-    log.warn("Could not find project root for layout file: {}", layoutFile.absolutePath)
-    return null
-  }
+  private fun findProjectRoot(layoutFile: File?): File? =
+      ProjectResourceLocator.findProjectRoot(layoutFile)
 
   private fun loadAndroidDrawable(
       imageView: ImageView,
