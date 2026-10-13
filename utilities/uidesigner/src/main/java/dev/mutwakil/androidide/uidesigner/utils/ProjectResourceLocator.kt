@@ -93,10 +93,11 @@ internal object ProjectResourceLocator {
   /** Finds the source set (for example, main, debug or a flavor) containing the layout. */
   fun findSourceSet(layoutFile: File?, moduleRoot: File? = findModuleRoot(layoutFile)): String? {
     if (layoutFile == null || moduleRoot == null) return null
-    val modulePath = moduleRoot.absoluteFile.toPath().normalize()
-    val filePath = layoutFile.absoluteFile.toPath().normalize()
-    if (!filePath.startsWith(modulePath)) return null
-    val relative = modulePath.relativize(filePath).toString().replace(File.separatorChar, '/')
+    val modulePath = moduleRoot.absolutePath.trimEnd(File.separatorChar)
+    val filePath = layoutFile.absolutePath
+    if (filePath != modulePath && !filePath.startsWith(modulePath + File.separator)) return null
+    val relative = filePath.removePrefix(modulePath).trimStart(File.separatorChar)
+        .replace(File.separatorChar, '/')
     val segments = relative.split('/')
     val srcIndex = segments.indexOf("src")
     return segments.getOrNull(srcIndex + 1)?.takeIf { srcIndex >= 0 }
