@@ -689,22 +689,6 @@ class BackgroundPreviewRenderer {
     }
   }
 
-  private fun resolveProjectColor(
-      projectRoot: File,
-      colorName: String,
-      context: Context,
-      visited: MutableSet<String>,
-  ): String? {
-    if (visited.size >= 8 || !visited.add(colorName)) return null
-    val value =
-        ProjectResourceLocator.findValueResource(projectRoot, "color", colorName, context)
-            ?: return null
-    return if (value.startsWith("@color/")) {
-      resolveProjectColor(projectRoot, value.substringAfter("@color/"), context, visited)
-    } else {
-      value.takeIf { !it.startsWith("@") && !it.startsWith("?") }
-    }
-  }
 
   private fun loadAndroidDrawable(view: View, resourceName: String, context: Context): Boolean {
     return try {
