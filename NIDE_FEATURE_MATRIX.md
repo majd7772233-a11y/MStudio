@@ -132,3 +132,6 @@ Vineflower is not executed inside Android's ART process. The app build stages th
 The Phase 9 decompiler boundary was hardened while preparing Phase 10 verification: archive preflight rejects unknown/negative and overflow-sized entry lengths; generated output is monitored with a 10,000-file / 256 MiB cap; policy tests cover hostile archive sizes and output ceilings. The PackageInstaller callback receiver is now private and receives the result through an explicit PendingIntent. These changes are **source-level only** until the manual verification workflow and device tests run.
 
 Prepared, not dispatched: `.github/workflows/phase10-verification.yml` (static checks, JVM tests, Tooling API tests/build, debug APK and checksums) and `.github/workflows/phase10-codeql.yml` (Java/Kotlin CodeQL). No test, build, scan, APK install or device validation has been run. Do not mark Phase 9 runtime acceptance or Phase 10 acceptance as verified based on workflow definitions alone.
+
+
+Phase 10 runbook: see PHASE10_VERIFICATION.md for manual workflow order, device matrix, evidence requirements, and the current unverified status.
