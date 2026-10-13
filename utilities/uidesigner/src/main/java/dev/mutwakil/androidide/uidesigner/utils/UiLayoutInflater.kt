@@ -68,7 +68,7 @@ class UiLayoutInflater : LayoutInflaterImpl() {
 
     // Map of Material component qualified names to their factory functions
     private val MATERIAL_COMPONENT_FACTORIES =
-        mapOf<String, (ViewGroup) -> android.view.View>(
+        mutableMapOf<String, (ViewGroup) -> android.view.View>(
             "com.google.android.material.button.MaterialButton" to
                 { parent ->
                   MaterialButton(parent.context).apply { text = "Button" }
@@ -246,7 +246,7 @@ class UiLayoutInflater : LayoutInflaterImpl() {
    */
   fun registerMaterialComponent(qualifiedName: String, factory: (ViewGroup) -> android.view.View) {
     if (!MATERIAL_COMPONENT_FACTORIES.containsKey(qualifiedName)) {
-      (MATERIAL_COMPONENT_FACTORIES as MutableMap)[qualifiedName] = factory
+      MATERIAL_COMPONENT_FACTORIES[qualifiedName] = factory
       log.debug("Registered new Material component: $qualifiedName")
     } else {
       log.warn("Material component already registered: $qualifiedName")
