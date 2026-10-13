@@ -545,3 +545,11 @@ Read `MSTUDIO_ROADMAP.md` first; its latest handoff checkpoint was committed in 
 
 - GradleBuildService.doInstallWrapper() now extracts the bundled archive into a staging directory and repairs only missing/invalid gradlew, gradle-wrapper.jar, and gradle-wrapper.properties. Existing valid components are preserved, including a valid project-specific distributionUrl; repaired files are checked before replacement, gradlew is marked executable, and strict wrapper preflight runs afterward. Staging is cleaned in finally.
 - Commit: d1f7581017e2f3f4fc14a7384af5c907595fd4ca. This was source-only work; no tests/builds/Actions/device checks were run. Continue auditing Phase 4 source requirements and documentation, without misrepresenting the deferred runtime acceptance as verified.
+
+
+## Phase 5 handoff — project structure validation (2026-10-13)
+
+- Live branch `dev` was rechecked before the change. The previous source HEAD was `9c92ba516504d690cdaa6f93945d04e664c1f266`; source correction: `52a8c27f385d0a31048f02e6230abb7370f0837f`; roadmap record: `b6044db8a0ec8ea0ed683013532df50ada6f3fef`.
+- Updated `core/app/src/main/java/dev/mutwakil/androidide/utils/ProjectValidation.kt` so import validation no longer hardcodes an `app/` module. It accepts a root Gradle build script, or a settings-based multi-module root with a descendant module build script within a bounded search depth; it rejects non-directory selections and build-script paths that are not regular files, and skips hidden/VCS/generated directories during descendant search. The special plugin-project case remains supported.
+- This is only source-level structural validation. It does not prove Gradle sync, SAF access, nested/composite project modeling, variants, classpaths, or dependency resolution. Parent-container picker and model-builder work remain open under Phase 5.
+- No tests, Gradle builds, Actions runs, or device checks were run. Keep all evidence-dependent checklist items unchecked and do not describe Phase 5 as complete.
