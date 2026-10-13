@@ -501,6 +501,7 @@
   <string name="decompiler_failed">فشل فك الشيفرة: %1$s</string>
   <string name="decompiler_unsupported_type">اختر ملف .class أو .jar أو .zip. لا تدعم الأداة APK أو DEX.</string>
   <string name="decompiler_input_too_large">حجم الملف يتجاوز حد الأمان البالغ 128 ميبيبايت.</string>
+  <string name="decompiler_archive_too_large">الأرشيف يتجاوز حدود الأمان (5000 مدخل أو 256 ميبيبايت بعد فك الضغط).</string>
   <string name="decompiler_no_sources">لم تُنتج ملفات Java. قد يكون الملف غير صالح أو غير مدعوم.</string>
   <string name="decompiler_sources">ملفات Java الناتجة</string>
   <string name="decompiler_read_failed">تعذرت قراءة المصدر: %1$s</string>
