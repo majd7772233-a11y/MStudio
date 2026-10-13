@@ -818,4 +818,6 @@
     <string name="decompiler_read_failed">Unable to read source: %1$s</string>
     <string name="decompiler_export_failed">Unable to export source: %1$s</string>
     <string name="decompiler_share">Export</string>
+    <string name="decompiler_export">Export source</string>
+    <string name="decompiler_export_success">Exported %1$s successfully.</string>
 </resources>
