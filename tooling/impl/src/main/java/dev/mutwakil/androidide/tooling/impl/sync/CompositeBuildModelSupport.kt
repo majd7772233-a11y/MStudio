@@ -1,5 +1,6 @@
 package dev.mutwakil.androidide.tooling.impl.sync
 
+import dev.mutwakil.androidide.project.AndroidModels
 import dev.mutwakil.androidide.project.GradleModels
 import dev.mutwakil.androidide.tooling.api.messages.AndroidInitializationParams
 import dev.mutwakil.androidide.tooling.api.messages.InitializeProjectParams
@@ -72,6 +73,52 @@ internal fun initializeParamsForIncludedBuild(
     gradleArgs = params.gradleArgs,
     jvmArgs = params.jvmArgs,
   )
+}
+
+/**
+ * Maps Android project-dependency paths in the root build to the included build namespace when
+ * AGP identifies the dependency as belonging to an included build. The build ID is kept as-is;
+ * only the IDE's lookup path is namespaced.
+ */
+internal fun namespaceRootBuildProjectDependencies(
+  project: GradleModels.GradleProject,
+  includedBuildNamesById: Map<String, String>,
+): GradleModels.GradleProject {
+  if (!project.hasAndroidProject()) return project
+  val androidProject = project.androidProject
+  if (!androidProject.hasVariantDependencies()) return project
+
+  val dependencies = androidProject.variantDependencies
+  val mappedLibraries =
+    dependencies.librariesMap.mapValues { (_, library) ->
+      val projectInfo = library.projectInfo
+      val buildId = projectInfo?.buildId.orEmpty()
+      val buildName =
+        includedBuildNamesById[buildId]
+          ?: includedBuildNamesById[buildId.trim(':')]
+      if (
+        library.type == AndroidModels.LibraryType.Project &&
+        projectInfo != null &&
+        buildName != null
+      ) {
+        library.toBuilder()
+          .setProjectInfo(
+            projectInfo.toBuilder()
+              .setProjectPath(compositeBuildProjectPath(buildName, projectInfo.projectPath))
+              .build(),
+          ).build()
+      } else {
+        library
+      }
+    }
+
+  return project.toBuilder()
+    .setAndroidProject(
+      androidProject.toBuilder()
+        .setVariantDependencies(
+          dependencies.toBuilder().clearLibraries().putAllLibraries(mappedLibraries).build(),
+        ).build(),
+    ).build()
 }
 
 /**
