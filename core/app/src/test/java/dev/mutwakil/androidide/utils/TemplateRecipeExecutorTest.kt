@@ -108,14 +108,14 @@ class TemplateRecipeExecutorTest {
     val root = File(temporaryFolder.root, "NewProject")
     val executor = TemplateRecipeExecutor()
 
-    val result = executor.executeRecipe {
+    val result = executor.executeRecipe<TemplateRecipeResult> {
       beginProjectCreation(root)
       root.mkdirs()
       save("partial", File(root, "partial.txt"))
       null
     }
 
-    assertEquals(null, result)
+    assertTrue(result == null)
     assertFalse(root.exists())
   }
 
