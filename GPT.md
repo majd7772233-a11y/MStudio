@@ -609,3 +609,10 @@ The user's latest instruction was to finish the two remaining Phase 5 gaps, then
 - Composite-build discovery now wraps access to ToolingGradleBuild.includedBuilds because that model property was added after older Gradle versions. An older build without this optional API should continue as a regular project rather than failing sync.
 - Source commit: e9a48859bdea06bcba990f0fd2bc6346b00b512c. Roadmap record: ae649a8fea8b05135a51101913cea07082ee4e3b.
 - No executable verification was performed. Keep custom includeBuild name aliases as a known limitation until a supported way to retrieve their Gradle task-selector names is implemented.
+
+
+### Phase 6 follow-up — invalidate diagnostics after workspace sync (2026-10-13)
+- Added PerFileDiagnosticCache.clearAll() and JavaDiagnosticProvider.clearAllDiagnostics(). JavaLanguageServer.setupWithProject clears diagnostics computed against the previous workspace/classpath before it starts analyzing the new workspace.
+- Added a source test that verifies clearing all cached diagnostic results.
+- Source commits: a4968892db009ff0685b9ab1c1d8e66006372f43 and 68d22c9bc0dcb1b77bb0d8097e367fd3fc3f50fd; test: 23c2a3c788f4a6aa8e060b2204540367856e9a75. Roadmap record: a277ba6e82cfebc0108b3b046979dc092bcdab72.
+- No tests/builds/Actions/device checks were run.
