@@ -135,6 +135,7 @@ class ImageViewSrcRenderer {
             "drawable",
             context,
             ProjectResourceLocator.findModuleRoot(layoutFile),
+            ProjectResourceLocator.findSourceSet(layoutFile),
         )
 
     return loadImageFromFolders(imageView, drawableName, drawableFolders, context, layoutFile)
