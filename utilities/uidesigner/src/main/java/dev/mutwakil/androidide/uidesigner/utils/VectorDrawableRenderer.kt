@@ -71,41 +71,31 @@ class VectorDrawableRenderer {
   ): Boolean {
     val drawableName = resourceName.substringAfter("@drawable/")
 
-    // Method 1: Try to load from Android resources (if it exists in the system)
-    try {
+    // Prefer the project file. Loading MStudio's own resource first can silently show an unrelated
+    // image when the project defines the same drawable name.
+    val projectRoot = findProjectRoot(layoutFile)
+    val vectorFile = projectRoot?.let { findVectorFile(it, drawableName, context) }
+    if (vectorFile != null) {
+      if (!isVectorDrawable(vectorFile)) return false
+      log.debug("Found project vector drawable file: {}", vectorFile.absolutePath)
+      if (tryVectorDrawableCompat(view, vectorFile, context, isBackground)) return true
+      if (tryCustomPathRendering(view, vectorFile, context, isBackground)) return true
+      return false
+    }
+
+    // No project source file was found; use a compiled resource only as a fallback.
+    return try {
       val resourceId =
           context.resources.getIdentifier(drawableName, "drawable", context.packageName)
-      if (resourceId != 0) {
-        val drawable = ContextCompat.getDrawable(context, resourceId)
-        if (drawable != null) {
-          applyDrawableToView(view, drawable, isBackground)
-          log.debug("Successfully loaded vector drawable from resources: {}", drawableName)
-          return true
-        }
-      }
+      if (resourceId == 0) return false
+      val drawable = ContextCompat.getDrawable(context, resourceId) ?: return false
+      applyDrawableToView(view, drawable, isBackground)
+      log.debug("Loaded fallback compiled drawable resource: {}", drawableName)
+      true
     } catch (e: Exception) {
-      log.debug("Could not load from resources: {}", e.message)
+      log.debug("Could not load drawable resource '{}': {}", drawableName, e.message)
+      false
     }
-
-    // Method 2: Try to find and load the vector file directly
-    val projectRoot = findProjectRoot(layoutFile) ?: return false
-    val vectorFile = findVectorFile(projectRoot, drawableName, context)
-
-    if (vectorFile != null && isVectorDrawable(vectorFile)) {
-      log.debug("Found vector drawable file: {}", vectorFile.absolutePath)
-
-      // Method 2a: Try VectorDrawableCompat with manipulated XML
-      if (tryVectorDrawableCompat(view, vectorFile, context, isBackground)) {
-        return true
-      }
-
-      // Method 2b: Try custom path rendering as fallback
-      if (tryCustomPathRendering(view, vectorFile, context, isBackground)) {
-        return true
-      }
-    }
-
-    return false
   }
 
   /** Try to use VectorDrawableCompat by manipulating the XML content */
