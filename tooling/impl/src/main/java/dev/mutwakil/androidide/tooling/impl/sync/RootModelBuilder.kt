@@ -186,7 +186,9 @@ object RootModelBuilder :
           val includedIdeaProject =
             controller.getModel(includedBuild.rootProject, IdeaProject::class.java)
           val includedModules = includedIdeaProject.modules
-          val buildName = includedBuild.rootProject.name
+          // Gradle's composite task path uses the included-build name, which defaults to
+          // the included directory name and may differ from settings.gradle's rootProject.name.
+          val buildName = includedBuild.rootProject.projectDirectory.name
           val includedInitializeParams = initializeParamsForIncludedBuild(initializeParams, buildName)
           val includedModulePaths =
             uniqueModuleNameToPath(
