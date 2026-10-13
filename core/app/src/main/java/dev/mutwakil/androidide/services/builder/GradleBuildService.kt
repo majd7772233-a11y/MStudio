@@ -408,9 +408,13 @@ class GradleBuildService : Service(), BuildService, IToolingApiClient,
     try {
       val projectDir = ProjectManagerImpl.getInstance().projectDir
       val files = ZipUtils.unzipFile(extracted, projectDir)
-      if (files != null && files.isNotEmpty()) {
+      if (files != null && files.isNotEmpty() && isGradleWrapperAvailable) {
         return GradleWrapperCheckResult(true)
       }
+      log.error(
+        "Gradle wrapper repair did not produce a complete, readable wrapper in {}",
+        projectDir
+      )
     } catch (e: IOException) {
       log.error("An error occurred while extracting Gradle wrapper", e)
     }
