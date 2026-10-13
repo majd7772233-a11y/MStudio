@@ -110,8 +110,8 @@ internal class WorkspaceViewHierarchyHandler : IViewGroup.SingleOnHierarchyChang
       frag.viewModel.workspaceScreen = WorkspaceViewModel.SCREEN_WORKSPACE
     }
 
-    // FIXED: Save M3 components to workspace state when they are added
-    if (view !is PlaceholderView) {
+    // Persist M3 additions made by the user, not components merely loaded from source XML.
+    if (!frag.isInflating && view !is PlaceholderView) {
       frag.saveM3ComponentToState(view)
     }
 
