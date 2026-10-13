@@ -133,6 +133,7 @@ internal object ProjectResourceLocator {
       resourceName: String,
       context: Context,
       preferredModuleRoot: File? = null,
+      preferredSourceSet: String? = null,
   ): String? =
       resolveValueResource(
           projectRoot,
@@ -140,6 +141,7 @@ internal object ProjectResourceLocator {
           resourceName,
           context,
           preferredModuleRoot,
+          preferredSourceSet,
           mutableSetOf(),
       )
 
@@ -149,12 +151,13 @@ internal object ProjectResourceLocator {
       resourceName: String,
       context: Context,
       preferredModuleRoot: File?,
+      preferredSourceSet: String?,
       visited: MutableSet<String>,
   ): String? {
     val key = "$resourceType/$resourceName"
     if (visited.size >= MAX_VALUE_ALIAS_DEPTH || !visited.add(key)) return null
     val value =
-        findValueResource(projectRoot, resourceType, resourceName, context, preferredModuleRoot)
+        findValueResource(projectRoot, resourceType, resourceName, context, preferredModuleRoot, preferredSourceSet)
             ?: return null
     val alias = Regex("^@($SUPPORTED_VALUE_TYPES)/([A-Za-z_][A-Za-z0-9_.]*)$").matchEntire(value)
     if (alias != null) {
@@ -166,6 +169,7 @@ internal object ProjectResourceLocator {
           targetName,
           context,
           preferredModuleRoot,
+          preferredSourceSet,
           visited,
       )
     }
@@ -178,10 +182,11 @@ internal object ProjectResourceLocator {
       resourceName: String,
       context: Context,
       preferredModuleRoot: File? = null,
+      preferredSourceSet: String? = null,
   ): String? {
     val parserFactory = XmlPullParserFactory.newInstance()
     val directories =
-        findResourceDirectories(projectRoot, "values", context, preferredModuleRoot)
+        findResourceDirectories(projectRoot, "values", context, preferredModuleRoot, preferredSourceSet)
     for (directory in directories) {
       val files = directory.listFiles()?.filter { it.isFile && it.extension == "xml" } ?: continue
       for (file in files.sortedBy { it.name }) {
