@@ -632,3 +632,16 @@ The user's latest instruction was to finish the two remaining Phase 5 gaps, then
 - Existing inflation-error handling continues to refuse generated XML when the preview is invalid.
 - Source commit: `f852a40bf4df457b82529e1dc6180fda22135385`.
 - This begins Phase 7; it does not establish that XML designer round-tripping, resource resolution, drag/drop constraints, custom views/includes or Compose preview are complete. No executable verification was run.
+
+
+## Phase 7 implementation handoff — 2026-10-13
+
+Latest source work is on branch `dev`. Re-fetch live files and this note before any follow-up.
+
+- Designer no longer treats source inflation as an edit: dirty state is marked by actual user attribute/hierarchy changes and M3 additions. Material views created while loading the XML are not persisted as user additions. Setting the same file path again preserves dirty/undo state through activity recreation; switching to a different path resets it.
+- The back action returns original UTF-8 XML when the visual tree is untouched. If a changed source contains `<include>`, `<merge>`, `<requestFocus>`, `<tag>`, `<fragment>`, or `<view class="...">`, save is blocked rather than returning a lossy generated tree. This guard is safety, not editing support for these nodes.
+- XML generation writes default namespace declarations as `xmlns` and rejects namespaced attributes with a URI but no usable prefix.
+- Material component registration now uses a mutable registry rather than casting a `mapOf` to `MutableMap`.
+- Compose preview sets its initialization-ready flag after successful initial setup, guards against stale source compilation results, and can recreate preview resources after low-memory cleanup.
+- Source tests were added for XML round-trip guards/default namespace serialization and dirty-state lifecycle. **No tests/builds/Actions/device checks were run**; do not claim runtime success.
+- Remaining Phase 7 functional gaps: full editing round-trip for XML-only nodes (currently safely refused), configuration-qualified resource resolution and broad resource-preview/error coverage. Continue Phase 7 only; Phase 8 must not start until the exact user authorization `يلا الان إبدأ بالمرحلة الثامنة`.
