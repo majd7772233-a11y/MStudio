@@ -404,23 +404,97 @@ class GradleBuildService : Service(), BuildService, IToolingApiClient,
     if (!ResourceUtils.copyFileFromAssets(ToolsManager.getCommonAsset("gradle-wrapper.zip"),
         extracted.absolutePath)
     ) {
-      log.error("Unable to extract gradle-plugin.zip from IDE resources.")
+      log.error("Unable to extract gradle-wrapper.zip from IDE resources.")
       return GradleWrapperCheckResult(false)
     }
+
+    val stagingDir = File(Environment.TMP_DIR, "gradle-wrapper-staging")
     try {
       val projectDir = ProjectManagerImpl.getInstance().projectDir
-      val files = ZipUtils.unzipFile(extracted, projectDir)
-      if (files != null && files.isNotEmpty() && isGradleWrapperAvailable) {
-        return GradleWrapperCheckResult(true)
+      if (!stagingDir.exists() && !stagingDir.mkdirs()) {
+        throw IOException("Unable to create Gradle wrapper staging directory: $stagingDir")
       }
-      log.error(
-        "Gradle wrapper repair did not produce a complete, readable wrapper in {}",
-        projectDir
+      stagingDir.listFiles()?.forEach { child ->
+        if (child.isDirectory) child.deleteRecursively() else child.delete()
+      }
+
+      val extractedFiles = ZipUtils.unzipFile(extracted, stagingDir)
+      if (extractedFiles.isNullOrEmpty()) {
+        throw IOException("Gradle wrapper archive extracted no files")
+      }
+
+      // Repair only missing or invalid components. Never overwrite a valid wrapper file,
+      // especially the project's own distributionUrl or executable script.
+      val relativePaths = listOf(
+        "gradlew",
+        "gradle/wrapper/gradle-wrapper.jar",
+        "gradle/wrapper/gradle-wrapper.properties"
       )
+      for (relativePath in relativePaths) {
+        val destination = File(projectDir, relativePath)
+        if (isValidWrapperComponent(destination, relativePath)) continue
+
+        val source = File(stagingDir, relativePath)
+        if (!isValidWrapperComponent(source, relativePath)) {
+          throw IOException("Bundled Gradle wrapper component is missing or invalid: $relativePath")
+        }
+        destination.parentFile?.let { parent ->
+          if (!parent.exists() && !parent.mkdirs()) {
+            throw IOException("Unable to create Gradle wrapper directory: $parent")
+          }
+        }
+        val temporary = File(destination.parentFile, destination.name + ".repair.tmp")
+        try {
+          source.inputStream().use { input ->
+            temporary.outputStream().use { output -> input.copyTo(output) }
+          }
+          if (temporary.length() == 0L) {
+            throw IOException("Repaired Gradle wrapper component is empty: $relativePath")
+          }
+          if (destination.exists() && !destination.delete()) {
+            throw IOException("Unable to replace invalid Gradle wrapper component: $destination")
+          }
+          if (!temporary.renameTo(destination)) {
+            source.copyTo(destination, overwrite = true)
+            temporary.delete()
+          }
+          if (relativePath == "gradlew") destination.setExecutable(true, false)
+        } finally {
+          if (temporary.exists()) temporary.delete()
+        }
+      }
+
+      if (isGradleWrapperAvailable) return GradleWrapperCheckResult(true)
+      log.error("Gradle wrapper repair did not produce a complete, readable wrapper in {}", projectDir)
     } catch (e: IOException) {
-      log.error("An error occurred while extracting Gradle wrapper", e)
+      log.error("An error occurred while repairing Gradle wrapper files", e)
+    } finally {
+      stagingDir.deleteRecursively()
     }
     return GradleWrapperCheckResult(false)
+  }
+
+  private fun isValidWrapperComponent(file: File, relativePath: String): Boolean {
+    if (!file.isFile || file.length() == 0L || !file.canRead()) return false
+    return when (relativePath) {
+      "gradle/wrapper/gradle-wrapper.jar" -> try {
+        java.util.zip.ZipFile(file).use { it.entries().hasMoreElements() }
+      } catch (error: IOException) {
+        false
+      }
+      "gradle/wrapper/gradle-wrapper.properties" -> try {
+        file.useLines { lines ->
+          lines.any { line ->
+            val entry = line.trim()
+            entry.startsWith("distributionUrl=") &&
+              entry.substringAfter('=').trim().isNotEmpty()
+          }
+        }
+      } catch (error: IOException) {
+        false
+      }
+      else -> true
+    }
   }
 
   private fun updateNotification(message: String, isProgress: Boolean) {
