@@ -25,7 +25,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
 import dev.mutwakil.androidide.R
 import dev.mutwakil.androidide.R.string
-import dev.mutwakil.androidide.activities.MainActivity
 import dev.mutwakil.androidide.adapters.TemplateWidgetsListAdapter
 import dev.mutwakil.androidide.databinding.FragmentTemplateDetailsBinding
 import dev.mutwakil.androidide.tasks.executeAsyncProvideError
@@ -36,13 +35,9 @@ import dev.mutwakil.androidide.templates.base.util.isValidProjectName
 import dev.mutwakil.androidide.templates.impl.ConstraintVerifier
 import dev.mutwakil.androidide.utils.TemplateRecipeExecutor
 import dev.mutwakil.androidide.utils.flashError
-import dev.mutwakil.androidide.utils.flashSuccess
 import dev.mutwakil.androidide.viewmodel.MainViewModel
 import org.slf4j.LoggerFactory
-import androidx.fragment.app.activityViewModels
-import dev.mutwakil.androidide.roomData.recentproject.RecentProject
 import dev.mutwakil.androidide.viewmodel.RecentProjectsViewModel
-import java.util.Date
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 /**
@@ -115,40 +110,26 @@ class TemplateDetailsFragment :
           template.recipe.execute(this) as? ProjectTemplateRecipeResult
         }
       }) { result, err ->
-
         viewModel.creatingProject.value = false
-        if (result == null || err != null || result !is ProjectTemplateRecipeResult) {
+
+        if (result !is ProjectTemplateRecipeResult || err != null) {
           if (err != null) {
             log.error("Failed to create project", err)
-            flashError(err.cause?.message ?: err.message ?: getString(string.project_creation_failed))
+            viewModel.pendingTemplateCreationError.value =
+              err.cause?.message ?: err.message ?: getString(string.project_creation_failed)
           } else {
             log.error("Template did not return a project result: {}", result)
-            flashError(string.project_creation_failed)
+            viewModel.pendingTemplateCreationError.value =
+              getString(string.project_creation_failed)
           }
           return@executeAsyncProvideError
         }
 
+        // Keep the result in the activity-scoped ViewModel. MainActivity owns the
+        // transition, recent-project entry, and launch so rotation cannot lose the
+        // completed result or cause the fragment to launch the project twice.
+        viewModel.pendingCreatedProject.value = result
         viewModel.setScreen(MainViewModel.SCREEN_MAIN)
-        flashSuccess(string.project_created_successfully)
-        
-        val now = System.currentTimeMillis().toString()
-        
-        val project = RecentProject(
-                    location = result.data.projectDir.path,
-                    name = result.data.name,
-                    createdAt = now,
-                    lastModified = now,
-                    templateName = getString(template.templateName),
-                    language = result.data.language?.name ?: "unknown"
-         )         
-
-        viewModel.postTransition(viewLifecycleOwner) {
-          // open the project
-          ((requireActivity() as MainActivity).openProject(
-                        result.data.projectDir,
-                        project = project
-          ))
-        }
       }
     }
 
