@@ -132,10 +132,10 @@ class DecompilerActivity : AppCompatActivity() {
                 val entry = entries.nextElement()
                 count++
                 val size = entry.size
-                if (size > 0) expandedBytes += size
-                if (!DecompilerInputPolicy.isArchiveWithinLimits(count, expandedBytes)) {
+                if (!DecompilerInputPolicy.canIncludeArchiveEntry(count, expandedBytes, size)) {
                     throw IOException(getString(ResourcesR.string.decompiler_archive_too_large))
                 }
+                expandedBytes += size
             }
         }
     }
@@ -187,12 +187,29 @@ class DecompilerActivity : AppCompatActivity() {
             start()
         }
         try {
-            if (!process.waitFor(3, TimeUnit.MINUTES)) {
-                process.destroyForcibly()
-                reader.join(1000)
-                throw IOException("Decompilation timed out after three minutes.")
+            val deadline = System.nanoTime() + TimeUnit.MINUTES.toNanos(3)
+            while (true) {
+                val remainingNanos = deadline - System.nanoTime()
+                if (remainingNanos <= 0L) {
+                    process.destroyForcibly()
+                    process.waitFor(1, TimeUnit.SECONDS)
+                    reader.join(1000)
+                    throw IOException("Decompilation timed out after three minutes.")
+                }
+                if (process.waitFor(minOf(1L, TimeUnit.NANOSECONDS.toSeconds(remainingNanos).coerceAtLeast(1L)), TimeUnit.SECONDS)) {
+                    break
+                }
+                if (!isOutputWithinLimits(output)) {
+                    process.destroyForcibly()
+                    process.waitFor(1, TimeUnit.SECONDS)
+                    reader.join(1000)
+                    throw IOException("Decompiled output exceeded the safety limit; the process was stopped.")
+                }
             }
             reader.join(1000)
+            if (!isOutputWithinLimits(output)) {
+                throw IOException("Decompiled output exceeded the safety limit.")
+            }
         } catch (interrupted: InterruptedException) {
             process.destroyForcibly()
             Thread.currentThread().interrupt()
@@ -203,6 +220,23 @@ class DecompilerActivity : AppCompatActivity() {
             throw IOException("Vineflower exited with code " + process.exitValue() +
                 if (details.isBlank()) "" else ":\n" + details)
         }
+    }
+
+    /** Monitors output while the child JVM runs so malformed inputs cannot fill app storage. */
+    private fun isOutputWithinLimits(directory: File): Boolean {
+        var fileCount = 0
+        var totalBytes = 0L
+        val files = directory.walkTopDown().iterator()
+        while (files.hasNext()) {
+            val file = files.next()
+            if (!file.isFile) continue
+            fileCount++
+            if (fileCount > DecompilerInputPolicy.MAX_OUTPUT_FILES) return false
+            val size = file.length()
+            if (size < 0L || size > DecompilerInputPolicy.MAX_OUTPUT_BYTES - totalBytes) return false
+            totalBytes += size
+        }
+        return DecompilerInputPolicy.isWithinOutputLimits(fileCount, totalBytes)
     }
 
     private fun queryDisplayName(uri: Uri): String? {
@@ -254,7 +288,7 @@ class DecompilerActivity : AppCompatActivity() {
             .setItems(visible.map { it.relativeTo(root).invariantSeparatorsPath }.toTypedArray()) { _, index ->
                 showSource(visible[index])
             }
-            .setNegativeButton(android.ResourcesR.string.cancel, null)
+            .setNegativeButton(android.R.string.cancel, null)
             .show()
     }
 
@@ -273,7 +307,7 @@ class DecompilerActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle(file.name)
             .setView(scroll)
-            .setPositiveButton(android.ResourcesR.string.ok, null)
+            .setPositiveButton(android.R.string.ok, null)
             .setNeutralButton(ResourcesR.string.decompiler_export) { _, _ ->
                 exportTarget = file
                 createExport.launch(file.name)
