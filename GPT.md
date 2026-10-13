@@ -737,3 +737,13 @@ The user's latest instruction to finish Phase 8 fully supersedes the earlier sou
 - Cancellation is treated as an intentional user action rather than a template-creation failure. Added unit tests for cancellation between writes and immediately before commit. These tests have not been executed.
 - Commits: `5b1f18b4ef9e04724fc79954845d56a51dd6731f`, `3f132d13a487f5cee1f06ab1503265e19d99982c`, `65968b3a2c4133fd4819ec7f70e5a286a4712fef`, `4af5db54e3bf336b377a66b100a617962b2772b2`, `537a5e12670cd4b3635abade126d582e74e7d151`, `789ab1ae6d0ccf0927a5427ed7af785208a0e990`.
 - The generated-project contract assertion was corrected to expect Gradle's actual `include(":app")` syntax. This is still unexecuted source coverage. Low-storage failure, rotation during a real generation, Tooling API build, installation, launch, RTL and narrow/landscape behavior remain runtime gates.
+
+
+## Execution log — 2026-10-13 (Phase 9 selected NIDE port)
+
+- Rechecked live branch dev at `8830ff4ea03ece700b0dc804ad1b8ae7344c6e8c` and reviewed roadmap/matrix before implementation.
+- Selected the unique decompiler gap. Rather than copying NIDE's old Fernflower source tree (Java 7 target and no separate module license file), integrated the maintained Apache-2.0 Vineflower 1.12.0 fork of Fernflower and documented attribution in `THIRD_PARTY_NOTICES.md`.
+- Added main-screen Java Decompiler action, non-exported activity, SAF selection/export, class/JAR/ZIP-only validation, bounded 128 MiB input copy, private output storage and source preview. APK/DEX is rejected; inputs are never executed.
+- Added English/Arabic strings, version-catalog dependency, policy tests and a JVM integration test that compiles a fixture class and checks generated Java output.
+- Other NIDE candidates: formatter duplicate; autocomplete/type resolution reference-only; legacy builder/dx/FastGradleParser/manual AAR resolver rejected for core build; no Logcat port without a proven gap; sample corpus and standalone Java/JAR execution deferred pending acceptance criteria.
+- No Gradle build, test, Actions run, APK install or device check was executed, honoring the user's request to defer tests until final verification. Dependency resolution, D8 compatibility, managed-runtime behavior, memory and malformed/large archive behavior remain unverified.
