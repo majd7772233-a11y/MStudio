@@ -62,6 +62,48 @@ internal object ProjectResourceLocator {
         )
   }
 
+  fun findProjectRoot(layoutFile: File?): File? {
+    var current = layoutFile?.absoluteFile?.parentFile ?: return null
+    repeat(MAX_PROJECT_ROOT_DEPTH) {
+      if (File(current, "build.gradle").isFile ||
+          File(current, "build.gradle.kts").isFile ||
+          File(current, "settings.gradle").isFile ||
+          File(current, "settings.gradle.kts").isFile
+      ) {
+        return current
+      }
+      current = current.parentFile ?: return null
+    }
+    return null
+  }
+
+  /** Resolves simple project value resources and aliases without pretending to be AAPT. */
+  fun resolveValueResource(
+      projectRoot: File,
+      resourceType: String,
+      resourceName: String,
+      context: Context,
+  ): String? = resolveValueResource(projectRoot, resourceType, resourceName, context, mutableSetOf())
+
+  private fun resolveValueResource(
+      projectRoot: File,
+      resourceType: String,
+      resourceName: String,
+      context: Context,
+      visited: MutableSet<String>,
+  ): String? {
+    val key = "$resourceType/$resourceName"
+    if (visited.size >= MAX_VALUE_ALIAS_DEPTH || !visited.add(key)) return null
+    val value = findValueResource(projectRoot, resourceType, resourceName, context) ?: return null
+    val alias = Regex("^@($SUPPORTED_VALUE_TYPES)/([A-Za-z_][A-Za-z0-9_.]*)$").matchEntire(value)
+    if (alias != null) {
+      val targetType = alias.groupValues[1]
+      val targetName = alias.groupValues[2]
+      return resolveValueResource(projectRoot, targetType, targetName, context, visited)
+    }
+    return value.takeIf { !it.startsWith("?") && !it.startsWith("@") }
+  }
+
   fun findValueResource(
       projectRoot: File,
       resourceType: String,
@@ -179,4 +221,7 @@ internal object ProjectResourceLocator {
   }
 
   private const val MAX_DEPTH = 8
+  private const val MAX_PROJECT_ROOT_DEPTH = 12
+  private const val MAX_VALUE_ALIAS_DEPTH = 12
+  private const val SUPPORTED_VALUE_TYPES = "string|color|dimen|integer|bool|fraction"
 }
