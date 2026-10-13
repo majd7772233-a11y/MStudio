@@ -384,6 +384,7 @@
   <string name="msg_path_must_be_dir">يجب أن يكون المسار إلى مجلد</string>
   <string name="msg_invalid_layout_name">اسم ملف التخطيط غير صالح</string>
   <string name="msg_invalid_project_details">تفاصيل المشروع غير صالحة</string>
+  <string name="msg_invalid_project_name">استخدم اسم مشروع لا يتجاوز 80 حرفًا ويتكوّن من حروف أو أرقام أو مسافات أو نقاط أو شرطات أو شرطات سفلية. لا تستخدم فواصل المسارات ولا تبدأ أو تنتهِ بعلامة ترقيم.</string>
   <string name="msg_use_kts">استخدام سكريبت كوتلن (.kts) لإنشاء ملفات بناء غرادل</string>
   <string name="title_privacy">الخصوصية</string>
   <string name="title_androidide_statistics">إحصائيات التطبيق</string>
