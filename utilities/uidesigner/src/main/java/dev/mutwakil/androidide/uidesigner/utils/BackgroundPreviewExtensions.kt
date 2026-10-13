@@ -89,6 +89,14 @@ fun ViewImpl.applyPreview(context: Context, workspace: Workspace?, layoutFile: F
   // Track which attributes we handle specially so we don't apply them twice
   val handledAttributes = mutableSetOf<String>()
 
+  // Apply project styles before explicit XML attributes so explicit attributes retain precedence.
+  this.attributes
+      .find { it.name.equals("style", ignoreCase = true) || it.name.equals("android:style", ignoreCase = true) }
+      ?.let { styleAttr ->
+        handledAttributes.add(styleAttr.name)
+        ProjectStylePreview.apply(this.view, styleAttr.value, context, fileToUse)
+      }
+
   // Apply background preview if background attribute exists
   this.attributes
       .find { isBackgroundAttribute(it.name) }
@@ -342,7 +350,11 @@ fun ViewImpl.applyAttributePreview(
       result
     }
     else -> {
-      // Resolve project string resources before the generic inflater consults IDE resources.
+      // Resolve project styles/resources before the generic inflater consults IDE resources.
+      if (attributeName.substringAfter(':').equals("style", ignoreCase = true) &&
+          ProjectStylePreview.apply(this.view, attributeValue, context, fileToUse)) {
+        return true
+      }
       if (ProjectTextResourcePreview.apply(this.view, attributeName, attributeValue, context, fileToUse) ||
           ProjectDimensionPreview.apply(this.view, attributeName, attributeValue, context, fileToUse)) {
         return true
