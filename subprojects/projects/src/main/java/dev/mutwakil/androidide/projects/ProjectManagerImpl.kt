@@ -66,6 +66,16 @@ import kotlin.io.path.isDirectory
 import kotlin.io.path.pathString
 
 /**
+ * Returns whether two non-empty project paths identify different canonical directories.
+ */
+internal fun projectPathsDiffer(currentPath: String?, nextPath: String): Boolean {
+  if (currentPath.isNullOrBlank()) return false
+  val current = runCatching { File(currentPath).canonicalFile.toPath() }.getOrNull() ?: return true
+  val next = runCatching { File(nextPath).canonicalFile.toPath() }.getOrNull() ?: return true
+  return current != next
+}
+
+/**
  * Internal implementation of [IProjectManager].
  *
  * @author Akash Yadav
@@ -262,12 +272,23 @@ class ProjectManagerImpl :
 	override fun destroy() {
 		log.info("Destroying project manager")
 		this.workspace = null
-
+		this.gradleBuild = null
+		this.androidBuildVariants = emptyMap()
 
 		this._indexingServiceManager?.close()
 		this._indexingServiceManager = null
+	}
 
-		(this.androidBuildVariants as? MutableMap?)?.clear()
+	/**
+	 * Prepares the manager for opening a project. A project switch must discard the previous
+	 * workspace, variants, sync issues and indexer so stale module data cannot leak into the new one.
+	 */
+	fun prepareForProject(directory: File) {
+		val nextPath = directory.canonicalPath
+		if (this::projectPath.isInitialized && projectPathsDiffer(projectPath, nextPath)) {
+			destroy()
+		}
+		projectPath = nextPath
 	}
 
 	@JvmOverloads
