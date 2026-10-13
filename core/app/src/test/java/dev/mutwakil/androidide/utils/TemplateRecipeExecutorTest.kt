@@ -11,6 +11,7 @@ package dev.mutwakil.androidide.utils
 
 import dev.mutwakil.androidide.templates.TemplateRecipeResult
 import java.io.File
+import java.util.concurrent.CancellationException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
@@ -116,6 +117,43 @@ class TemplateRecipeExecutorTest {
     }
 
     assertTrue(result == null)
+    assertFalse(root.exists())
+  }
+
+  @Test
+  fun cancellationBetweenWritesStopsRecipeAndRollsBackGeneratedOutput() {
+    val root = File(temporaryFolder.root, "CancelledProject")
+    val executor = TemplateRecipeExecutor()
+
+    assertThrows(CancellationException::class.java) {
+      executor.executeRecipe {
+        beginProjectCreation(root)
+        root.mkdirs()
+        save("partial", File(root, "partial.txt"))
+        executor.cancel()
+        save("must not be written", File(root, "second.txt"))
+        object : TemplateRecipeResult {}
+      }
+    }
+
+    assertFalse(root.exists())
+  }
+
+  @Test
+  fun cancellationImmediatelyBeforeCommitRollsBackGeneratedOutput() {
+    val root = File(temporaryFolder.root, "CancelledBeforeCommit")
+    val executor = TemplateRecipeExecutor()
+
+    assertThrows(CancellationException::class.java) {
+      executor.executeRecipe {
+        beginProjectCreation(root)
+        root.mkdirs()
+        save("partial", File(root, "partial.txt"))
+        executor.cancel()
+        object : TemplateRecipeResult {}
+      }
+    }
+
     assertFalse(root.exists())
   }
 
