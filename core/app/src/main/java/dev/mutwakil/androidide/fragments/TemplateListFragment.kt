@@ -20,6 +20,7 @@ package dev.mutwakil.androidide.fragments
 import android.os.Bundle
 import android.view.View
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
@@ -98,8 +99,24 @@ class TemplateListFragment :
     // Show only project templates
     // reloading the tempaltes also makes sure that the resources are
     // released from template parameter widgets
-    val templates = ITemplateProvider.getInstance(reload = true).getTemplates()
-      .filterIsInstance<ProjectTemplate>()
+    var loadFailed = false
+    val templates = try {
+      ITemplateProvider.getInstance(reload = true).getTemplates()
+        .filterIsInstance<ProjectTemplate>()
+    } catch (error: Exception) {
+      loadFailed = true
+      log.error("Failed to load project templates", error)
+      emptyList()
+    }
+
+    binding.list.isVisible = templates.isNotEmpty()
+    binding.emptyState.isVisible = templates.isEmpty()
+    if (templates.isEmpty()) {
+      binding.emptyState.setText(
+        if (loadFailed) R.string.msg_templates_load_failed
+        else R.string.msg_no_templates_available
+      )
+    }
 
     adapter = TemplateListAdapter(templates) { template, _ ->
       viewModel.template.value = template
