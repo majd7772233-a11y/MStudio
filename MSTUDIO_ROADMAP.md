@@ -822,3 +822,40 @@ Source-level boundary: this closes the identified implementation gaps in process
 - Per the user's standing constraint, **no tests, Gradle builds, GitHub Actions, or device checks were run**. All newly added tests are source-only and still need execution when the user authorizes verification.
 - SAF selection still intentionally rejects non-primary removable-storage paths; composite/included builds are delegated to Gradle's Tooling API model and have not been independently verified as separate IDE modules.
 - The acceptance statement above is not a runtime claim: confirm module/task/variant/dependency models, dependency resolution, sync error UX, project switching and import safety in the deferred verification batch before calling Phase 5 fully accepted.
+
+
+## Phase 5 follow-up — removable storage and composite builds (2026-10-13)
+
+**Scope:** close the two previously recorded source gaps: selecting project folders on mounted removable storage and representing Gradle included/composite builds as separate IDE modules. This is source implementation, not runtime acceptance.
+
+### Removable storage
+
+- core/common/src/main/java/dev/mutwakil/androidide/fragments/BaseFragment.kt now resolves external-storage SAF document IDs through Android's StorageManager rather than assuming the primary volume. It accepts the primary volume and a currently mounted removable volume whose UUID is reported by Android, maps it to the public /storage/<UUID> path, canonicalizes the selected directory, and rejects path traversal or unavailable/unreadable locations.
+- Selecting the root of a mounted volume is allowed so it can be used as a project container; the existing bounded project discovery still decides which actual project roots can be imported.
+- The app's own document provider path and authority restrictions remain intact. Providers that do not expose a real filesystem path are still not accepted because Gradle needs filesystem-backed project files.
+- Source commits: 0b78e430 (allow volume root) and c829c37e (resolve volumes through StorageManager).
+
+### Composite/included builds
+
+- tooling/impl/.../RootModelBuilder.kt now obtains the Tooling API GradleBuild model, walks reachable included builds with canonical-root cycle/duplicate protection, requests each included build's IdeaProject, and adds its modules to the cached IDE model.
+- Included-build module, task and project-dependency paths are namespaced using the included directory/build path so same-named projects from separate builds do not collide. Android project dependency metadata and Java module dependencies are remapped to the IDE paths. Root-build Android project dependencies are also mapped to their included-build module paths when AGP supplies an included build ID.
+- Saved variant selections for a namespaced included build are translated back to the local module paths only for that build, preventing a root :app selection from leaking into an included build's :app.
+- Added source tests for composite path namespaces, task/dependency path remapping, root-to-included Android dependency mapping, and isolated included-build variant selections.
+- Main source commits: 66f67a43, 35c10651, 8f10da15, 78742022, f7801575, fd963f60, 0dba230b, f4708405; tests: f49f1b9b, e71c2637, ac4c417e.
+- Remaining composite limitation: Gradle's public ToolingGradleBuild model does not expose an includeBuild { name = ... } override directly. The current namespace uses the included directory name, which is Gradle's default included-build name. Explicitly renamed included-build aliases need separate support; do not claim they are covered.
+
+### Phase 5 status
+
+- Source-level implementation now covers the two requested gaps for mounted removable storage and ordinary directory-named included builds.
+- Runtime acceptance is still unverified. The added tests have not been executed, and no Gradle build, GitHub Actions run, or device check was performed per the user's standing constraint. Keep the acceptance checklist unchecked until authorized verification.
+
+
+## Phase 6 start — editor/LSP diagnostics and module routing (2026-10-13)
+
+- Began Phase 6 source audit in the Java diagnostics provider and workspace module lookup before porting or replacing any editor implementation.
+- Found that JavaDiagnosticProvider stored a single global cachedDiagnostics result while keeping freshness timestamps per file. A cache hit for one Java source could therefore return the last analyzed file's diagnostics. Replaced the global result with a concurrent per-file cache pairing each document's diagnostics and freshness timestamp; closing a document removes both.
+- Found that Workspace.findModuleForFile used string-prefix matching, which could assign /workspace/app-old/... to a module rooted at /workspace/app. It now compares normalized/canonical Path segments and chooses the deepest containing module directory.
+- Fixed an asynchronous race in JavaLanguageServer.analyzeSelected: it now analyzes the file captured before launching the coroutine rather than re-reading mutable selectedFile inside the background task.
+- Added source tests for per-file diagnostic isolation/clearing and exact workspace path containment.
+- Source commits: f118137e, 8f9f1123, cde81243, 968e766c, 20bcc3c2; tests: d3a5e486, 915250a4.
+- Phase 6 is in progress, not complete. Continue auditing classpath/sync recovery, stale diagnostic clearing, Java/Kotlin/XML language features, formatting/code actions and indexing responsiveness. No tests/builds/Actions/device checks were run.
