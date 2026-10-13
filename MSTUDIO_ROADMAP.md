@@ -716,3 +716,11 @@ No build, tests, workflow dispatch, Actions run or device validation is authoriz
 - Live source review of `core/app/src/main/java/dev/mutwakil/androidide/services/builder/ToolingServerRunner.kt` found that the process-wait coroutine logs the managed Java process exit code but never calls `Observer.onServerExited(exitCode)`, although `GradleBuildService` implements that callback to clear foreground-service state. This leaves the declared lifecycle callback disconnected on normal process termination.
 - Implement a minimal lifecycle correction in the process-wait path: capture the actual exit code and notify the observer exactly when the process exits, without replacing Gradle Tooling API or conflating a process exit with a successful build result.
 - This is a source correction only. Do not run build/tests/Actions/device validation; the user will run verification after the code batch.
+
+
+### Phase 4 execution — propagate managed Tooling API process exit (2026-10-13)
+
+- Source fix committed as `48b12cd2972e7c70ff6be0a8c7cef7065e192b59` in `core/app/src/main/java/dev/mutwakil/androidide/services/builder/ToolingServerRunner.kt`.
+- The process-wait coroutine now captures the actual `Process.waitFor()` exit code and calls `Observer.onServerExited(exitCode)` before releasing its process reference. This connects the existing observer callback to normal process termination and lets `GradleBuildService` clear foreground-service state when the managed Tooling API process exits.
+- This callback reports only process termination; it does not imply a Gradle task succeeded. Startup failures before the process-wait coroutine is established, full cancellation behavior, concurrent build lifecycle and actual Android runtime behavior remain unverified.
+- No build, tests, workflow dispatch, GitHub Actions run or device validation was performed, per user instruction. Phase 1.4/1.5 evidence gate remains pending.
