@@ -125,3 +125,10 @@ No Phase 9 code has been imported. This audit is not a completed Phase 9; an app
 ### Phase 9 implementation detail correction
 
 Vineflower is not executed inside Android's ART process. The app build stages the single non-transitive Vineflower JAR into generated APK assets; MStudio copies it into its private runtime directory and invokes it using the already-managed Java executable. The child JVM is capped at 384 MiB heap and two active processors, has a three-minute timeout, drains process output, and is forcibly terminated on interruption/timeout. Inputs are capped at 128 MiB; JAR/ZIP archives are preflight-limited to 5,000 entries and 256 MiB declared expanded size. These are source safeguards, not a substitute for device profiling.
+
+
+## Phase 10 integration note — 2026-10-13
+
+The Phase 9 decompiler boundary was hardened while preparing Phase 10 verification: archive preflight rejects unknown/negative and overflow-sized entry lengths; generated output is monitored with a 10,000-file / 256 MiB cap; policy tests cover hostile archive sizes and output ceilings. The PackageInstaller callback receiver is now private and receives the result through an explicit PendingIntent. These changes are **source-level only** until the manual verification workflow and device tests run.
+
+Prepared, not dispatched: `.github/workflows/phase10-verification.yml` (static checks, JVM tests, Tooling API tests/build, debug APK and checksums) and `.github/workflows/phase10-codeql.yml` (Java/Kotlin CodeQL). No test, build, scan, APK install or device validation has been run. Do not mark Phase 9 runtime acceptance or Phase 10 acceptance as verified based on workflow definitions alone.
