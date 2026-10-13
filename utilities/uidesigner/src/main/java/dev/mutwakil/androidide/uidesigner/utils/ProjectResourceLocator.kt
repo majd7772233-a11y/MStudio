@@ -52,7 +52,7 @@ internal object ProjectResourceLocator {
               (directory.name == resourceType || directory.name.startsWith("$resourceType-"))
         }
         .toList()
-        .distinctBy { it.absoluteFile.normalize().path }
+        .distinctBy { it.absolutePath }
         .sortedWith(
             compareByDescending<File> { qualifierScore(it.name, resourceType, context) }
                 .thenByDescending { if (it.path.contains("/src/main/res/")) 1 else 0 }
