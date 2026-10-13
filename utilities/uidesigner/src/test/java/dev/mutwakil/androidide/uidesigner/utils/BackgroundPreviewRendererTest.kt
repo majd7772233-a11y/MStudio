@@ -13,6 +13,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.view.View
+import android.widget.ImageView
 import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -97,6 +98,37 @@ class BackgroundPreviewRendererTest {
         BackgroundPreviewRenderer().applyBackgroundPreview(
             preview,
             "@drawable/unsupported_preview",
+            RuntimeEnvironment.getApplication(),
+            layoutFile,
+        )
+    )
+  }
+
+  @Test
+  fun unsupportedImageViewXmlDrawableIsNotReplacedWithAPlaceholder() {
+    val projectRoot = temporaryFolder.newFolder("unsupported-image-project")
+    File(projectRoot, "settings.gradle").writeText("")
+    val layoutFile = File(projectRoot, "app/src/main/res/layout/screen.xml").apply {
+      parentFile?.mkdirs()
+      writeText("<FrameLayout />")
+    }
+    File(projectRoot, "app/src/main/res/drawable/unsupported_image_preview.xml").apply {
+      parentFile?.mkdirs()
+      writeText(
+          """
+          <selector xmlns:android="http://schemas.android.com/apk/res/android">
+              <item android:state_pressed="true" android:drawable="@android:drawable/ic_menu_add" />
+          </selector>
+          """.trimIndent(),
+      )
+    }
+
+    val image = ImageView(RuntimeEnvironment.getApplication())
+
+    assertFalse(
+        ImageViewSrcRenderer().applySrcPreview(
+            image,
+            "@drawable/unsupported_image_preview",
             RuntimeEnvironment.getApplication(),
             layoutFile,
         )
