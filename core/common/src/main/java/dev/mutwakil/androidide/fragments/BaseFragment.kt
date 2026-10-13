@@ -17,8 +17,10 @@
 
 package dev.mutwakil.androidide.fragments
 
+import android.content.Context
 import android.content.Intent
 import android.os.Environment
+import android.os.storage.StorageManager
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.provider.DocumentsContractCompat
 import androidx.core.provider.DocumentsContractCompat.buildDocumentUriUsingTree
@@ -46,7 +48,7 @@ import androidx.annotation.StringRes
  * mounted removable volume reported by Android is accepted; arbitrary volume names are never
  * turned into filesystem paths.
  */
-internal fun resolveExternalStorageDocument(documentId: String): File? {
+internal fun resolveExternalStorageDocument(context: Context, documentId: String): File? {
   val separator = documentId.indexOf(':')
   if (separator <= 0 || separator == documentId.lastIndex) return null
 
@@ -60,7 +62,7 @@ internal fun resolveExternalStorageDocument(documentId: String): File? {
     } else {
       val mountedVolume =
         runCatching {
-          Environment.getStorageVolumes().firstOrNull { volume ->
+          context.getSystemService(StorageManager::class.java)?.storageVolumes?.firstOrNull { volume ->
             volume.isRemovable &&
               volume.uuid?.equals(volumeId, ignoreCase = true) == true &&
               volume.state == Environment.MEDIA_MOUNTED
@@ -135,7 +137,7 @@ open class BaseFragment @JvmOverloads constructor(contentLayoutId: Int = 0) :
         if (authority == ANDROIDIDE_DOCS_AUTHORITY) {
           runCatching { File(docId).canonicalFile }.getOrNull()
         } else {
-          resolveExternalStorageDocument(docId).also { resolved ->
+          resolveExternalStorageDocument(context, docId).also { resolved ->
             if (resolved == null) {
               flashError(getString(string.msg_select_from_primary_storage))
               return@registerForActivityResult
