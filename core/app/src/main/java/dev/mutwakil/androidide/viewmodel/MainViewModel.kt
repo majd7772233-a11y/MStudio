@@ -29,6 +29,7 @@ import dev.mutwakil.androidide.roomData.recentproject.RecentProjectDao
 import dev.mutwakil.androidide.templates.Language
 import dev.mutwakil.androidide.templates.ProjectTemplateRecipeResult
 import dev.mutwakil.androidide.templates.Template
+import dev.mutwakil.androidide.utils.TemplateRecipeExecutor
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -75,6 +76,7 @@ class MainViewModel(
 	internal val creatingProject = MutableLiveData(false)
 	internal val pendingCreatedProject = MutableLiveData<ProjectTemplateRecipeResult?>(null)
 	internal val pendingTemplateCreationError = MutableLiveData<String?>(null)
+	internal var activeTemplateRecipeExecutor: TemplateRecipeExecutor? = null
 
 	val currentScreen: LiveData<Int> = _currentScreen
 
