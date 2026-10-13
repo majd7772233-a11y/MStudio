@@ -194,12 +194,7 @@ internal class XmlResourceReferenceDiagnosticProvider {
   }
 
   private fun declaredIds(source: String, comments: List<IntRange>): Set<String> =
-      DECLARED_ID_REFERENCE.findAll(source)
-          .filter { match ->
-            comments.none { match.range.first >= it.first && match.range.first <= it.last }
-          }
-          .map { it.groupValues[1] }
-          .toSet()
+      declaredIdsFromSource(source, comments)
 
   private fun positionAt(source: String, offset: Int): Position {
     val safeOffset = offset.coerceIn(0, source.length)
@@ -232,6 +227,17 @@ internal class XmlResourceReferenceDiagnosticProvider {
   }
 
   companion object {
+    internal fun declaredIdsFromSource(
+        source: String,
+        comments: List<IntRange>,
+    ): Set<String> =
+        DECLARED_ID_REFERENCE.findAll(source)
+            .filter { match ->
+              comments.none { match.range.first >= it.first && match.range.first <= it.last }
+            }
+            .map { it.groupValues[1] }
+            .toSet()
+
     internal fun isSourceResourcePath(file: Path, moduleRoot: File): Boolean {
       val root = moduleRoot.toPath().toAbsolutePath().normalize()
       val candidate = file.toAbsolutePath().normalize()
