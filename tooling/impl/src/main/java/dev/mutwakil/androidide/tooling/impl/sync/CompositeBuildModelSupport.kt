@@ -95,6 +95,38 @@ internal fun namespaceIncludedBuildProject(
         },
       )
 
+  if (project.hasAndroidProject()) {
+    val androidProject = project.androidProject
+    if (androidProject.hasVariantDependencies()) {
+      val dependencies = androidProject.variantDependencies
+      val mappedLibraries =
+        dependencies.librariesMap.mapValues { (_, library) ->
+          val projectInfo = library.projectInfo
+          if (
+            library.type == dev.mutwakil.androidide.project.AndroidModels.LibraryType.Project &&
+            projectInfo != null &&
+            projectInfo.buildId == ":"
+          ) {
+            library.toBuilder()
+              .setProjectInfo(
+                projectInfo.toBuilder()
+                  .setProjectPath(
+                    compositeBuildProjectPath(includedBuildName, projectInfo.projectPath),
+                  ).build(),
+              ).build()
+          } else {
+            library
+          }
+        }
+      builder.setAndroidProject(
+        androidProject.toBuilder()
+          .setVariantDependencies(
+            dependencies.toBuilder().clearLibraries().putAllLibraries(mappedLibraries).build(),
+          ).build(),
+      )
+    }
+  }
+
   if (project.hasJavaProject()) {
     val javaProject = project.javaProject
     builder.setJavaProject(
