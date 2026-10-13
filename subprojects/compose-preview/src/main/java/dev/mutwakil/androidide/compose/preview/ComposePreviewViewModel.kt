@@ -12,6 +12,7 @@ import dev.mutwakil.androidide.compose.preview.domain.PreviewSourceParser
 import dev.mutwakil.androidide.compose.preview.domain.model.ParsedPreviewSource
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -82,6 +83,7 @@ class ComposePreviewViewModel(
     val availablePreviews: StateFlow<List<String>> = _availablePreviews.asStateFlow()
 
     private val sourceChanges = MutableSharedFlow<SourceUpdate>()
+    private val compileGeneration = AtomicLong(0)
 
     private var currentSource: String = ""
     private var cachedFilePath: String = ""
@@ -94,6 +96,7 @@ class ComposePreviewViewModel(
     private data class SourceUpdate(
         val source: String,
         val parsedSource: ParsedPreviewSource,
+        val generation: Long,
     )
 
     init {
@@ -102,7 +105,7 @@ class ComposePreviewViewModel(
                 .debounce(DEBOUNCE_MS)
                 .distinctUntilChanged { old, new -> old.source == new.source }
                 .collect { update ->
-                    compilePreview(update.source, update.parsedSource)
+                    compilePreview(update.source, update.parsedSource, update.generation)
                 }
         }
     }
@@ -159,19 +162,21 @@ class ComposePreviewViewModel(
 
     fun onSourceChanged(source: String) {
         currentSource = source
+        val generation = compileGeneration.incrementAndGet()
         val parsed = parseAndValidateSource(source) ?: return
 
         viewModelScope.launch {
-            sourceChanges.emit(SourceUpdate(source, parsed))
+            sourceChanges.emit(SourceUpdate(source, parsed, generation))
         }
     }
 
     fun compileNow(source: String) {
         currentSource = source
+        val generation = compileGeneration.incrementAndGet()
         val parsed = parseAndValidateSource(source) ?: return
 
         viewModelScope.launch {
-            compilePreview(source, parsed)
+            compilePreview(source, parsed, generation)
         }
     }
 
@@ -204,8 +209,17 @@ class ComposePreviewViewModel(
         }
     }
 
-    private suspend fun compilePreview(source: String, parsed: ParsedPreviewSource) {
+    private suspend fun compilePreview(
+        source: String,
+        parsed: ParsedPreviewSource,
+        generation: Long,
+    ) {
         initializationDeferred.await()
+
+        if (generation != compileGeneration.get()) {
+            LOG.debug("Skipping stale Compose compilation request")
+            return
+        }
 
         if (!isInitialized.get()) {
             LOG.debug("Skipping compilePreview - initialization failed")
@@ -222,6 +236,10 @@ class ComposePreviewViewModel(
         repository
             .compilePreview(source, parsed)
             .onSuccess { result ->
+                if (generation != compileGeneration.get()) {
+                    LOG.debug("Discarding stale Compose compilation result")
+                    return@onSuccess
+                }
                 _previewState.value =
                     PreviewState.Ready(
                         dexFile = result.dexFile,
@@ -232,6 +250,10 @@ class ComposePreviewViewModel(
                     )
             }
             .onFailure { error ->
+                if (generation != compileGeneration.get()) {
+                    LOG.debug("Discarding stale Compose compilation failure")
+                    return@onFailure
+                }
                 val diagnostics =
                     if (error is CompilationException) error.diagnostics else emptyList()
                 _previewState.value =
