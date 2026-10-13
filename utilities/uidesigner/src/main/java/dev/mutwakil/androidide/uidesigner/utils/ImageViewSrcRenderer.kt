@@ -146,7 +146,7 @@ class ImageViewSrcRenderer {
             "app/src/main/res/drawable-xxxhdpi",
         )
 
-    return loadImageFromFolders(imageView, drawableName, projectRoot, drawableFolders, context)
+    return loadImageFromFolders(imageView, drawableName, projectRoot, drawableFolders, context, layoutFile)
   }
 
   private fun loadFromResMipmap(
@@ -173,7 +173,7 @@ class ImageViewSrcRenderer {
             "app/src/main/res/mipmap-xxxhdpi",
         )
 
-    return loadImageFromFolders(imageView, mipmapName, projectRoot, mipmapFolders, context)
+    return loadImageFromFolders(imageView, mipmapName, projectRoot, mipmapFolders, context, layoutFile)
   }
 
   private fun loadImageFromFolders(
@@ -182,6 +182,7 @@ class ImageViewSrcRenderer {
       projectRoot: File,
       folders: List<String>,
       context: Context,
+      layoutFile: File?,
   ): Boolean {
     val extensions = listOf(".png", ".jpg", ".jpeg", ".webp", ".gif", ".xml")
 
@@ -196,7 +197,7 @@ class ImageViewSrcRenderer {
             // Handle XML drawables (vectors, shapes, etc.)
             if (ext == ".xml") {
               log.debug("Attempting to load XML drawable for ImageView: {}", imageFile.absolutePath)
-              if (loadXmlDrawable(imageView, imageFile, context)) {
+              if (loadXmlDrawable(imageView, imageFile, context, layoutFile)) {
                 return true
               }
               continue
@@ -219,11 +220,16 @@ class ImageViewSrcRenderer {
   }
 
   /** Load XML drawable files (vectors, shapes, gradients, etc.) for ImageView */
-  private fun loadXmlDrawable(imageView: ImageView, xmlFile: File, context: Context): Boolean {
+  private fun loadXmlDrawable(
+      imageView: ImageView,
+      xmlFile: File,
+      context: Context,
+      layoutFile: File?,
+  ): Boolean {
     try {
       // First, try using VectorDrawableCompat for vector drawables
       if (isVectorDrawable(xmlFile)) {
-        return loadVectorDrawable(imageView, xmlFile, context)
+        return loadVectorDrawable(imageView, xmlFile, context, layoutFile)
       }
 
       // Try parsing as shape drawable
@@ -280,27 +286,25 @@ class ImageViewSrcRenderer {
   }
 
   /** Load vector drawable for ImageView */
-  private fun loadVectorDrawable(imageView: ImageView, xmlFile: File, context: Context): Boolean {
+  private fun loadVectorDrawable(
+      imageView: ImageView,
+      xmlFile: File,
+      context: Context,
+      layoutFile: File?,
+  ): Boolean {
+    // VectorDrawable XML is not a bitmap stream. Use the same project-aware renderer as
+    // background previews so path data, viewport dimensions and tint are actually interpreted.
     return try {
-      // Try to create a drawable from the XML stream
-      val inputStream = FileInputStream(xmlFile)
-      val drawable = Drawable.createFromStream(inputStream, xmlFile.name)
-
-      if (drawable != null) {
-        imageView.setImageDrawable(drawable)
-        log.debug("SUCCESS: Loaded vector drawable for ImageView: {}", xmlFile.name)
-        return true
-      }
-
-      // Fallback: Create a placeholder to show that the XML was recognized
-      val placeholderDrawable =
-          ColorDrawable(Color.parseColor("#2196F3")) // Blue placeholder for vectors
-      imageView.setImageDrawable(placeholderDrawable)
-      log.debug("FALLBACK: Created vector placeholder for ImageView: {}", xmlFile.name)
-      return true
+      VectorDrawableRenderer().applyVectorPreview(
+          view = imageView,
+          vectorValue = xmlFile.nameWithoutExtension,
+          context = context,
+          layoutFile = layoutFile ?: xmlFile,
+          isBackground = false,
+      )
     } catch (e: Exception) {
-      log.debug("Vector loading failed for ImageView: {}", e.message)
-      return false
+      log.debug("Vector loading failed for ImageView {}: {}", xmlFile.name, e.message)
+      false
     }
   }
 
