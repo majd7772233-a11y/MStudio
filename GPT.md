@@ -693,3 +693,11 @@ Phase 7 source implementation is closed for the current safe-support boundary; t
 - Keep existing UI language/style, strings, RTL/LTR and visual consistency intact. Do not introduce a second design language.
 - **Phase 8 is locked** until the exact user instruction `يلا الان إبدأ بالمرحلة الثامنة`.
 - Latest commits: `2fafe43e1dbe6f23755c5898f10ecd5f5dc25f01`, `8578c155139a19dc03b8fd624c0db8ec784eae54`, `b41850269cebbfe680635aa81bd58c68329dbcde`, `f59dfea1d241bde70b4ab9df06dcabfc320b4d68`, `2ea65c264a7c43a15a52b080ca0f6191a9e8020a`. Roadmap closeout commit: `b94c66b5b740dae6eea4f3c84456aa2b21a702e9`.
+
+
+## Phase 8 execution log — 2026-10-13 (initial pass)
+
+- User explicitly authorized starting Phase 8. Re-read this handoff and the live roadmap on `dev`; the latest commit before the phase work was `bfd60ae7995fb06ec90f4acc499ac2330371cb03` (template creation/reopen lifecycle fix). The phase acceptance criteria remain: advertised templates must produce runnable APKs through the actual local Tooling API, project configuration must agree, and failures must support recovery. No build, tests, Actions, or device verification are allowed under the current verification hold.
+- Inspected the current `MainActivity.kt` and `MainViewModel.kt`, plus the latest template-creation lifecycle commits. Found a concrete transition bug in `MainViewModel.postTransition`: `LiveData.observe` immediately emits the current `true` value while a transition is running, but the observer removed itself and ran the pending action on that first emission. This could open a newly-created project before the screen transition ends, and could undermine the intended rotation-safe delivery.
+- Fixed the observer to remain registered while the value is true and execute only after the transition callback publishes false. Commit: `a1e3aeeae6fc3f40fb8f844f94734ebc00cdb2b2` (`fix: wait for screen transition before opening created project`). The change is source-reviewed only; it has not been tested or run.
+- Phase 8 remains in progress, not accepted. Continue inspecting template recipe generation, input validation, filesystem rollback/cleanup, generated Gradle/manifest/resource consistency, and onboarding recovery. Do not claim every template builds, syncs, installs, or launches until evidence exists. Keep the verification hold in force.
