@@ -54,6 +54,33 @@ internal fun resolveConfiguredAndroidVariant(
 }
 
 /**
+ * Resolves the compiled library JAR for exactly the selected AGP variant. Flavor dimensions are
+ * already represented in the variant name. Search is intentionally confined to that variant's
+ * output directory so another variant's classes can never leak into the selected classpath.
+ */
+internal fun findClassesJarForVariant(buildDirectory: File, configuredVariant: String): File {
+  val variantOutputDir =
+    File(
+      buildDirectory,
+      "${IAndroidProject.FD_INTERMEDIATES}/compile_library_classes_jar/$configuredVariant",
+    )
+  val expectedJar = File(variantOutputDir, "classes.jar")
+  if (expectedJar.isFile) return expectedJar
+
+  if (variantOutputDir.isDirectory) {
+    variantOutputDir.walkTopDown()
+      .maxDepth(4)
+      .filter { it.isFile && it.name == "classes.jar" }
+      .sortedBy { it.relativeTo(variantOutputDir).path }
+      .firstOrNull()
+      ?.let { return it }
+  }
+
+  // Preserve the expected path when the selected variant has not been built yet.
+  return expectedJar
+}
+
+/**
  * Builds model for Android application and library projects.
  *
  * @author Akash Yadav
@@ -124,31 +151,4 @@ object AndroidProjectModelBuilder :
   private fun getClassesJar(
     gradleProject: GradleProject,
     configuredVariant: String,
-  ): File {
-    // AGP variant names already include their flavor dimensions (for example, freeMinApiDebug).
-    // Search only inside this exact variant's output directory so a different variant's classes.jar
-    // can never be silently used as a fallback.
-    val variantOutputDir =
-      File(
-        gradleProject.buildDirectory,
-        "${IAndroidProject.FD_INTERMEDIATES}/compile_library_classes_jar/$configuredVariant",
-      )
-    val expectedJar = File(variantOutputDir, "classes.jar")
-    if (expectedJar.isFile) return expectedJar
-
-    // Some AGP versions place the jar one or more levels below the variant directory.
-    // Keep the search scoped to the exact variant to support flavor/build-type output layouts safely.
-    if (variantOutputDir.isDirectory) {
-      variantOutputDir.walkTopDown()
-        .maxDepth(4)
-        .filter { it.isFile && it.name == "classes.jar" }
-        .sortedBy { it.relativeTo(variantOutputDir).path }
-        .firstOrNull()
-        ?.let { return it }
-    }
-
-    // Preserve the expected path when the jar has not been generated yet; consumers can still
-    // report the missing classpath and a build/sync can generate it later.
-    return expectedJar
-  }
-}
+  ): File = findClassesJarForVariant(gradleProject.buildDirectory, configuredVariant)}
