@@ -167,22 +167,9 @@ class BackgroundPreviewRenderer {
     val projectRoot = findProjectRoot(layoutFile) ?: return false
 
     val drawableFolders =
-        listOf(
-            "src/main/res/drawable",
-            "src/main/res/drawable-hdpi",
-            "src/main/res/drawable-mdpi",
-            "src/main/res/drawable-xhdpi",
-            "src/main/res/drawable-xxhdpi",
-            "src/main/res/drawable-xxxhdpi",
-            "app/src/main/res/drawable",
-            "app/src/main/res/drawable-hdpi",
-            "app/src/main/res/drawable-mdpi",
-            "app/src/main/res/drawable-xhdpi",
-            "app/src/main/res/drawable-xxhdpi",
-            "app/src/main/res/drawable-xxxhdpi",
-        )
+        ProjectResourceLocator.findResourceDirectories(projectRoot, "drawable", context)
 
-    return loadImageFromFolders(view, drawableName, projectRoot, drawableFolders, context)
+    return loadImageFromFolders(view, drawableName, drawableFolders, context)
   }
 
   private fun loadFromResMipmap(
@@ -194,36 +181,21 @@ class BackgroundPreviewRenderer {
     val projectRoot = findProjectRoot(layoutFile) ?: return false
 
     val mipmapFolders =
-        listOf(
-            "src/main/res/mipmap",
-            "src/main/res/mipmap-hdpi",
-            "src/main/res/mipmap-mdpi",
-            "src/main/res/mipmap-xhdpi",
-            "src/main/res/mipmap-xxhdpi",
-            "src/main/res/mipmap-xxxhdpi",
-            "app/src/main/res/mipmap",
-            "app/src/main/res/mipmap-hdpi",
-            "app/src/main/res/mipmap-mdpi",
-            "app/src/main/res/mipmap-xhdpi",
-            "app/src/main/res/mipmap-xxhdpi",
-            "app/src/main/res/mipmap-xxxhdpi",
-        )
+        ProjectResourceLocator.findResourceDirectories(projectRoot, "mipmap", context)
 
-    return loadImageFromFolders(view, mipmapName, projectRoot, mipmapFolders, context)
+    return loadImageFromFolders(view, mipmapName, mipmapFolders, context)
   }
 
   private fun loadImageFromFolders(
       view: View,
       imageName: String,
-      projectRoot: File,
-      folders: List<String>,
+      folders: List<File>,
       context: Context,
   ): Boolean {
     val extensions = listOf(".png", ".jpg", ".jpeg", ".webp", ".gif", ".xml")
 
-    for (folder in folders) {
-      val resourceDir = File(projectRoot, folder)
-      if (!resourceDir.exists()) continue
+    for (resourceDir in folders) {
+      if (!resourceDir.isDirectory || !resourceDir.canRead()) continue
 
       for (ext in extensions) {
         val imageFile = File(resourceDir, "$imageName$ext")
@@ -318,70 +290,18 @@ class BackgroundPreviewRenderer {
   /** Load vector drawable using VectorDrawableCompat */
   private fun loadVectorDrawable(view: View, xmlFile: File, context: Context): Boolean {
     return try {
-      // Create a temporary resource entry
-      val packageName = context.packageName
-      val drawableName = xmlFile.nameWithoutExtension
-
-      // Try to inflate using the system drawable inflater
-      val inputStream = FileInputStream(xmlFile)
-      val drawable = Drawable.createFromStream(inputStream, xmlFile.name)
-
-      if (drawable != null) {
-        view.background = drawable
-        log.debug("SUCCESS: Loaded with createFromStream: {}", xmlFile.name)
-        return true
-      }
-
-      // Fallback: Just create a colored rectangle as a preview indicator
-      // This at least shows that the XML was found and recognized
-      // Fallback: Extract gradient info and create proper gradient
-      val gradientInfo = extractGradientFromXml(xmlFile)
-      if (gradientInfo != null) {
-        val gradientDrawable =
-            GradientDrawable().apply {
-              colors = gradientInfo.colors
-              orientation = gradientInfo.orientation
-              shape = GradientDrawable.RECTANGLE
-
-              // Apply corner radius
-              if (gradientInfo.cornerRadius > 0f) {
-                cornerRadius = gradientInfo.cornerRadius
-              } else if (
-                  gradientInfo.topLeftRadius > 0f ||
-                      gradientInfo.topRightRadius > 0f ||
-                      gradientInfo.bottomLeftRadius > 0f ||
-                      gradientInfo.bottomRightRadius > 0f
-              ) {
-                cornerRadii =
-                    floatArrayOf(
-                        gradientInfo.topLeftRadius,
-                        gradientInfo.topLeftRadius, // top-left
-                        gradientInfo.topRightRadius,
-                        gradientInfo.topRightRadius, // top-right
-                        gradientInfo.bottomRightRadius,
-                        gradientInfo.bottomRightRadius, // bottom-right
-                        gradientInfo.bottomLeftRadius,
-                        gradientInfo.bottomLeftRadius, // bottom-left
-                    )
-              }
-            }
-        view.background = gradientDrawable
-        log.debug("SUCCESS: Created gradient from XML: {}", xmlFile.name)
-        return true
-      }
-
-      // Final fallback: Green placeholder
-      val fallbackDrawable =
-          GradientDrawable().apply {
-            setColor(Color.parseColor("#4CAF50"))
-            cornerRadius = 8f
-          }
-      view.background = fallbackDrawable
-      log.debug("FALLBACK: Created placeholder for XML: {}", xmlFile.name)
-      return true
+      // XML vectors are not image streams. Parse their vector/path data using the same renderer
+      // used by ImageView src previews, and never report a fake placeholder as a successful render.
+      VectorDrawableRenderer().applyVectorPreview(
+          view = view,
+          vectorValue = xmlFile.nameWithoutExtension,
+          context = context,
+          layoutFile = xmlFile,
+          isBackground = true,
+      )
     } catch (e: Exception) {
-      log.debug("Vector loading completely failed: {}", e.message)
-      return false
+      log.debug("Vector loading failed for {}: {}", xmlFile.name, e.message)
+      false
     }
   }
 
