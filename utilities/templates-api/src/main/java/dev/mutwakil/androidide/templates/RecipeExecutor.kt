@@ -28,6 +28,14 @@ import java.io.InputStream
 interface RecipeExecutor {
 
   /**
+   * Begin a new-project transaction before any template directories or files are created.
+   *
+   * Implementations may reject an existing destination and track newly created paths for rollback.
+   * The default is a no-op so existing third-party executors remain source-compatible.
+   */
+  fun beginProjectCreation(projectDir: File) {}
+
+  /**
    * Get the project template data. This is available only while creating modules in an existing project.
    *
    * @return The project template data or `null` if the not available.
