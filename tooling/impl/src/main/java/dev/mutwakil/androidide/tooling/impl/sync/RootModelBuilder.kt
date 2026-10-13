@@ -33,6 +33,7 @@ import dev.mutwakil.androidide.utils.sha256
 import kotlinx.coroutines.runBlocking
 import org.gradle.tooling.ConfigurableLauncher
 import org.gradle.tooling.model.idea.IdeaProject
+import org.gradle.tooling.model.gradle.GradleBuild as ToolingGradleBuild
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.Serializable
@@ -174,7 +175,63 @@ object RootModelBuilder :
             }
 
             gradleProject.build()
+          }.toMutableList()
+
+        // Included builds are separate Gradle builds, not children in the root project's
+        // IdeaProject. Query Gradle's Tooling API build model and import every reachable included
+        // build as a separately namespaced set of IDE modules.
+        val toolingBuild = controller.getModel(ToolingGradleBuild::class.java)
+        val includedBuilds = collectIncludedBuilds(toolingBuild)
+        includedBuilds.forEach { includedBuild ->
+          val includedIdeaProject =
+            controller.getModel(includedBuild.rootProject, IdeaProject::class.java)
+          val includedModules = includedIdeaProject.modules
+          val buildName = includedBuild.rootProject.name
+          val includedModulePaths =
+            uniqueModuleNameToPath(
+              includedModules.map { module ->
+                module.name to compositeBuildProjectPath(buildName, module.gradleProject.path)
+              },
+            )
+
+          includedModules.forEach { includedModule ->
+            val includedGradleProject =
+              GradleProjectModelBuilder
+                .build(initializeParams, includedModule.gradleProject)
+                .toBuilder()
+
+            val versions = getAndroidVersions(includedModule, controller)
+            if (versions != null) {
+              checkAgpVersion(versions, syncIssueReporter)
+              val androidProject =
+                AndroidProjectModelBuilder
+                  .build(
+                    initializeParams,
+                    AndroidProjectModelBuilderParams(
+                      controller,
+                      includedModule,
+                      versions,
+                      syncIssueReporter,
+                    ),
+                  )
+              includedGradleProject.setAndroidProject(androidProject)
+            } else {
+              val javaProject =
+                JavaProjectModelBuilder
+                  .build(
+                    initializeParams,
+                    JavaProjectModelBuilderParams(
+                      includedIdeaProject,
+                      includedModule,
+                      includedModulePaths,
+                    ),
+                  )
+              includedGradleProject.setJavaProject(javaProject)
+            }
+
+            projects += namespaceIncludedBuildProject(includedGradleProject.build(), buildName)
           }
+        }
 
         val gradleBuild =
           GradleBuild(
