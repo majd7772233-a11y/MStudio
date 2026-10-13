@@ -89,7 +89,7 @@ class VectorDrawableRenderer {
 
     // Method 2: Try to find and load the vector file directly
     val projectRoot = findProjectRoot(layoutFile) ?: return false
-    val vectorFile = findVectorFile(projectRoot, drawableName)
+    val vectorFile = findVectorFile(projectRoot, drawableName, context)
 
     if (vectorFile != null && isVectorDrawable(vectorFile)) {
       log.debug("Found vector drawable file: {}", vectorFile.absolutePath)
@@ -200,34 +200,16 @@ $modified"""
   }
 
   /** Find vector file in project drawable folders */
-  private fun findVectorFile(projectRoot: File, drawableName: String): File? {
-    val drawableFolders =
-        listOf(
-            "src/main/res/drawable",
-            "src/main/res/drawable-hdpi",
-            "src/main/res/drawable-mdpi",
-            "src/main/res/drawable-xhdpi",
-            "src/main/res/drawable-xxhdpi",
-            "src/main/res/drawable-xxxhdpi",
-            "app/src/main/res/drawable",
-            "app/src/main/res/drawable-hdpi",
-            "app/src/main/res/drawable-mdpi",
-            "app/src/main/res/drawable-xhdpi",
-            "app/src/main/res/drawable-xxhdpi",
-            "app/src/main/res/drawable-xxxhdpi",
-        )
-
-    for (folder in drawableFolders) {
-      val resourceDir = File(projectRoot, folder)
-      if (!resourceDir.exists()) continue
-
-      val vectorFile = File(resourceDir, "$drawableName.xml")
-      if (vectorFile.exists() && vectorFile.canRead()) {
-        return vectorFile
-      }
-    }
-
-    return null
+  private fun findVectorFile(
+      projectRoot: File,
+      drawableName: String,
+      context: Context,
+  ): File? {
+    return ProjectResourceLocator
+        .findResourceDirectories(projectRoot, "drawable", context)
+        .asSequence()
+        .map { File(it, "$drawableName.xml") }
+        .firstOrNull { it.isFile && it.canRead() }
   }
 
   /** Check if XML file is a vector drawable */
