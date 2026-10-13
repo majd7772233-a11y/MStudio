@@ -136,7 +136,7 @@ dependencies {
     implementation(libs.common.charts)
     implementation(libs.common.hiddenApiBypass)
     implementation(libs.aapt2.common)
-    implementation("org.vineflower:vineflower:1.12.0")
+    implementation(libs.vineflower)
 
     implementation(libs.google.auto.service.annotations)
     implementation(libs.google.gson)
