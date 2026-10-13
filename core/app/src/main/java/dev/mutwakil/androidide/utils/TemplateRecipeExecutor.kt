@@ -82,6 +82,13 @@ class TemplateRecipeExecutor : RecipeExecutor {
     dest.writeText(source, Charsets.UTF_8)
   }
 
+  override fun saveBytes(source: ByteArray, dest: File) {
+    checkActive()
+    ensureParentDirectory(dest)
+    registerNewFile(dest)
+    dest.outputStream().buffered().use { output -> output.write(source) }
+  }
+
   override fun openAsset(path: String): InputStream {
     checkActive()
     require(path.isNotBlank()) { "Template asset path must not be blank" }
