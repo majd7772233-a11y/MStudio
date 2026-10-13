@@ -731,3 +731,10 @@ No build, tests, workflow dispatch, Actions run or device validation is authoriz
 - `GradleBuildService.isGradleWrapperAvailable` currently treats the wrapper as usable when three paths merely `exists()`. Empty files, directories at those paths, a corrupt wrapper JAR, or properties without a usable `distributionUrl` therefore bypass the repair path and fail later during build startup.
 - Strengthen the preflight to require regular, non-empty wrapper files, a readable properties file with a non-empty `distributionUrl`, and a wrapper JAR that can be opened as a ZIP. Keep this a focused local wrapper check; do not replace the real Gradle wrapper or Tooling API.
 - Source correction only; no builds, tests, Actions or device validation.
+
+
+### Phase 4 execution — validate wrapper files before declaring them available (2026-10-13)
+
+- Source correction committed as `62b333c644694d033f750a70d0d41e753d9c7aee` in `core/app/src/main/java/dev/mutwakil/androidide/services/builder/GradleBuildService.kt`.
+- Wrapper preflight now rejects missing/non-regular/empty `gradlew`, wrapper JAR and properties; unreadable/empty properties; a missing or empty `distributionUrl`; and a wrapper JAR that cannot be opened as a non-empty ZIP archive. Rejected wrapper state now enters the existing repair path rather than being treated as available merely because paths exist.
+- The asset extraction/repair path still needs runtime validation for read-only projects, partial extraction, and preservation of user wrapper files. No build, tests, Actions or device validation was performed.
