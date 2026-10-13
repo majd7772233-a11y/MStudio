@@ -116,7 +116,7 @@ class XMLLanguageServer : ILanguageServer {
   }
 
   override suspend fun analyze(file: Path): DiagnosticResult {
-    if (!DocumentUtils.isXmlFile(file)) {
+    if (!getSettings().diagnosticsEnabled() || !DocumentUtils.isXmlFile(file)) {
       return DiagnosticResult.NO_UPDATE
     }
     return syntaxDiagnosticProvider.analyze(file)
