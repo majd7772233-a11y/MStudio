@@ -105,7 +105,7 @@ private fun generateTemplateProject(name: String, languages: Array<Language>,
         template.setupRootProjectParams(name = projectName,
           packageName = packageName, language = language)
         template.executeRecipe()
-        assertGeneratedProject(projectName, useKts = false, packageName)
+        assertGeneratedProject(projectName, useKts = false, packageName, expectsLauncherActivity = name != "NoActivity")
       } finally {
         unmockTemplateDatas()
       }
@@ -125,7 +125,7 @@ private fun generateTemplateProject(name: String, languages: Array<Language>,
         template.setupRootProjectParams(name = projectName,
           packageName = ktsPackageName, language = language)
         template.executeRecipe()
-        assertGeneratedProject(projectName, useKts = true, ktsPackageName)
+        assertGeneratedProject(projectName, useKts = true, ktsPackageName, expectsLauncherActivity = name != "NoActivity")
       } finally {
         unmockTemplateDatas()
       }
@@ -137,6 +137,7 @@ private fun assertGeneratedProject(
   projectName: String,
   useKts: Boolean,
   packageName: String,
+  expectsLauncherActivity: Boolean,
 ) {
   val projectDir = File(testProjectsDir, projectName)
   val rootBuild = File(projectDir, if (useKts) "build.gradle.kts" else "build.gradle")
@@ -160,8 +161,31 @@ private fun assertGeneratedProject(
   assertThat(wrapperProperties.readText()).contains("gradle-${GRADLE_DISTRIBUTION_VERSION}-bin.zip")
   assertThat(rootBuild.readText()).contains(ANDROID_GRADLE_PLUGIN_VERSION)
   assertThat(settings.readText()).contains(projectName)
-  assertThat(appBuild.readText()).contains(packageName)
-  assertThat(appBuild.readText()).contains("compileSdk =")
+  val rootBuildText = rootBuild.readText()
+  val settingsText = settings.readText()
+  val appBuildText = appBuild.readText()
+  val manifestText = manifest.readText()
+  val wrapperText = wrapperProperties.readText()
+
+  assertThat(rootBuildText).contains(ANDROID_GRADLE_PLUGIN_VERSION)
+  assertThat(settingsText).contains(projectName)
+  assertThat(settingsText).contains("include(\"app\")")
+  assertThat(appBuildText).contains(packageName)
+  assertThat(appBuildText).contains("namespace")
+  assertThat(appBuildText).contains("applicationId =")
+  assertThat(appBuildText).contains("compileSdk =")
+  assertThat(appBuildText).contains("minSdk =")
+  assertThat(appBuildText).contains("targetSdk =")
+  assertThat(wrapperText).contains("gradle-${GRADLE_DISTRIBUTION_VERSION}-bin.zip")
+  assertThat(manifestText).contains(packageName)
+  if (expectsLauncherActivity) {
+    assertThat(manifestText).contains("android.intent.action.MAIN")
+    assertThat(manifestText).contains("android.intent.category.LAUNCHER")
+  } else {
+    // The intentionally headless template is buildable/installable but has no launcher activity.
+    assertThat(manifestText).doesNotContain("android.intent.action.MAIN")
+    assertThat(manifestText).doesNotContain("android.intent.category.LAUNCHER")
+  }
 }
 
 fun Template<*>.setupRootProjectParams(name: String = "TestTemplate",
