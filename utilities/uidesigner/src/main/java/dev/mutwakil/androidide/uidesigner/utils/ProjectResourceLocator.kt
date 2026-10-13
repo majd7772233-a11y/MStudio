@@ -216,6 +216,120 @@ internal object ProjectResourceLocator {
     return null
   }
 
+  /** Resolve a simple project style and its explicit parent chain for visual preview. */
+  fun resolveStyleItems(
+      projectRoot: File,
+      styleName: String,
+      context: Context,
+      preferredModuleRoot: File? = null,
+      preferredSourceSet: String? = null,
+  ): Map<String, String>? =
+      resolveStyleItems(
+          projectRoot,
+          styleName,
+          context,
+          preferredModuleRoot,
+          preferredSourceSet,
+          mutableSetOf(),
+      )
+
+  private fun resolveStyleItems(
+      projectRoot: File,
+      styleName: String,
+      context: Context,
+      preferredModuleRoot: File?,
+      preferredSourceSet: String?,
+      visited: MutableSet<String>,
+  ): Map<String, String>? {
+    if (styleName.isBlank() || visited.size >= MAX_VALUE_ALIAS_DEPTH || !visited.add(styleName)) {
+      return null
+    }
+    val definition =
+        findStyleDefinition(
+            projectRoot,
+            styleName,
+            context,
+            preferredModuleRoot,
+            preferredSourceSet,
+        ) ?: return null
+    val result = linkedMapOf<String, String>()
+    val parentName =
+        definition.parent?.removePrefix("@style/")?.takeIf { it != definition.parent }
+            ?: definition.parent?.takeIf { !it.startsWith("@") && !it.startsWith("?") }
+            ?: styleName.takeIf { it.contains('.') }?.substringBeforeLast('.')
+    if (!parentName.isNullOrBlank()) {
+      resolveStyleItems(
+              projectRoot,
+              parentName,
+              context,
+              preferredModuleRoot,
+              preferredSourceSet,
+              visited,
+          )
+          ?.let(result::putAll)
+    }
+    result.putAll(definition.items)
+    return result
+  }
+
+  private data class StyleDefinition(
+      val parent: String?,
+      val items: Map<String, String>,
+  )
+
+  private fun findStyleDefinition(
+      projectRoot: File,
+      styleName: String,
+      context: Context,
+      preferredModuleRoot: File?,
+      preferredSourceSet: String?,
+  ): StyleDefinition? {
+    val parserFactory = XmlPullParserFactory.newInstance()
+    val directories =
+        findResourceDirectories(projectRoot, "values", context, preferredModuleRoot, preferredSourceSet)
+    for (directory in directories) {
+      val files = directory.listFiles()?.filter { it.isFile && it.extension == "xml" } ?: continue
+      for (file in files.sortedBy { it.name }) {
+        try {
+          file.inputStream().buffered().use { input ->
+            val parser = parserFactory.newPullParser()
+            parser.setInput(input, "UTF-8")
+            var event = parser.eventType
+            while (event != XmlPullParser.END_DOCUMENT) {
+              if (event == XmlPullParser.START_TAG && parser.name == "style" &&
+                  parser.getAttributeValue(null, "name") == styleName
+              ) {
+                val parent = parser.getAttributeValue(null, "parent")
+                val items = linkedMapOf<String, String>()
+                val styleDepth = parser.depth
+                while (parser.next() != XmlPullParser.END_DOCUMENT) {
+                  if (parser.eventType == XmlPullParser.END_TAG &&
+                      parser.name == "style" && parser.depth == styleDepth
+                  ) {
+                    return StyleDefinition(parent, items)
+                  }
+                  if (parser.eventType == XmlPullParser.START_TAG &&
+                      parser.name == "item" && parser.depth == styleDepth + 1
+                  ) {
+                    val itemName = parser.getAttributeValue(null, "name")
+                    val itemValue = runCatching { parser.nextText().trim() }.getOrNull()
+                    if (!itemName.isNullOrBlank() && !itemValue.isNullOrBlank()) {
+                      items[itemName] = itemValue
+                    }
+                  }
+                }
+              }
+              event = parser.next()
+            }
+          }
+        } catch (_: Exception) {
+          // Ignore malformed unrelated files; continue looking for a valid definition.
+        }
+      }
+    }
+    return null
+  }
+
   private fun qualifierScore(folderName: String, resourceType: String, context: Context): Int {
     if (folderName == resourceType) return 0
 
