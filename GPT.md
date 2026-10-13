@@ -747,3 +747,9 @@ The user's latest instruction to finish Phase 8 fully supersedes the earlier sou
 - Added English/Arabic strings, version-catalog dependency, policy tests and a JVM integration test that compiles a fixture class and checks generated Java output.
 - Other NIDE candidates: formatter duplicate; autocomplete/type resolution reference-only; legacy builder/dx/FastGradleParser/manual AAR resolver rejected for core build; no Logcat port without a proven gap; sample corpus and standalone Java/JAR execution deferred pending acceptance criteria.
 - No Gradle build, test, Actions run, APK install or device check was executed, honoring the user's request to defer tests until final verification. Dependency resolution, D8 compatibility, managed-runtime behavior, memory and malformed/large archive behavior remain unverified.
+
+
+### Phase 9 decompiler implementation correction — managed JVM boundary
+
+- Vineflower is staged as an APK asset by a dedicated non-transitive Gradle configuration and is run with `Environment.JAVA` in a child JVM, not loaded into Android ART. The app copies the JAR into private files storage before first use.
+- Child JVM uses `-Xmx384m`, `-XX:ActiveProcessorCount=2`, a three-minute timeout, merged/drained output, and forced termination on interruption/timeout. Input cap is 128 MiB; ZIP/JAR preflight limits 5,000 entries and 256 MiB declared expanded size; failure paths delete copied input/output. These are source-level guards and remain unverified on device.
