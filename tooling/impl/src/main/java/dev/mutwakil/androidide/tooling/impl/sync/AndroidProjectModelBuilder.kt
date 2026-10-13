@@ -53,19 +53,20 @@ object AndroidProjectModelBuilder :
       "${variantNames.size} build variants found for project '$projectPath': $variantNames",
     )
 
-    var androidVariant = androidParams.variantSelections[projectPath]
-
-    if (androidVariant != null && !variantNames.contains(androidVariant)) {
-      log(
-        "Configured variant '$androidVariant' not found for project '$projectPath'. Falling back to default variant.",
+    val requestedVariant = androidParams.variantSelections[projectPath]
+    if (requestedVariant != null && requestedVariant !in variantNames) {
+      throw ModelBuilderException(
+        "The selected build variant '$requestedVariant' is not available for project '$projectPath'. " +
+          "Available variants: ${variantNames.ifEmpty { listOf("<none>") }.joinToString()}. " +
+          "Refresh the project model and choose an available variant; the requested selection was not replaced.",
       )
-      androidVariant = null
     }
 
-    val configurationVariant = androidVariant ?: variantNames.firstOrNull()
+    val configurationVariant = requestedVariant ?: variantNames.firstOrNull()
     if (configurationVariant.isNullOrBlank()) {
       throw ModelBuilderException(
-        "No variant found for project '$projectPath'. providedVariant=$androidVariant",
+        "No build variants were reported for project '$projectPath'. " +
+          "Check the Android Gradle Plugin configuration and sync output.",
       )
     }
 
@@ -110,10 +111,30 @@ object AndroidProjectModelBuilder :
     gradleProject: GradleProject,
     configuredVariant: String,
   ): File {
-    // TODO(itsaky): this should handle product flavors as well
-    return File(
-      gradleProject.buildDirectory,
-      "${IAndroidProject.FD_INTERMEDIATES}/compile_library_classes_jar/$configuredVariant/classes.jar",
-    )
+    // AGP variant names already include their flavor dimensions (for example, freeMinApiDebug).
+    // Search only inside this exact variant's output directory so a different variant's classes.jar
+    // can never be silently used as a fallback.
+    val variantOutputDir =
+      File(
+        gradleProject.buildDirectory,
+        "${IAndroidProject.FD_INTERMEDIATES}/compile_library_classes_jar/$configuredVariant",
+      )
+    val expectedJar = File(variantOutputDir, "classes.jar")
+    if (expectedJar.isFile) return expectedJar
+
+    // Some AGP versions place the jar one or more levels below the variant directory.
+    // Keep the search scoped to the exact variant to support flavor/build-type output layouts safely.
+    if (variantOutputDir.isDirectory) {
+      variantOutputDir.walkTopDown()
+        .maxDepth(4)
+        .filter { it.isFile && it.name == "classes.jar" }
+        .sortedBy { it.relativeTo(variantOutputDir).path }
+        .firstOrNull()
+        ?.let { return it }
+    }
+
+    // Preserve the expected path when the jar has not been generated yet; consumers can still
+    // report the missing classpath and a build/sync can generate it later.
+    return expectedJar
   }
 }
