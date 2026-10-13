@@ -752,3 +752,15 @@ No build, tests, workflow dispatch, Actions run or device validation is authoriz
 - Runner state reset committed as `4ea24fb29278ec07bd53738e8436685a27ada168`: on a real child-process exit, `ToolingServerRunner` now clears `isStarted` and `pid` before notifying its observer.
 - Service state reset committed as `d5ece4b74fc0d66c03bbb0dd05cbf45ef87fef1d`: `GradleBuildService.onServerExited` now clears its server proxy and started flag before removing the foreground notification.
 - These changes allow a later start attempt to recognize that the old process is gone instead of retaining a stale PID/server. Full restart, RPC future completion, cancellation and build-in-progress recovery remain runtime verification items; no build/tests/Actions/device validation was run.
+
+## Phase 4 implementation pass — lifecycle gaps to close before verification
+
+Source review at branch `dev` HEAD `c994bcc567f63b16b5456bc240de75e9675bc31c` found that Phase 4 is **not complete**:
+- `ToolingServerRunner.startAsync` logs startup failures but has no failure callback, leaving service/UI callers without a terminal startup signal.
+- A process exit can leave the RPC listener's blocking `future.get()` alive after the process waiter completes.
+- RPC futures already returned to the service are not centrally failed if the child JVM exits, so build/sync requests can wait indefinitely and build-in-progress state can remain stale.
+- Wrapper repair extracts the bundled ZIP directly into the project and reports success when any file was extracted; partial extraction can leave a mixed wrapper, and the method does not re-run the strict wrapper preflight after repair.
+- Build Scan is passed as `--scan` solely from a preference; the call path must not enable data upload without an explicit consent gate.
+
+Implementation order: fix process/RPC terminal-state propagation and retryable runner state; make wrapper repair verify the resulting wrapper and avoid clobbering valid user files; inspect the Build Scan preference/UI and require an explicit consent state; then record precise source completion. Phase 4 runtime acceptance remains deferred per user instruction: do not run tests, builds, Actions or device checks in this pass. Never mark runtime acceptance complete without evidence.
+
