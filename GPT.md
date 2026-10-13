@@ -678,3 +678,18 @@ Resource APIs now accept a preferred module root, and preview callers derive it 
 - No tests/builds/Actions/device checks were run. Do not claim runtime acceptance.
 - Phase 7 still has explicit limitations: AAPT dependency/product-flavor/theme merging, full style/plural/styled-string support, missing-resource diagnostics across all types, and lossless editing of `<merge>`, `<requestFocus>`, `<tag>`, `<fragment>`, and class-qualified `<view>` nodes (currently refused on edited save). Complex drawable XML is refused rather than faked.
 - Do not begin Phase 8 until the exact authorization `يلا الان إبدأ بالمرحلة الثامنة`.
+
+
+## Phase 7 source closeout — 2026-10-13
+
+Phase 7 source implementation is closed for the current safe-support boundary; this does **not** mean runtime acceptance has been proven. Read the final Phase 7 section in `MSTUDIO_ROADMAP.md` before further changes.
+
+- XML resource-index cache invalidation now runs only for changed files under Android source-set `res` folders, not every XML editor keystroke.
+- Missing-resource diagnostics now index `@+id/name` declarations from XML resource files and no longer blanket-ignore `@id/name` or custom `@attr/name` references. Unsaved local ID declarations and commented ID declarations are excluded from false-positive missing-ID warnings.
+- Added tests for source-set resource cache invalidation, generated/non-resource path exclusion, and declared-ID indexing/comment handling.
+- Resource preview remains module/source-set/qualifier-aware and resolves common project string/color/dimension/style values; vector rendering uses real vector/path data. Complex drawable XML and XML-only view constructs not faithfully represented by the visual model fail closed instead of being saved as lossy or fake previews.
+- **Do not run tests, Gradle builds, GitHub Actions, or device checks yet.** The user requested source changes only and will verify later. Do not claim compile/test/runtime success.
+- Runtime acceptance remains pending. Explicit limitations: complete Gradle/AAPT dependency/product-flavor resource merging and themes are not emulated; edited layouts containing `<merge>`, `<requestFocus>`, `<tag>`, `<fragment>`, or legacy `<view class="...">` are refused instead of losslessly edited; complex selector/layer-list/ripple/animated drawables and full plural/styled-string semantics remain unsupported.
+- Keep existing UI language/style, strings, RTL/LTR and visual consistency intact. Do not introduce a second design language.
+- **Phase 8 is locked** until the exact user instruction `يلا الان إبدأ بالمرحلة الثامنة`.
+- Latest commits: `2fafe43e1dbe6f23755c5898f10ecd5f5dc25f01`, `8578c155139a19dc03b8fd624c0db8ec784eae54`, `b41850269cebbfe680635aa81bd58c68329dbcde`, `f59dfea1d241bde70b4ab9df06dcabfc320b4d68`, `2ea65c264a7c43a15a52b080ca0f6191a9e8020a`. Roadmap closeout commit: `b94c66b5b740dae6eea4f3c84456aa2b21a702e9`.
