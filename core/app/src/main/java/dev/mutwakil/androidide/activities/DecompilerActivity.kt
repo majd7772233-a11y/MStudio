@@ -15,9 +15,10 @@ import dev.mutwakil.androidide.utils.DecompilerInputPolicy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.java.decompiler.main.decompiler.ConsoleDecompiler
+import dev.mutwakil.androidide.utils.Environment
 import java.io.File
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 /** Offline JVM bytecode inspection. Input is parsed as data and is never executed. */
 class DecompilerActivity : AppCompatActivity() {
@@ -82,7 +83,7 @@ class DecompilerActivity : AppCompatActivity() {
                         if (!mkdirs() && !isDirectory) throw IOException("Cannot create output directory")
                     }
                     try {
-                        ConsoleDecompiler.main(arrayOf(input.absolutePath, output.absolutePath))
+                        runDecompiler(input, output)
                     } finally {
                         input.delete()
                     }
@@ -108,6 +109,60 @@ class DecompilerActivity : AppCompatActivity() {
             } finally {
                 running = false
             }
+        }
+    }
+
+    private fun runDecompiler(input: File, output: File) {
+        val runtimeJar = File(filesDir, "decompiler/vineflower.jar")
+        if (!runtimeJar.isFile) {
+            if (!runtimeJar.parentFile?.mkdirs()!! && !runtimeJar.parentFile!!.isDirectory) {
+                throw IOException("Cannot prepare decompiler runtime directory")
+            }
+            val temporary = File(runtimeJar.parentFile, "vineflower.jar.tmp")
+            assets.open("vineflower.jar").use { source ->
+                temporary.outputStream().use { target -> source.copyTo(target) }
+            }
+            if (!temporary.renameTo(runtimeJar)) {
+                temporary.delete()
+                throw IOException("Cannot install the bundled decompiler")
+            }
+        }
+
+        val java = Environment.JAVA
+        if (!java.isFile || !java.canExecute()) {
+            throw IOException("The managed Java runtime is not ready. Finish MStudio runtime setup and retry.")
+        }
+        val process = ProcessBuilder(
+            java.absolutePath,
+            "-jar",
+            runtimeJar.absolutePath,
+            input.absolutePath,
+            output.absolutePath
+        ).redirectErrorStream(true).start()
+        val log = StringBuilder()
+        val reader = Thread {
+            process.inputStream.bufferedReader().useLines { lines ->
+                lines.forEach { line ->
+                    synchronized(log) {
+                        if (log.length < 32768) log.append(line).append('\\n')
+                    }
+                }
+            }
+        }.apply {
+            isDaemon = true
+            name = "MStudio-Vineflower-Output"
+            start()
+        }
+        if (!process.waitFor(3, TimeUnit.MINUTES)) {
+            process.destroyForcibly()
+            reader.join(1000)
+            throw IOException("Decompilation timed out after three minutes.")
+        }
+        reader.join(1000)
+        if (process.exitValue() != 0) {
+            val details = synchronized(log) { log.toString().takeLast(2000) }
+            throw IOException("Vineflower exited with code " + process.exitValue() +
+                if (details.isBlank()) "" else ":\\n" + details)
         }
     }
 
