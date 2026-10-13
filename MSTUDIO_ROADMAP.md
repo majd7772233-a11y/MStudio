@@ -1042,3 +1042,5 @@ The user's later explicit authorization to start Phase 8 supersedes the older lo
 The repository's active verification hold remains in force: no tests, Gradle builds, GitHub Actions, or device checks were run. Do not mark this phase accepted or claim compilation/runtime success without those results.
 
 - Follow-up hardening: `MainViewModel.saveProjectToRecents` is now suspending and awaits its database operation on `Dispatchers.IO`. Template completion launches that operation in the activity ViewModel scope and publishes `pendingCreatedProject` only after the save attempt finishes, so rotation does not cancel the persistence step. Commits: `149182d49a101b985bbb8f60ab4084e0faa7e121`, `38088121e97d718a8d036c9fe04f6a8fc02f5d90`.
+
+- Final source review for this pass confirmed the template success path now awaits the recent-project DAO attempt before publishing the pending result. No runtime checks were executed in this pass; template APK generation, Tooling API sync/build, install/launch, and all edge-case acceptance still require the authorized verification environment.
