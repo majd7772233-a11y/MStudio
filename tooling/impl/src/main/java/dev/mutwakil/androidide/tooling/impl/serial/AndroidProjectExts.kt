@@ -1,26 +1,26 @@
 package dev.mutwakil.androidide.tooling.impl.serial
 
-import com.android.builder.model.v2.dsl.BuildType
-import com.android.builder.model.v2.ide.AndroidArtifact
-import com.android.builder.model.v2.ide.AndroidLibraryData
-import com.android.builder.model.v2.ide.ArtifactDependencies
-import com.android.builder.model.v2.ide.GraphItem
-import com.android.builder.model.v2.ide.JavaCompileOptions
+import com.android.builder.model.v2.dsl.BuildType as AgpBuildType
+import com.android.builder.model.v2.ide.AndroidArtifact as AgpAndroidArtifact
+import com.android.builder.model.v2.ide.AndroidLibraryData as AgpAndroidLibraryData
+import com.android.builder.model.v2.ide.ArtifactDependencies as AgpArtifactDependencies
+import com.android.builder.model.v2.ide.GraphItem as AgpGraphItem
+import com.android.builder.model.v2.ide.JavaCompileOptions as AgpJavaCompileOptions
 import com.android.builder.model.v2.ide.Library
-import com.android.builder.model.v2.ide.LibraryInfo
-import com.android.builder.model.v2.ide.LibraryType
-import com.android.builder.model.v2.ide.ProjectInfo
-import com.android.builder.model.v2.ide.ProjectType
-import com.android.builder.model.v2.ide.SourceProvider
-import com.android.builder.model.v2.ide.SourceSetContainer
-import com.android.builder.model.v2.ide.UnresolvedDependency
-import com.android.builder.model.v2.ide.Variant
-import com.android.builder.model.v2.ide.ViewBindingOptions
-import com.android.builder.model.v2.models.AndroidDsl
-import com.android.builder.model.v2.models.AndroidProject
-import com.android.builder.model.v2.models.BasicAndroidProject
-import com.android.builder.model.v2.models.VariantDependencies
-import com.android.builder.model.v2.models.Versions
+import com.android.builder.model.v2.ide.LibraryInfo as AgpLibraryInfo
+import com.android.builder.model.v2.ide.LibraryType as AgpLibraryType
+import com.android.builder.model.v2.ide.ProjectInfo as AgpProjectInfo
+import com.android.builder.model.v2.ide.ProjectType as AgpProjectType
+import com.android.builder.model.v2.ide.SourceProvider as AgpSourceProvider
+import com.android.builder.model.v2.ide.SourceSetContainer as AgpSourceSetContainer
+import com.android.builder.model.v2.ide.UnresolvedDependency as AgpUnresolvedDependency
+import com.android.builder.model.v2.ide.Variant as AgpVariant
+import com.android.builder.model.v2.ide.ViewBindingOptions as AgpViewBindingOptions
+import com.android.builder.model.v2.models.AndroidDsl as AgpAndroidDsl
+import com.android.builder.model.v2.models.AndroidProject as AgpAndroidProject
+import com.android.builder.model.v2.models.BasicAndroidProject as AgpBasicAndroidProject
+import com.android.builder.model.v2.models.VariantDependencies as AgpVariantDependencies
+import com.android.builder.model.v2.models.Versions as AgpVersions
 import dev.mutwakil.androidide.project.AndroidArtifact
 import dev.mutwakil.androidide.project.AndroidLibraryData
 import dev.mutwakil.androidide.project.AndroidModels
@@ -42,22 +42,22 @@ import dev.mutwakil.androidide.utils.capitalizeString
 import java.io.File
 
 fun createAndroidProjectProtoModel(
-    basicAndroidProject: BasicAndroidProject,
-    androidProject: AndroidProject,
-    androidDsl: AndroidDsl,
-    versions: Versions,
-    variantDependencies: VariantDependencies,
+    basicAndroidProject: AgpBasicAndroidProject,
+    androidProject: AgpAndroidProject,
+    androidDsl: AgpAndroidDsl,
+    versions: AgpVersions,
+    variantDependencies: AgpVariantDependencies,
     configuredVariantName: String?,
     classesJar: File,
 ) = AndroidProject(
     namespace = androidProject.namespace,
     projectType =
         when (basicAndroidProject.projectType) {
-            ProjectType.APPLICATION -> AndroidModels.ProjectType.ApplicationProject
-            ProjectType.LIBRARY -> AndroidModels.ProjectType.LibraryProject
-            ProjectType.DYNAMIC_FEATURE -> AndroidModels.ProjectType.DynamicFeature
-            ProjectType.TEST -> AndroidModels.ProjectType.Test
-            ProjectType.FUSED_LIBRARY -> AndroidModels.ProjectType.FusedLibrary
+            AgpProjectType.APPLICATION -> AndroidModels.ProjectType.ApplicationProject
+            AgpProjectType.LIBRARY -> AndroidModels.ProjectType.LibraryProject
+            AgpProjectType.DYNAMIC_FEATURE -> AndroidModels.ProjectType.DynamicFeature
+            AgpProjectType.TEST -> AndroidModels.ProjectType.Test
+            AgpProjectType.FUSED_LIBRARY -> AndroidModels.ProjectType.FusedLibrary
         },
     mainSourceSet = basicAndroidProject.mainSourceSet?.asProtoModel(),
     javaCompilerSettings = androidProject.javaCompileOptions?.asProtoModel(),
@@ -78,7 +78,7 @@ fun createAndroidProjectProtoModel(
     variantDependencies = variantDependencies.asProtoModel(),
 )
 
-fun VariantDependencies.asProtoModel() =
+fun AgpVariantDependencies.asProtoModel() =
     VariantDependencies(
         name = this.name,
         mainArtifact = this.mainArtifact.asProtoModel(),
@@ -94,16 +94,16 @@ fun VariantDependencies.asProtoModel() =
         },
     )
 
-fun Library.asProtoModel() =
+fun AgpLibrary.asProtoModel() =
     Library(
         key = this.key,
         type =
             when (this.type) {
-                LibraryType.PROJECT -> AndroidModels.LibraryType.Project
-                LibraryType.ANDROID_LIBRARY -> AndroidModels.LibraryType.ExternalAndroidLibrary
-                LibraryType.JAVA_LIBRARY -> AndroidModels.LibraryType.ExternalJavaLibrary
-                LibraryType.RELOCATED -> AndroidModels.LibraryType.Relocated
-                LibraryType.NO_ARTIFACT_FILE -> AndroidModels.LibraryType.NoArtifactFile
+                AgpLibraryType.PROJECT -> AndroidModels.LibraryType.Project
+                AgpLibraryType.ANDROID_LIBRARY -> AndroidModels.LibraryType.ExternalAndroidLibrary
+                AgpLibraryType.JAVA_LIBRARY -> AndroidModels.LibraryType.ExternalJavaLibrary
+                AgpLibraryType.RELOCATED -> AndroidModels.LibraryType.Relocated
+                AgpLibraryType.NO_ARTIFACT_FILE -> AndroidModels.LibraryType.NoArtifactFile
             },
         projectInfo = this.projectInfo?.asProtoModel(),
         libraryInfo = this.libraryInfo?.asProtoModel(),
@@ -111,66 +111,66 @@ fun Library.asProtoModel() =
         artifactPath = this.artifact?.absolutePath,
     )
 
-fun AndroidLibraryData.asProtoModel() =
+fun AgpAndroidLibraryData.asProtoModel() =
     AndroidLibraryData(
         compileJarFilePathsList = this.compileJarFiles.map { it.absolutePath },
         manifestFilePath = this.manifest.absolutePath,
         resFolderPath = this.resFolder.absolutePath,
     )
 
-fun ProjectInfo.asProtoModel() =
+fun AgpProjectInfo.asProtoModel() =
     ProjectInfo(
         buildId = this.buildId,
         projectPath = projectPath,
     )
 
-fun LibraryInfo.asProtoModel() =
+fun AgpLibraryInfo.asProtoModel() =
     LibraryInfo(
         group = this.group,
         name = this.name,
         version = this.version,
     )
 
-fun ArtifactDependencies.asProtoModel() =
+fun AgpArtifactDependencies.asProtoModel() =
     ArtifactDependencies(
         compileDependencyList = this.compileDependencies.map { it.asProtoModel() },
         unresolvedDependencyList = this.unresolvedDependencies.map { it.asProtoModel() },
     )
 
-fun GraphItem.asProtoModel(): AndroidModels.GraphItem =
+fun AgpGraphItem.asProtoModel(): AndroidModels.GraphItem =
     GraphItem(
         key = this.key,
         requestedCoordinates = this.requestedCoordinates,
         dependencyList = this.dependencies.map { it.asProtoModel() },
     )
 
-fun UnresolvedDependency.asProtoModel() =
+fun AgpUnresolvedDependency.asProtoModel() =
     UnresolvedDependency(
         name = this.name,
         cause = this.cause,
     )
 
-fun SourceSetContainer.asProtoModel() = SourceSetContainer(sourceProvider = this.sourceProvider?.asProtoModel())
+fun AgpSourceSetContainer.asProtoModel() = SourceSetContainer(sourceProvider = this.sourceProvider?.asProtoModel())
 
-fun SourceProvider.asProtoModel() =
+fun AgpSourceProvider.asProtoModel() =
     SourceProvider(
         javaDirsList = this.javaDirectories.map { dir -> dir.absolutePath },
         kotlinDirsList = this.kotlinDirectories.map { dir -> dir.absolutePath },
         resDirsList = this.resDirectories?.map { dir -> dir.absolutePath } ?: emptyList(),
     )
 
-fun JavaCompileOptions.asProtoModel() =
+fun AgpJavaCompileOptions.asProtoModel() =
     JavaCompilerSettings(
         sourceCompatibility = this.sourceCompatibility,
         targetCompatibility = this.targetCompatibility,
     )
 
-fun ViewBindingOptions.asProtoModel() =
+fun AgpViewBindingOptions.asProtoModel() =
     ViewBindingOptions(
         isEnabled = this.isEnabled,
     )
 
-fun Variant.asProtoModel(
+fun AgpVariant.asProtoModel(
     basicAndroidProject: BasicAndroidProject,
     androidProject: AndroidProject,
     androidDsl: AndroidDsl,
@@ -188,7 +188,7 @@ fun Variant.asProtoModel(
         ),
 )
 
-fun AndroidArtifact.asProtoModel(
+fun AgpAndroidArtifact.asProtoModel(
     artifactName: String,
     variantName: String,
     basicAndroidProject: BasicAndroidProject,
@@ -225,7 +225,7 @@ fun AndroidArtifact.asProtoModel(
     targetSdkVersionOverride = this.targetSdkVersionOverride?.apiLevel ?: 1,
 )
 
-private fun AndroidArtifact.computeApplicationId(
+private fun AgpAndroidArtifact.computeApplicationId(
     variantName: String,
     basicAndroidProject: BasicAndroidProject,
     androidProject: AndroidProject,
@@ -298,7 +298,7 @@ private fun computeApplicationIdLegacy(
  */
 private fun computeApplicationIdSuffix(
     variantName: String,
-    buildType: BuildType,
+    buildType: AgpBuildType,
     basicAndroidProject: BasicAndroidProject,
     androidDsl: AndroidDsl,
 ): String {
