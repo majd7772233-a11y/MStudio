@@ -212,6 +212,12 @@ class SourceWriter {
 
   @PublishedApi
   internal fun ModuleTemplateBuilder.write(file: JavaFile) {
-    file.writeTo(mainJavaSrc())
+    val className = checkNotNull(file.typeSpec.name) {
+      "Generated Java source must have a top-level type name"
+    }
+    executor.save(
+      file.toString(),
+      srcFilePath(SrcSet.Main, file.packageName, className, Language.Java),
+    )
   }
 }
