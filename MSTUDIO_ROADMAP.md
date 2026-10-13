@@ -958,3 +958,32 @@ Do not begin Phase 8 or edit its implementation. Phase 8 remains locked until th
 - Commits: `e3a93bfe635be76de790342fd64905f53e0a324e`, `3b4a02e6eff38f483ad9b0e62a779e5539f3dec6`, `2bd32a851e16a25ae012e56cdf2db4d45b01c71c`, `6faddd97d3e9636bc14c21b4e9bb26441f79ec25`, `568d6e05530c39d08134f814318dc8da807c7f26`, `09e40c450824421157807912aa0e7ad7d7d74a34`, `1f7ad16f85e66a3b9dad2e3376b891b37e1c7772`, `62aef7f3886ebf859bcd08199f2fa8d4783c1ebc`, `b105ca2c4c1ee4aca2d2014c22baf6478ccb8244`, `d9c23a73b4aea78736cf720bfee24720e3a2ee18`, `43e00da3d780427f0c04a5c45d01911e3434c4d0`, `735c638eb2775d97e7fa1081ae6fde6acefa61f7`.
 
 The Phase 7 closeout gate above remains in force: do not claim full acceptance or start Phase 8 while the documented XML-only editing, full AAPT resource merging/style resolution, broad resource diagnostics, and runtime acceptance gaps remain.
+
+
+## Phase 7 latest implementation batch — 2026-10-13
+
+### Added/updated since the previous checkpoint
+
+- Resource selection now prioritizes the opened Android module first, then the source set containing the opened layout (for example `debug` or `main`), then the matching configuration qualifier. This ordering is applied to drawable/mipmap/vector and project values resources. Locale qualifiers using `b+language+REGION` are recognized in addition to common language qualifiers.
+- Centralized project-root discovery so the background, ImageView and vector preview paths do not maintain divergent root-walking implementations.
+- Added project-string preview for common `text`, `hint`, `title` and `contentDescription` attributes. A project string is resolved before MStudio's own resource table; an unresolved project string is not silently replaced with a same-named IDE resource.
+- Added project-dimension preview for common text size, width/height, min size, elevation, padding and margin attributes. It resolves simple `@dimen` aliases and converts dp/dip/sp/px/pt/in/mm to preview pixels.
+- Added a limited project-style preview resolver with explicit and inferred style-parent inheritance. It applies common text, hint, title, text color, background, dimension, visibility and enabled items. Theme attributes, styled spans, plural resources, AAPT linking and complete Android style semantics remain unsupported; unsupported items are skipped instead of being fabricated.
+- XML LSP now reports malformed XML with a navigable diagnostic range and clears the syntax diagnostic after the document becomes valid.
+- Added source tests for module/source-set precedence, project string and dimension preview, simple style inheritance, and XML syntax diagnostic lifecycle.
+
+### Source commits in this batch
+
+- Resource source-set precedence: `affc542aa065b441b1fde97c18125cd0a1506903`, `50f83ffad2b49d7267a5a9db5bd60e67b67e0842`, `edcbdc2e5da6c77b8b117ff54c2e52de4b16bd2d`, `6d47301efc159c018de119d065f669480e94fd79`, `4471793cf2d579c9bd54d3730c75f5cbd580bf94`, `0bc4462cc84108593463bbc1c88491f1aef215f6`, `1b8b9a746ec1f681185062e5f2ccdd0bc1004bba`, `6169a09281fc627fef2e5df694aaec5d99629a44`, `5263ef55f758cc5b7bd947b9ecf68335d208caaf`, `0cf8fb0f688820618346136f369462d7985455fb`.
+- Project strings/dimensions/styles: `b2a8e0ac807560ee003a9390dc70e70a33885eb7`, `82fd49c22c1c9bb59d45a38da59c890f73ba8a64`, `eda7a0b86255511a3bb0ca38f053742631bf0b51`, `eeb4f772b34823decfae4bc561edc762ed24b92e`, `255a85babff03ba4ab065dce27c97bd687099358`, `43642a952786182761449746f2ab68763b558314`, `1ade46d06e5d31f739863d573d2e069ebafd89a5`, `e5a6a0aabca2f8b8d5120498ba14ba83feb38c25`, `11360e5f06fe32c5984625eba4cedeec3e104c77d`, `1b6c420951baa6b848730ddec3d736854ec6b77d`.
+- XML syntax diagnostics: `630603812dc7e9c171dc468f7d41f627b310ae69`, `f32490e3870140432872c024fe44246af14d6974`, `d367bc31f06cc7a0074225369b0f24c458751194`, `bf21c883836ad266fcdfa1fff4a28deb005bc71f`, `07be35c5a642dea2d4a89c1c6d9eb8dfce0390d1`.
+- Added tests: `59b661ef1815fac91abc3db86d6b2cf23fad59f4`, `46b54a7b5a12072317fb3ea5c6de6416f21dca92`, `40c53e319d09d8898605e0b98c2ee137fb84bf0f`.
+
+### Phase 7 closeout status — do not overstate acceptance
+
+- Source changes cover XML parse-error diagnostics, safe unchanged-source return, supported visual XML serialization, namespace serialization safety, include preservation, guarded refusal for XML-only nodes not represented by the visual model, drag/drop hierarchy undo/dirty tracking, common project drawable/value/style preview and Compose lifecycle/stale-result recovery.
+- The filesystem resolver remains a preview aid, not a replacement for Gradle/AAPT's merged resource table. Dependency visibility, product-flavor overlay semantics, themes/attribute resolution, plurals/styled spans and complex selector/layer-list/ripple/animated drawable rendering are not fully implemented.
+- Missing project resource references do not yet have a comprehensive LSP diagnostic pass across all resource types. Unsupported preview cases are refused/logged rather than represented by fake placeholders. XML syntax errors are now navigable diagnostics.
+- `<merge>`, `<requestFocus>`, `<tag>`, `<fragment>`, and `<view class="...">` remain guarded against lossy edited saves; `<include>` is represented by the existing include model. Full lossless visual editing of those special nodes remains unsupported.
+- No tests, Gradle builds, GitHub Actions, or device checks were run, per the verification hold. Static review only; source tests are authored but unexecuted.
+- **Do not start Phase 8.** Keep Phase 8 locked until the user explicitly says `يلا الان إبدأ بالمرحلة الثامنة`.
