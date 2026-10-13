@@ -160,6 +160,38 @@ class ProjectResourceLocatorTest {
   }
 
   @Test
+  fun prefersOpenedModuleAndSourceSetBeforeOtherModulesQualifiers() {
+    val projectRoot = temporaryFolder.newFolder("variant-precedence")
+    val appRoot = File(projectRoot, "app").apply { mkdirs() }
+    val featureRoot = File(projectRoot, "feature").apply { mkdirs() }
+    File(appRoot, "build.gradle").writeText("plugins {}")
+    File(featureRoot, "build.gradle").writeText("plugins {}")
+    File(appRoot, "src/main/res/drawable").mkdirs()
+    File(appRoot, "src/debug/res/drawable").mkdirs()
+    File(featureRoot, "src/main/res/drawable-night").mkdirs()
+    val layout = File(appRoot, "src/debug/res/layout/screen.xml").apply {
+      parentFile?.mkdirs()
+      writeText("<View />")
+    }
+    val context = RuntimeEnvironment.getApplication()
+    val projectDirs =
+        ProjectResourceLocator.findResourceDirectories(
+            projectRoot,
+            "drawable",
+            context,
+            appRoot,
+            ProjectResourceLocator.findSourceSet(layout, appRoot),
+        )
+
+    assertEquals(
+        listOf("drawable", "drawable"),
+        projectDirs.take(2).map { it.name },
+    )
+    assertTrue(projectDirs.take(2).all { it.absolutePath.startsWith(appRoot.absolutePath) })
+    assertEquals("debug", ProjectResourceLocator.findSourceSet(layout, appRoot))
+  }
+
+  @Test
   fun discoversResourcesInNonAppModulesAndQualifiedDirectories() {
     val projectRoot = temporaryFolder.newFolder("project")
     File(projectRoot, "feature/profile/src/main/res/drawable").mkdirs()
