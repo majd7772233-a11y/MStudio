@@ -328,7 +328,7 @@ class JavaLanguageServer : ILanguageServer {
         if (!Files.exists(file)) return
 
         CoroutineScope(Dispatchers.Default).launch {
-            val result = analyze(selectedFile!!)
+            val result = analyze(file)
             withContext(Dispatchers.Main) {
                 client?.publishDiagnostics(result)
             }
