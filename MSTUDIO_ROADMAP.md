@@ -1126,3 +1126,6 @@ Vineflower runs in a child process using MStudio's managed Java runtime, not ins
 - Root `gradle.properties` still requests a 5096 MiB Gradle heap and 4096 MiB Kotlin daemon heap. It was not tuned without measurements; these source-build values are not evidence of the managed on-device build runtime's memory budget.
 
 **Phase 10 status: source hardening and verification preparation in progress; acceptance gates pending.**
+
+
+Phase 10 runbook: see PHASE10_VERIFICATION.md for manual workflow order, device matrix, evidence requirements, and the current unverified status.
