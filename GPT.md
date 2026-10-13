@@ -553,3 +553,11 @@ Read `MSTUDIO_ROADMAP.md` first; its latest handoff checkpoint was committed in 
 - Updated `core/app/src/main/java/dev/mutwakil/androidide/utils/ProjectValidation.kt` so import validation no longer hardcodes an `app/` module. It accepts a root Gradle build script, or a settings-based multi-module root with a descendant module build script within a bounded search depth; it rejects non-directory selections and build-script paths that are not regular files, and skips hidden/VCS/generated directories during descendant search. The special plugin-project case remains supported.
 - This is only source-level structural validation. It does not prove Gradle sync, SAF access, nested/composite project modeling, variants, classpaths, or dependency resolution. Parent-container picker and model-builder work remain open under Phase 5.
 - No tests, Gradle builds, Actions runs, or device checks were run. Keep all evidence-dependent checklist items unchecked and do not describe Phase 5 as complete.
+
+
+## Mandatory execution scope when the user says “يلا المرحلة الخامسة” — 2026-10-13
+
+- Interpret this exact request as authorization and instruction to execute **all of Phase 5**, including every subphase, task, subtask, improvement, bug fix, integration point, and documentation/roadmap update that belongs to Phase 5—not merely start it or complete one isolated fix.
+- Work from the live `dev` branch and latest source commit; read this file and `MSTUDIO_ROADMAP.md`, inspect the actual source and existing work, avoid repeating completed changes, and keep the roadmap and this handoff synchronized as implementation progresses.
+- Continue until all implementable Phase 5 work is completed and the code is ready to move directly to Phase 6. Do not mark runtime/build/device acceptance as passed without running it; current user constraint defers tests, builds, GitHub Actions, and device checks until explicitly requested. If verification is deferred, document that limitation precisely, but do not use it as an excuse to stop the remaining source implementation.
+- Execute directly with concise communication; do not replace implementation with a plan, progress narration, or a partial phase. Ask only if a genuinely blocking ambiguity prevents safe implementation.
