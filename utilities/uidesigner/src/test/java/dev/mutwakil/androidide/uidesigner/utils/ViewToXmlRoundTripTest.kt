@@ -1,0 +1,57 @@
+/*
+ * This file is part of AndroidIDE.
+ *
+ * AndroidIDE is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ */
+
+package dev.mutwakil.androidide.uidesigner.utils
+
+import java.io.File
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.rules.TemporaryFolder
+import org.robolectric.RobolectricTestRunner
+
+@RunWith(RobolectricTestRunner::class)
+class ViewToXmlRoundTripTest {
+
+  @get:Rule
+  val temporaryFolder = TemporaryFolder()
+
+  @Test
+  fun ordinaryViewLayoutCanBeSerialized() {
+    val file = layout(
+        """
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" />
+        </LinearLayout>
+        """.trimIndent()
+    )
+
+    assertNull(ViewToXml.findUnsupportedRoundTripConstruct(file))
+  }
+
+  @Test
+  fun includeMergeAndOtherXmlOnlyNodesAreRejectedForEditedLayouts() {
+    listOf(
+        "<LinearLayout><include layout=\"@layout/toolbar\" /></LinearLayout>" to "include",
+        "<merge><TextView /></merge>" to "merge",
+        "<LinearLayout><requestFocus /></LinearLayout>" to "requestFocus",
+        "<LinearLayout><tag android:id=\"@+id/key\" android:value=\"value\" /></LinearLayout>" to "tag",
+        "<LinearLayout><view class=\"example.CustomView\" /></LinearLayout>" to "view",
+        "<LinearLayout><fragment android:name=\"example.Screen\" /></LinearLayout>" to "fragment",
+    ).forEach { (xml, expectedTag) ->
+      assertEquals(expectedTag, ViewToXml.findUnsupportedRoundTripConstruct(layout(xml)))
+    }
+  }
+
+  private fun layout(contents: String): File {
+    return temporaryFolder.newFile("layout.xml").apply { writeText(contents) }
+  }
+}
