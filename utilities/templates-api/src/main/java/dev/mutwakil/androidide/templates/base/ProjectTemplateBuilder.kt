@@ -28,7 +28,6 @@ import dev.mutwakil.androidide.templates.base.root.buildGradleSrcKts
 import dev.mutwakil.androidide.templates.base.root.gradleWrapperProps
 import dev.mutwakil.androidide.templates.base.root.settingsGradleSrcStr
 import dev.mutwakil.androidide.templates.base.util.optonallyKts
-import dev.mutwakil.androidide.utils.transferToStream
 import java.io.File
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
@@ -136,12 +135,7 @@ class ProjectTemplateBuilder :
       while (zipEntry != null) {
         if (zipEntry.name in entriesToCopy) {
           val fileOut = File(data.projectDir, zipEntry.name)
-          fileOut.parentFile!!.mkdirs()
-
-          fileOut.outputStream().buffered().use { outStream ->
-            zipIn.transferToStream(outStream)
-            outStream.flush()
-          }
+          executor.saveBytes(zipIn.readBytes(), fileOut)
         }
 
         zipEntry = zipIn.nextEntry
@@ -150,15 +144,21 @@ class ProjectTemplateBuilder :
 
       val gradlew = File(data.projectDir, "gradlew")
       val gradlewBat = File(data.projectDir, "${gradlew.name}.bat")
+      val wrapperJar = File(data.projectDir, "gradle/wrapper/gradle-wrapper.jar")
 
-      check(gradlew.exists()) {
-        "'$gradlew' does not exist!"
+      check(gradlew.isFile && gradlew.length() > 0L) {
+        "Gradle wrapper script '$gradlew' is missing or empty"
       }
-      check(gradlewBat.exists()) {
-        "'$gradlew' does not exist!"
+      check(gradlewBat.isFile && gradlewBat.length() > 0L) {
+        "Gradle wrapper batch script '$gradlewBat' is missing or empty"
+      }
+      check(wrapperJar.isFile && wrapperJar.length() > 0L) {
+        "Gradle wrapper JAR '$wrapperJar' is missing or empty"
       }
 
-      gradlew.setExecutable(true)
+      check(gradlew.setExecutable(true) || gradlew.canExecute()) {
+        "Unable to make Gradle wrapper executable: '$gradlew'"
+      }
       gradlewBat.setExecutable(true)
     }
 
