@@ -72,7 +72,7 @@ class BackgroundPreviewRenderer {
           return loadMipmapResource(view, value, context, layoutFile)
         }
         value.startsWith("@color/") -> {
-          return loadColorResource(view, value, context)
+          return loadColorResource(view, value, context, layoutFile)
         }
         value.startsWith("@android:drawable/") -> {
           return loadAndroidDrawable(view, value, context)
@@ -626,29 +626,63 @@ class BackgroundPreviewRenderer {
     return null
   }
 
-  private fun loadColorResource(view: View, resourceName: String, context: Context): Boolean {
+  private fun loadColorResource(
+      view: View,
+      resourceName: String,
+      context: Context,
+      layoutFile: File?,
+  ): Boolean {
+    val colorName = resourceName.substringAfter("@color/")
+
+    // Resolve the opened project's values first, avoiding collisions with the IDE's own resources.
+    val projectRoot = findProjectRoot(layoutFile)
+    val projectColor =
+        projectRoot?.let {
+          resolveProjectColor(it, colorName, context, mutableSetOf())
+        }
+    if (projectColor != null) {
+      return try {
+        view.background = ColorDrawable(Color.parseColor(projectColor))
+        true
+      } catch (e: Exception) {
+        log.debug("Project color '{}' could not be previewed: {}", colorName, e.message)
+        false
+      }
+    }
+
     return try {
-      val colorName = resourceName.substringAfter("@color/")
-      var resourceId = context.resources.getIdentifier(colorName, "color", context.packageName)
-
-      if (resourceId == 0) {
-        resourceId =
-            context.applicationContext.resources.getIdentifier(
-                colorName,
-                "color",
-                context.applicationContext.packageName,
-            )
-      }
-
-      if (resourceId != 0) {
-        val color = ContextCompat.getColor(context, resourceId)
-        view.background = ColorDrawable(color)
-        return true
-      }
-
-      false
+      val resourceId =
+          context.resources.getIdentifier(colorName, "color", context.packageName)
+              .takeIf { it != 0 }
+              ?: context.applicationContext.resources.getIdentifier(
+                  colorName,
+                  "color",
+                  context.applicationContext.packageName,
+              )
+      if (resourceId == 0) return false
+      val color = ContextCompat.getColor(context, resourceId)
+      view.background = ColorDrawable(color)
+      true
     } catch (e: Exception) {
+      log.debug("Unable to resolve color '{}': {}", colorName, e.message)
       false
+    }
+  }
+
+  private fun resolveProjectColor(
+      projectRoot: File,
+      colorName: String,
+      context: Context,
+      visited: MutableSet<String>,
+  ): String? {
+    if (visited.size >= 8 || !visited.add(colorName)) return null
+    val value =
+        ProjectResourceLocator.findValueResource(projectRoot, "color", colorName, context)
+            ?: return null
+    return if (value.startsWith("@color/")) {
+      resolveProjectColor(projectRoot, value.substringAfter("@color/"), context, visited)
+    } else {
+      value.takeIf { it.startsWith("#") || it.lowercase() in setOf("black", "white", "red", "green", "blue", "transparent") }
     }
   }
 
