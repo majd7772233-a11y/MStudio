@@ -66,7 +66,7 @@ class ViewToXmlRoundTripTest {
     val file =
         layout(
             """
-            <LinearLayout>
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android">
                 <include layout="@layout/toolbar" android:layout_width="match_parent" android:layout_height="wrap_content" />
             </LinearLayout>
             """.trimIndent()
