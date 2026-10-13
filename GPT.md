@@ -662,3 +662,8 @@ Recent follow-up commits:
 No tests/builds/Actions/device checks were run. Do not claim runtime success.
 
 Phase 7 is not to be described as fully accepted until the source-level remaining gaps are addressed: lossless editing of merge/requestFocus/tag/fragment/class-qualified view nodes (currently safely blocked when dirty), actual Gradle/AAPT variant/dependency resource merging and style/theme application, broad XML resource completion/missing-reference diagnostics, and Compose runtime acceptance. Phase 8 is strictly locked until the exact user authorization `يلا الان إبدأ بالمرحلة الثامنة`.
+
+
+### Phase 7 latest source handoff — 2026-10-13
+
+Resource APIs now accept a preferred module root, and preview callers derive it from the opened layout. Module-local drawable/mipmap/vector and values resources are preferred when names collide. Shape color/dimension references and custom vector fill/stroke colors use project-aware resolution. Unsupported generic selector/layer-list/ripple/animated XML no longer displays a fake placeholder as a successful preview. Tests for module precedence and failure behavior were added but not run. Latest source/test commits are recorded in MSTUDIO_ROADMAP.md. Phase 7 remains not runtime-accepted; full style/theme/AAPT merge and lossless editing of blocked XML constructs remain gaps. Phase 8 stays locked until the exact user authorization `يلا الان إبدأ بالمرحلة الثامنة`.
