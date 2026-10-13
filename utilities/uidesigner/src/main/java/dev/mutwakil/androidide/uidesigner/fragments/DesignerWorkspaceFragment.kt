@@ -135,6 +135,7 @@ class DesignerWorkspaceFragment : BaseFragment() {
     val inflater = UiLayoutInflater()
     inflater.inflationEventListener = inflationHandler
 
+    hierarchyHandler.beginSourceLoad()
     val inflated =
         try {
           startParse(viewModel.file)
@@ -145,6 +146,7 @@ class DesignerWorkspaceFragment : BaseFragment() {
           viewModel.layoutHasError = true
           emptyList()
         } finally {
+          hierarchyHandler.endSourceLoad()
           inflationHandler.release()
           inflater.close()
         }
