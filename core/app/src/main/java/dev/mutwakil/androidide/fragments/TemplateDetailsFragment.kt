@@ -105,6 +105,7 @@ class TemplateDetailsFragment :
         return@setOnClickListener
       }
 
+      val defaultFailureMessage = getString(string.project_creation_failed)
       executeAsyncProvideError({
         TemplateRecipeExecutor().executeRecipe {
           template.recipe.execute(this) as? ProjectTemplateRecipeResult
@@ -116,11 +117,11 @@ class TemplateDetailsFragment :
           if (err != null) {
             log.error("Failed to create project", err)
             viewModel.pendingTemplateCreationError.value =
-              err.cause?.message ?: err.message ?: getString(string.project_creation_failed)
+              err.cause?.message ?: err.message ?: defaultFailureMessage
           } else {
             log.error("Template did not return a project result: {}", result)
             viewModel.pendingTemplateCreationError.value =
-              getString(string.project_creation_failed)
+              defaultFailureMessage
           }
           return@executeAsyncProvideError
         }
@@ -128,8 +129,14 @@ class TemplateDetailsFragment :
         // Keep the result in the activity-scoped ViewModel. MainActivity owns the
         // transition, recent-project entry, and launch so rotation cannot lose the
         // completed result or cause the fragment to launch the project twice.
+        if (!result.data.projectDir.isDirectory) {
+          log.error("Template returned a project directory that does not exist: {}", result.data.projectDir)
+          viewModel.pendingTemplateCreationError.value = defaultFailureMessage
+          return@executeAsyncProvideError
+        }
+
+        // MainActivity observes this value and owns the screen transition.
         viewModel.pendingCreatedProject.value = result
-        viewModel.setScreen(MainViewModel.SCREEN_MAIN)
       }
     }
 
