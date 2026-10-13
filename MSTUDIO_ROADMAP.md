@@ -1023,3 +1023,20 @@ The Phase 7 closeout gate above remains in force: do not claim full acceptance o
 - Fixed `MainViewModel.postTransition` so it waits for the transition state to become false before removing the observer and running the action. Commit: `a1e3aeeae6fc3f40fb8f844f94734ebc00cdb2b2`.
 - **Phase 8 is not complete.** Remaining acceptance work includes full template catalog/source inspection; name/package/namespace/manifest/resources/wrapper/AGP/SDK consistency; actual Tooling API sync/build and install/launch acceptance for every advertised template; invalid/duplicate/Unicode names, low storage, cancellation, partial cleanup and reopen-after-restart handling; and onboarding/recovery UX with strings, RTL, keyboard/insets and narrow/landscape checks.
 - Per the standing verification hold, no unit tests, Gradle builds, GitHub Actions, install, or device checks were run. The fix is source-reviewed only; do not describe the app as compiling or templates as runnable until verification is authorized and evidence is available.
+
+
+## Phase 8 execution update — 2026-10-13 (continued)
+
+The user's later explicit authorization to start Phase 8 supersedes the older lock wording in historical handoffs above.
+
+### Source changes completed in this pass
+
+- Fixed `MainViewModel.postTransition` so a pending action is not executed on LiveData's immediate `true` emission while a screen transition is active. Commit: `a1e3aeeae6fc3f40fb8f844f94734ebc00cdb2b2`.
+- Unified template completion through `MainViewModel.pendingCreatedProject` and `MainActivity`, rather than letting `TemplateDetailsFragment` open the editor independently. This avoids duplicate screen-state transitions and keeps project launch resilient to activity recreation. Commits: `1a4df200595b2a6da46ae2713195d638c04d62c2`, `42a251295421ff78f16499882bffb2459301c680`.
+- Routed template failures through activity-scoped pending-error state, reject a success result whose project directory is absent, and persist the generated project to recents before navigation so it remains discoverable after a process interruption. Commit: `af90256815939b64567c420fcfbf6b04e7aebede`.
+
+### Phase 8 status and remaining acceptance gate
+
+**Not complete.** The changes above fix lifecycle and recovery gaps but do not prove the templates are runnable. The remaining gate is to inspect all eight advertised recipes and their generated files; verify package/activity/namespace, manifest/resources, Gradle wrapper/settings, AGP and SDK alignment; execute each template through the real local Tooling API; sync/build/install/launch every generated APK; and cover duplicate/invalid/Unicode names, low storage, cancellation, partial cleanup, restart recovery, RTL, keyboard/insets, narrow and landscape layouts.
+
+The repository's active verification hold remains in force: no tests, Gradle builds, GitHub Actions, or device checks were run. Do not mark this phase accepted or claim compilation/runtime success without those results.
