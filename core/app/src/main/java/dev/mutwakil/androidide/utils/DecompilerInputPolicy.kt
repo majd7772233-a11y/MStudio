@@ -1,11 +1,13 @@
 package dev.mutwakil.androidide.utils
 
-/** Input limits for the embedded JVM bytecode decompiler; APK/DEX is not JVM bytecode. */
+/** Input and output limits for the embedded JVM bytecode decompiler; APK/DEX is not JVM bytecode. */
 object DecompilerInputPolicy {
     const val MAX_INPUT_BYTES: Long = 128L * 1024L * 1024L
     const val MAX_LISTED_FILES: Int = 100
     const val MAX_ARCHIVE_ENTRIES: Int = 5000
     const val MAX_EXPANDED_ARCHIVE_BYTES: Long = 256L * 1024L * 1024L
+    const val MAX_OUTPUT_FILES: Int = 10000
+    const val MAX_OUTPUT_BYTES: Long = 256L * 1024L * 1024L
 
     fun isSupportedFileName(name: String): Boolean {
         val extension = name.substringAfterLast('.', "").lowercase()
@@ -17,4 +19,18 @@ object DecompilerInputPolicy {
 
     fun isArchiveWithinLimits(entryCount: Int, uncompressedBytes: Long): Boolean =
         entryCount in 0..MAX_ARCHIVE_ENTRIES && uncompressedBytes in 0..MAX_EXPANDED_ARCHIVE_BYTES
+
+    /** Uses subtraction before addition so a hostile ZIP size cannot overflow a Long. */
+    fun canIncludeArchiveEntry(
+        entryCount: Int,
+        currentExpandedBytes: Long,
+        entryBytes: Long
+    ): Boolean =
+        entryCount in 1..MAX_ARCHIVE_ENTRIES &&
+            currentExpandedBytes in 0..MAX_EXPANDED_ARCHIVE_BYTES &&
+            entryBytes >= 0 &&
+            entryBytes <= MAX_EXPANDED_ARCHIVE_BYTES - currentExpandedBytes
+
+    fun isWithinOutputLimits(fileCount: Int, totalBytes: Long): Boolean =
+        fileCount in 0..MAX_OUTPUT_FILES && totalBytes in 0..MAX_OUTPUT_BYTES
 }
