@@ -155,11 +155,16 @@ class DesignerWorkspaceFragment : BaseFragment() {
       viewModel.errText = getString(R.string.msg_empty_ui_layout)
     }
 
-    // FIXED: Restore M3 components from workspace state AFTER inflation
+    // Restore session-only M3 additions as model restoration, not as new user edits.
     val workspaceState = viewModel.getWorkspaceState()
     if (workspaceState?.m3Components?.isNotEmpty() == true) {
       log.debug("Restoring ${workspaceState.m3Components.size} M3 components from workspace state")
-      restoreM3ComponentsFromState(workspaceState.m3Components)
+      isInflating = true
+      try {
+        restoreM3ComponentsFromState(workspaceState.m3Components)
+      } finally {
+        isInflating = false
+      }
     }
 
     // FIXED: Ensure M3 components are properly styled after inflation
