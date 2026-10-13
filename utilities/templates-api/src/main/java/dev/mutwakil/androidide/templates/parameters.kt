@@ -177,7 +177,7 @@ abstract class Parameter<T>(@StringRes val name: Int,
    * @see afterCreateView
    */
   fun doAfterCreateView(action: (Parameter<T>) -> Unit) {
-    this.actionBeforeCreateView = action
+    this.actionAfterCreateView = action
   }
 
   /**
