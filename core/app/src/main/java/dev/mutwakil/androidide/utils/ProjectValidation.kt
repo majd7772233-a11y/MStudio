@@ -46,17 +46,54 @@ fun isValidProjectDirectory(selectedDir: File): Boolean {
 }
 
 /**
- * Determines if the directory is either a valid Gradle project itself or a container that includes
- * one or more valid projects. Containers are not recursively treated as projects unless their own
- * Gradle boundary is present.
+ * Finds project roots inside a selected directory. A directory that is itself a project is treated
+ * as one root and is not traversed, so nested source folders cannot be mistaken for separate projects.
+ * Parent containers are searched to a bounded depth; hidden, generated, VCS and dependency folders
+ * are skipped, and canonical paths prevent symlink loops or duplicate roots.
  */
-internal fun isValidProjectOrContainerDirectory(selectedDir: File): Boolean {
-    if (!selectedDir.isProjectCandidateDir()) return false
-    if (isValidProjectDirectory(selectedDir)) return true
+internal fun findValidProjectsInContainer(
+    selectedDir: File,
+    maxDepth: Int = 4,
+): List<File> {
+    if (!selectedDir.isProjectCandidateDir() || maxDepth < 0) return emptyList()
+    if (isValidProjectDirectory(selectedDir)) return listOf(selectedDir)
 
-    val subDirs = selectedDir.listFiles()?.filter { it.isProjectCandidateDir() } ?: return false
-    return subDirs.any { sub -> isValidProjectDirectory(sub) }
+    val found = linkedMapOf<String, File>()
+    val visited = hashSetOf<String>()
+    val ignoredNames = setOf("build", ".gradle", ".git", "node_modules", ".idea", ".kotlin")
+
+    fun visit(directory: File, depth: Int) {
+        if (depth > maxDepth || !directory.isProjectCandidateDir()) return
+        val canonicalPath = runCatching { directory.canonicalPath }.getOrNull() ?: return
+        if (!visited.add(canonicalPath)) return
+
+        val children = directory.listFiles()
+            ?.filter { child ->
+                child.isProjectCandidateDir() && child.name !in ignoredNames
+            }
+            ?.sortedBy { it.name }
+            .orEmpty()
+
+        for (child in children) {
+            if (isValidProjectDirectory(child)) {
+                val path = runCatching { child.canonicalPath }.getOrNull() ?: continue
+                found.putIfAbsent(path, child)
+            } else {
+                visit(child, depth + 1)
+            }
+        }
+    }
+
+    visit(selectedDir, 0)
+    return found.values.toList()
 }
+
+/**
+ * Determines whether the selected directory is a valid Gradle project or a parent container that
+ * contains at least one project within the bounded search depth.
+ */
+internal fun isValidProjectOrContainerDirectory(selectedDir: File): Boolean =
+    findValidProjectsInContainer(selectedDir).isNotEmpty()
 
 /** Checks whether the directory contains a specific plugin project structure. */
 internal fun isPluginProject(dir: File): Boolean {
