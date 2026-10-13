@@ -80,9 +80,14 @@ class DecompilerActivity : AppCompatActivity() {
                     }
                     val input = File(cacheDir, "decompiler-" + System.nanoTime() + "-" + safeName(name))
                     copyBounded(uri, input)
-                    validateArchive(input)
-                    val output = File(filesDir, "decompiled/" + System.currentTimeMillis()).apply {
-                        if (!mkdirs() && !isDirectory) throw IOException("Cannot create output directory")
+                    val output = try {
+                        validateArchive(input)
+                        File(filesDir, "decompiled/" + System.currentTimeMillis()).apply {
+                            if (!mkdirs() && !isDirectory) throw IOException("Cannot create output directory")
+                        }
+                    } catch (error: Exception) {
+                        input.delete()
+                        throw error
                     }
                     try {
                         runDecompiler(input, output)
