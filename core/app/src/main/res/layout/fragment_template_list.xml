@@ -50,6 +50,22 @@
     tools:listitem="@layout/layout_template_list_item"
     tools:spanCount="3" />
 
+  <com.google.android.material.textview.MaterialTextView
+    android:id="@+id/empty_state"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="24dp"
+    android:layout_marginEnd="24dp"
+    android:gravity="center"
+    android:text="@string/msg_no_templates_available"
+    android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+    android:textColor="?attr/colorOnSurfaceVariant"
+    android:visibility="gone"
+    app:layout_constraintBottom_toTopOf="@id/exit_button"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/title" />
+
   <com.google.android.material.button.MaterialButton
     android:id="@+id/exit_button"
     style="@style/Widget.Material3.Button.OutlinedButton"
