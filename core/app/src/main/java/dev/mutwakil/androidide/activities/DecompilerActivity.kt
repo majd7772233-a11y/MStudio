@@ -84,6 +84,9 @@ class DecompilerActivity : AppCompatActivity() {
                     }
                     try {
                         runDecompiler(input, output)
+                    } catch (error: Exception) {
+                        output.deleteRecursively()
+                        throw error
                     } finally {
                         input.delete()
                     }
@@ -135,6 +138,8 @@ class DecompilerActivity : AppCompatActivity() {
         }
         val process = ProcessBuilder(
             java.absolutePath,
+            "-Xmx384m",
+            "-XX:ActiveProcessorCount=2",
             "-jar",
             runtimeJar.absolutePath,
             input.absolutePath,
@@ -179,21 +184,25 @@ class DecompilerActivity : AppCompatActivity() {
 
     private fun copyBounded(uri: Uri, destination: File) {
         val input = contentResolver.openInputStream(uri) ?: throw IOException("Cannot open selected file")
-        input.use { source ->
-            destination.outputStream().use { target ->
-                val buffer = ByteArray(8192)
-                var total = 0L
-                while (true) {
-                    val count = source.read(buffer)
-                    if (count < 0) break
-                    total += count
-                    if (!DecompilerInputPolicy.isWithinSizeLimit(total)) {
-                        destination.delete()
-                        throw IOException(getString(ResourcesR.string.decompiler_input_too_large))
+        try {
+            input.use { source ->
+                destination.outputStream().use { target ->
+                    val buffer = ByteArray(8192)
+                    var total = 0L
+                    while (true) {
+                        val count = source.read(buffer)
+                        if (count < 0) break
+                        total += count
+                        if (!DecompilerInputPolicy.isWithinSizeLimit(total)) {
+                            throw IOException(getString(ResourcesR.string.decompiler_input_too_large))
+                        }
+                        target.write(buffer, 0, count)
                     }
-                    target.write(buffer, 0, count)
                 }
             }
+        } catch (error: Exception) {
+            destination.delete()
+            throw error
         }
     }
 
