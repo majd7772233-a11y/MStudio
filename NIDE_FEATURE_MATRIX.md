@@ -159,3 +159,8 @@ Fixes committed on `dev`:
 - `bdfc189` and `2907ef5`: trigger Phase 10 verification and CodeQL on relevant `dev` source pushes as well as manual dispatch.
 
 The initial CodeQL failure was a build/configuration failure, not a completed clean security analysis. The failed test run produced no test reports because compilation stopped before tests could execute. The fixes are not considered verified until the new Actions runs finish and their logs/artifacts are reviewed.
+
+
+## Phase 10 CI failure follow-up (2026-10-14)
+
+Three Kotlin compile blockers from GitHub Actions were fixed on `dev`: protobuf SyncIssue construction now uses the generated Java builder in `RootModelBuilder.kt`; the missing `PROJECT_NAME` enum import was added in template parameters; and both invalid `module.delegate.projectDir` references now use `module.projectDir`. Static safety/manifest checks passed, but unit tests did not run and APK/CodeQL jobs were blocked by compilation. Acceptance remains pending until fresh verification and CodeQL runs pass on the final corrected commit.
