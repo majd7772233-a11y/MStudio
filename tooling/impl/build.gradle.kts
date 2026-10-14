@@ -39,6 +39,8 @@ tasks.register("deleteExistingJarFiles") {
 }
 
 tasks.register("copyJar") {
+  // The app's asset task consumes this output, so the shaded JAR must exist first.
+  dependsOn("shadowJar")
   doLast {
     val libsDir = project.layout.buildDirectory.dir("libs")
 
@@ -53,11 +55,6 @@ tasks.register("copyJar") {
 
 project.tasks.getByName("jar") {
   dependsOn("deleteExistingJarFiles")
-  finalizedBy("shadowJar")
-}
-
-project.tasks.getByName("shadowJar") {
-  finalizedBy("copyJar")
 }
 
 dependencies {
