@@ -1254,3 +1254,15 @@ The signed Release workflow has since completed successfully: run `38589235744` 
 - Add/update regression coverage where practical, run the complete Phase 10 verification workflow and signed Release workflow, inspect results/artifacts, and record device-only checks as pending unless a real device test is performed.
 
 Acceptance: both permission Settings flows use the actual installed app ID; no blank/invalid package-target settings launch remains in source; Arabic is the first-launch app locale while an explicit user language choice persists; JVM/static/debug build and signed Release verification pass. Device acceptance still requires installing and testing the produced APK.
+
+
+## Onboarding permissions and Arabic-default implementation — 2026-10-14
+
+- Root cause found in `PermissionsFragment.kt`: package-scoped Settings intents used the inherited source namespace instead of the installed application ID. MStudio's current application ID is `com.magd.mstudio`, while the source namespace remains `dev.mutwakil.androidide`. Settings can therefore open the wrong app-permission page.
+- Updated both package-scoped permission flows to use `requireContext().packageName`, added a fallback to general all-files settings / app details, and show a localized error if Settings cannot be opened.
+- Arabic is now selected once on first launch only when no app language has previously been selected. A persisted initialization flag prevents later launches from overriding a user's language or System Default selection.
+- Translated the onboarding permission labels and the new Settings fallback message into Arabic.
+- Added CI static invariants for runtime package targeting, fallback navigation, Arabic first-launch default, preserving later language choice, and the required Arabic permission strings.
+- Commits: `550d855985528128ad0f7fba779f5a3425968037`, `97e0d68558746a56b46ffb23f1b9f596a26ee96a`, `6a50780245318915d3680d6e1d59be6fb4c82c8e`, `588558241e49c25a1a2431337ede5dd4528bde0e`, `7dc457cfc02e41115e83525e10d6b4de3fc88821`, `2d37c54eb84000fe93a7d58128027c096dd519b4`, `f55d6d892fa1deeca7b818256606cb3e844722e4`.
+- Verification run `38604431592` tested an intermediate commit before the new string resource had been committed, so its app compile failed on the missing `permission_settings_unavailable` resource. The final source commit `f55d6d892fa1deeca7b818256606cb3e844722e4` includes that resource; its verification run is `38604647746`. The static safety job has passed, while the debug APK build and JVM/Tooling API job were still running at the time of this note. Do not claim build/tests passed until that run completes.
+- Signed Release run `38589235744` succeeded on the previous source commit, before these fixes. The signed Release workflow remains manual-only; no new signed Release artifact has been built from the fix commit in this session. Device installation and actual Settings navigation still require on-device verification.
