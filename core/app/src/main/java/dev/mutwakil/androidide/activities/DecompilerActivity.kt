@@ -300,7 +300,7 @@ class DecompilerActivity : AppCompatActivity() {
         }
         val text = TextView(this).apply {
             setPadding(24, 16, 24, 16)
-            textIsSelectable = true
+            setTextIsSelectable(true)
             text = content
         }
         val scroll = android.widget.ScrollView(this).apply { addView(text) }
