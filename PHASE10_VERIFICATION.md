@@ -1,6 +1,6 @@
 # Phase 10 — Verification Runbook
 
-This runbook is separate from implementation status. **Defining a workflow is not evidence that a build, test, scan, or device check passed.** The workflows below are manual-only and have not been dispatched.
+This runbook is separate from implementation status. **Defining a workflow is not evidence that a build, test, scan, or device check passed.** Historical manual-only wording below describes the initial preparation state; see the dated CI updates at the end for the current results.
 
 ## 1. Automated verification
 
@@ -48,7 +48,7 @@ Record the exact device model, Android API, ABI, app version, commit SHA and res
 
 ## Current status
 
-Source-level hardening and workflow preparation are committed. No tests, builds, Actions, CodeQL scans, APK installs, or device checks have been run. Phase 9 runtime acceptance and Phase 10 acceptance remain **pending**.
+Current state before the Phase 12 source fix: run 38576235891 failed because CloudBuildActivity.kt did not compile; static safety checks passed, but tests and debug APK assembly were blocked. CodeQL run 38576235807 also failed at the same compilation error. Phase 9 runtime acceptance, Phase 10 acceptance, and Phase 11 cloud-build runtime acceptance remain **pending**. See the latest dated section below.
 
 
 ## Failure analysis and corrective changes (2026-10-14)
@@ -72,3 +72,14 @@ The paired CodeQL run built the debug app and Tooling API successfully, but its 
 ## Follow-up: reflective compiler access (2026-10-14)
 
 The first reflective fix removed the Kotlin compile-time errors, and the test suite then ran 42 tests, but the Fernflower integration test failed with `IllegalAccessException`: invoking the method through the JDK's concrete compiler implementation class is blocked by module access. The invocation now resolves `run(InputStream, OutputStream, OutputStream, String[])` through the public `javax.tools.JavaCompiler` interface instead. The static checks and debug APK build passed in that run; the test failure is not yet considered fixed until the next CI run passes.
+
+
+## Phase 12 pre-build audit — 2026-10-14
+
+Latest inspected head before the corrective commit: `23a0175c250a64e3d7472071bf5eb56bb9ba85ca`.
+
+- Verification run: https://github.com/majd7772233-a11y/MStudio/actions/runs/38576235891
+- CodeQL run: https://github.com/majd7772233-a11y/MStudio/actions/runs/38576235807
+- Root cause in both runs: `CloudBuildActivity.kt` used the nonexistent Kotlin synthetic property `textIsSelectable` (three compile errors) and declared a button property named `approveWorkflow`, colliding with the method of the same name and making the button reference ambiguous.
+- Corrected the TextView property to `isTextSelectable` and renamed the field to `approveWorkflowButton`. A fresh run must confirm this correction; source edits alone do not count as passing tests.
+- Added the manual-only Phase 12 Release workflow and static invariants for its four signing secrets, read-only permissions, signature verification, and SHA-256 output. Release signing itself has not yet run.
