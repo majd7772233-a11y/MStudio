@@ -825,7 +825,7 @@
     <string name="cloud_build_title">Cloud Build</string>
     <string name="cloud_build_subtitle">Build an Android project from GitHub. Local builds remain available without connecting GitHub.</string>
     <string name="cloud_build_token_hint">Fine-grained GitHub token (encrypted on this device)</string>
-    <string name="cloud_build_token_help">Use a repository-scoped token: Metadata read, Contents read/write, Workflows write, Actions read/write. Never pass this token to Gradle scripts. GitHub-hosted runners execute the repository's build scripts.</string>
+    <string name="cloud_build_token_help">Use a repository-scoped token: Metadata read, Contents read/write, Workflows write, Actions read/write. Never pass this token to Gradle scripts. GitHub-hosted runners execute the repository\\'s build scripts.</string>
     <string name="cloud_build_repository_hint">Repository (owner/name)</string>
     <string name="cloud_build_branch_hint">Source branch, e.g. main</string>
     <string name="cloud_build_task_hint">Gradle task, e.g. :app:assembleDebug</string>
