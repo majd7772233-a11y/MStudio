@@ -83,3 +83,8 @@ Latest inspected head before the corrective commit: `23a0175c250a64e3d7472071bf5
 - Root cause in both runs: `CloudBuildActivity.kt` used the nonexistent Kotlin synthetic property `textIsSelectable` (three compile errors) and declared a button property named `approveWorkflow`, colliding with the method of the same name and making the button reference ambiguous.
 - Corrected the TextView property to `isTextSelectable` and renamed the field to `approveWorkflowButton`. A fresh run must confirm this correction; source edits alone do not count as passing tests.
 - Added the manual-only Phase 12 Release workflow and static invariants for its four signing secrets, read-only permissions, signature verification, and SHA-256 output. Release signing itself has not yet run.
+
+
+### Phase 12 static checker follow-up — 2026-10-14
+
+Verification run `38582488392` had its static job fail because the new check looked for literal `apksigner verify`, but the workflow invokes `"$APKSIGNER" verify`. The checker was corrected to check the variable and the actual verification arguments in commit `53e7781dd9f5300873296e4d8d6cd37ef9573849`. Fresh run `38582699324` is queued; the earlier static-job failure is not an APK signature result.
