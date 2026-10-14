@@ -1239,3 +1239,18 @@ The first run of the new static Release checks failed because the checker search
 - The four requested signing secrets are wired to the inherited plugin contract; the manual workflow validates the Base64 JKS and alias before Gradle and verifies signatures/checksums after assembly. No secret values were accessed.
 - **Still pending:** dispatch `.github/workflows/phase12-release.yml` on `dev`, confirm successful keystore preflight and signed Release assembly, download/verify `SHA256SUMS.txt`, and install/launch the APK on-device. Do not mark Phase 12 complete before this evidence exists.
 - Phase 9 decompiler, Phase 10 security/performance/device matrix, Phase 11 Cloud Build runtime acceptance, and other earlier-phase device gates remain explicitly open; the green verification gate does not waive them.
+
+
+## Post-Release device-blocker follow-up — 2026-10-14
+
+The signed Release workflow has since completed successfully: run `38589235744` on `dev` (commit `914762c968e89342da399118ba04983846f18427`). This confirms the current signed Release build and signature/checksum pipeline, but does not prove device onboarding works.
+
+### User-reported onboarding blocker and localization requirement
+
+- Reproduce by source inspection the permissions screen's settings intents and the application-ID change before attempting another build.
+- Correct all package-scoped Settings intents to use the installed application's runtime `packageName`, not the inherited AndroidIDE package constant. Add safe fallback navigation if a Settings action is unavailable and keep permission state refreshed when returning.
+- Make Arabic the first-launch default without overwriting a language explicitly selected by the user later; keep the existing language preference functional.
+- Translate the permission/onboarding labels currently falling back to English in `core/resources/src/main/res/values-ar-rSA/strings.xml`.
+- Add/update regression coverage where practical, run the complete Phase 10 verification workflow and signed Release workflow, inspect results/artifacts, and record device-only checks as pending unless a real device test is performed.
+
+Acceptance: both permission Settings flows use the actual installed app ID; no blank/invalid package-target settings launch remains in source; Arabic is the first-launch app locale while an explicit user language choice persists; JVM/static/debug build and signed Release verification pass. Device acceptance still requires installing and testing the produced APK.
