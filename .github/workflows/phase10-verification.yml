@@ -7,6 +7,7 @@ on:
     branches: [ "dev" ]
     paths:
       - ".github/workflows/phase10-verification.yml"
+      - ".github/workflows/phase12-release.yml"
       - "settings.gradle.kts"
       - "build.gradle.kts"
       - "gradle/**"
