@@ -79,7 +79,7 @@ class VectorDrawableRenderer {
       if (!isVectorDrawable(vectorFile)) return false
       log.debug("Found project vector drawable file: {}", vectorFile.absolutePath)
       if (tryVectorDrawableCompat(view, vectorFile, context, isBackground)) return true
-      if (tryCustomPathRendering(view, vectorFile, context, isBackground)) return true
+      if (tryCustomPathRendering(view, vectorFile, context, layoutFile, isBackground)) return true
       return false
     }
 
@@ -156,6 +156,7 @@ $modified"""
       view: View,
       vectorFile: File,
       context: Context,
+      layoutFile: File?,
       isBackground: Boolean,
   ): Boolean {
     try {
@@ -361,7 +362,7 @@ $modified"""
       // Draw root-level paths
       for (pathData in vectorData.paths) {
         if (pathData.pathString.isNotEmpty()) {
-          drawPath(canvas, pathData)
+          drawPath(canvas, pathData, context, layoutFile)
         }
       }
 
@@ -383,7 +384,7 @@ $modified"""
         // Draw paths in the group
         for (pathData in group.paths) {
           if (pathData.pathString.isNotEmpty()) {
-            drawPath(canvas, pathData)
+            drawPath(canvas, pathData, context, layoutFile)
           }
         }
 
@@ -400,7 +401,12 @@ $modified"""
   }
 
   /** Enhanced path drawing with better paint handling */
-  private fun drawPath(canvas: Canvas, pathData: PathData) {
+  private fun drawPath(
+      canvas: Canvas,
+      pathData: PathData,
+      context: Context,
+      layoutFile: File?,
+  ) {
     try {
       val path = PathParser.createPathFromPathData(pathData.pathString)
       if (path == null) {

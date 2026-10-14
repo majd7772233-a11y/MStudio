@@ -406,9 +406,14 @@ class BackgroundPreviewRenderer {
   }
 
   /** Load shape drawable by parsing XML */
-  private fun loadShapeDrawable(view: View, xmlFile: File, context: Context): Boolean {
+  private fun loadShapeDrawable(
+      view: View,
+      xmlFile: File,
+      context: Context,
+      layoutFile: File?,
+  ): Boolean {
     try {
-      val drawable = parseShapeDrawable(xmlFile)
+      val drawable = parseShapeDrawable(xmlFile, context, layoutFile)
       if (drawable != null) {
         view.background = drawable
         log.debug("Successfully loaded shape drawable: {}", xmlFile.absolutePath)

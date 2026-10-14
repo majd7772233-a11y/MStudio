@@ -110,8 +110,8 @@ class CompositeBuildModelSupportTest {
 
     assertThat(included.androidParams.variantSelections)
       .containsExactly(
-        ":" to "includedRootRelease",
-        ":app" to "includedAppDebug",
+        ":", "includedRootRelease",
+        ":app", "includedAppDebug",
       )
     assertThat(params.androidParams.variantSelections[":app"]).isEqualTo("rootDebug")
   }
