@@ -1176,3 +1176,12 @@ The paired CodeQL run built the debug app and Tooling API successfully, but its 
 ## Follow-up: reflective compiler access (2026-10-14)
 
 The first reflective fix removed the Kotlin compile-time errors, and the test suite then ran 42 tests, but the Fernflower integration test failed with `IllegalAccessException`: invoking the method through the JDK's concrete compiler implementation class is blocked by module access. The invocation now resolves `run(InputStream, OutputStream, OutputStream, String[])` through the public `javax.tools.JavaCompiler` interface instead. The static checks and debug APK build passed in that run; the test failure is not yet considered fixed until the next CI run passes.
+
+
+## Phase 11 implementation update — 2026-10-14
+
+- Phase 10 verification passed on `b55feb889f4b7701446a216a463744d76d32d7e0`: `https://github.com/majd7772233-a11y/MStudio/actions/runs/38558846341`. The debug APK build and verification steps succeeded.
+- The paired CodeQL run built the app and Tooling API but its runner received a shutdown signal during result upload: `https://github.com/majd7772233-a11y/MStudio/actions/runs/38558846521`. Treat this as an interrupted scan, not a source build failure or clean security result.
+- Added optional Cloud Build UI and navigation, Android Keystore AES-GCM token storage, GitHub REST repository/branch/tree inspection, conservative Gradle assemble-task detection, a manual-only workflow template, explicit workflow preview/approval, no-overwrite behavior, dispatch, run/job/step status, log archive download, artifact download, safe APK-only extraction and the existing APK installer handoff.
+- The generated build job has `contents: read`, disables checkout credential persistence, receives no personal token or release secrets, times out after 45 minutes and retains APK artifacts for seven days. Local build remains independent of GitHub.
+- **Acceptance remains pending:** current CI must compile and pass the new tests. Then validate token permissions, public/private repositories, workflow commit/dispatch, status/log/artifact APIs, APK installation, token revocation, rate limits and interrupted network operations on-device. Do not claim runtime acceptance from source alone.

@@ -176,3 +176,7 @@ The paired CodeQL run built the debug app and Tooling API successfully, but its 
 ## Follow-up: reflective compiler access (2026-10-14)
 
 The first reflective fix removed the Kotlin compile-time errors, and the test suite then ran 42 tests, but the Fernflower integration test failed with `IllegalAccessException`: invoking the method through the JDK's concrete compiler implementation class is blocked by module access. The invocation now resolves `run(InputStream, OutputStream, OutputStream, String[])` through the public `javax.tools.JavaCompiler` interface instead. The static checks and debug APK build passed in that run; the test failure is not yet considered fixed until the next CI run passes.
+
+
+## Phase 11 — optional GitHub Cloud Build (2026-10-14)
+Source implementation added in `core/app/.../cloudbuild` and `CloudBuildActivity`: Android Keystore AES-GCM token storage; GitHub REST repository/branch/tree inspection; conservative Gradle task selection; reviewed manual-only workflow; explicit no-overwrite approval; dispatch; run/job/step status; downloadable logs and artifacts; APK-only safe extraction and installer handoff. The build job uses read-only contents permissions, checkout credential persistence is disabled, timeout is bounded, and artifacts expire after seven days. Local build remains independent. CI and real public/private repository/device acceptance remain pending.

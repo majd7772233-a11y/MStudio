@@ -1,6 +1,6 @@
 # MStudio Cloud Build — Deferred Feature Design
 
-> **Status: DEFERRED.** Local on-device Gradle build is the current priority. This file records the optional future capability only; it does not implement GitHub login, workflow generation or orchestration.
+> **Status: IMPLEMENTED IN SOURCE; ACCEPTANCE PENDING (2026-10-14).** An optional token-based GitHub Cloud Build path is now present. It is not runtime-accepted until CI and real repository/device checks pass.
 
 ## 1. Goal
 
@@ -93,3 +93,17 @@ Handle network drops, queue delays, rate limits, token expiry/revocation, cancel
 - [ ] Public/private repository flows and APK installation have test evidence.
 
 **Cloud build must not delay local Gradle execution, tool setup, project import or local MVP.**
+
+
+## Implementation delta — 2026-10-14
+
+Implemented source path:
+- Fine-grained repository-scoped token is entered by the user and encrypted using Android Keystore AES-GCM; disconnect clears the ciphertext and key.
+- Repository/branch metadata and recursive tree are inspected before proposing a workflow. Unsupported/truncated layouts fail without writing.
+- Gradle task is constrained to assembleDebug/assembleRelease forms; task and JDK are included in the preview.
+- Generated workflow is manual-only, has `contents: read`, no personal token/release secrets, checkout credential persistence disabled, 45-minute timeout and seven-day artifact retention.
+- Existing workflow is never overwritten. The user explicitly approves a new workflow file on the repository default branch.
+- Dispatch targets the selected source ref. The app polls run/job/step state, downloads log archives, lists artifacts for that exact run, downloads the selected artifact, extracts APK files only with path/size limits and hands the APK to the existing installer.
+- Unit tests cover project/task detection and workflow safety constraints.
+
+Remaining acceptance is evidence-gated: run CI, then verify token permissions and private/public repository behavior, workflow creation/dispatch, logs/artifact download, APK installation, token revocation/expiry, rate limits and interrupted network operations on a real device. Do not mark Phase 11 accepted from source presence alone.

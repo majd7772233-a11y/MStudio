@@ -813,3 +813,9 @@ The paired CodeQL run built the debug app and Tooling API successfully, but its 
 ## Follow-up: reflective compiler access (2026-10-14)
 
 The first reflective fix removed the Kotlin compile-time errors, and the test suite then ran 42 tests, but the Fernflower integration test failed with `IllegalAccessException`: invoking the method through the JDK's concrete compiler implementation class is blocked by module access. The invocation now resolves `run(InputStream, OutputStream, OutputStream, String[])` through the public `javax.tools.JavaCompiler` interface instead. The static checks and debug APK build passed in that run; the test failure is not yet considered fixed until the next CI run passes.
+
+
+## MStudio Phase 11 cloud-build source update — 2026-10-14
+Phase 10 verification run 38558846341 succeeded, including debug APK build. CodeQL run 38558846521 built app and Tooling API but the runner shut down during result upload; treat it as interrupted, not a clean scan.
+
+Phase 11 source now includes optional CloudBuildActivity/navigation, Android Keystore AES-GCM token storage, GitHub REST repository/branch/tree inspection, conservative task detection, reviewed manual-only workflow template, explicit approval/no-overwrite behavior, dispatch, run/job/step status, downloadable logs and artifacts, safe APK extraction and installer handoff. The workflow job uses read-only contents permissions, does not persist checkout credentials or receive the personal token, has a bounded timeout and seven-day artifact retention. Local build remains available without GitHub. CI and real repository/device acceptance are pending.
