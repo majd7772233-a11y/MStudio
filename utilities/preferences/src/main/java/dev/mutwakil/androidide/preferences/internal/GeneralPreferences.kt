@@ -30,6 +30,7 @@ object GeneralPreferences {
   const val UI_MODE = "idepref_general_uiMode"
   const val SELECTED_THEME = "idpref_general_theme"
   const val SELECTED_LOCALE = "idpref_general_locale"
+  const val DEFAULT_LOCALE_INITIALIZED = "idpref_general_defaultLocaleInitialized"
   const val OPEN_PROJECTS = "idepref_general_autoOpenProjects"
   const val CONFIRM_PROJECT_OPEN = "idepref_general_confirmProjectOpen"
   const val TERMINAL_USE_SYSTEM_SHELL = "idepref_general_terminalShell"
@@ -62,6 +63,16 @@ object GeneralPreferences {
     }
     set(value) {
       prefManager.putString(SELECTED_LOCALE, value)
+    }
+
+  /**
+   * Tracks whether the first-launch locale default has been applied. This prevents choosing
+   * Arabic on every launch after the user later selects another language or System Default.
+   */
+  var defaultLocaleInitialized: Boolean
+    get() = prefManager.getBoolean(DEFAULT_LOCALE_INITIALIZED, false)
+    set(value) {
+      prefManager.putBoolean(DEFAULT_LOCALE_INITIALIZED, value)
     }
 
   var isFirstBuild: Boolean
