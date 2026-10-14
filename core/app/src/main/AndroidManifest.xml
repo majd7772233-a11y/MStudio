@@ -83,7 +83,7 @@
       android:windowSoftInputMode="adjustResize" />
 
     <provider
-      android:authorities="dev.mutwakil.androidide.documents"
+      android:authorities="${applicationId}.documents"
       android:exported="true"
       android:grantUriPermissions="true"
       android:name=".provider.IDEDocumentsProvider"
