@@ -18,6 +18,8 @@
 package dev.mutwakil.androidide.activities
 
 import android.content.Intent
+import dev.mutwakil.androidide.R
+import dev.mutwakil.androidide.activities.CloudBuildActivity
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.View
@@ -104,6 +106,13 @@ class MainActivity : EdgeToEdgeIDEActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding.mainToolbar.inflateMenu(R.menu.menu_main)
+        binding.mainToolbar.setOnMenuItemClickListener { item ->
+            if (item.itemId == R.id.menu_cloud_build) {
+                startActivity(Intent(this, CloudBuildActivity::class.java))
+                true
+            } else false
+        }
         ToolsManager.addInitResultListener(runtimeSetupResultListener)
         val hasPendingCreatedProject =
             viewModel.pendingCreatedProject.value != null || viewModel.creatingProject.value == true

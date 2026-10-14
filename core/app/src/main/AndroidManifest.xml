@@ -77,6 +77,7 @@
     <activity android:name=".activities.AboutActivity" />
     <activity android:name=".activities.ContributorsActivity" />
     <activity android:name=".activities.DecompilerActivity" android:exported="false" />
+    <activity android:name=".activities.CloudBuildActivity" android:exported="false" />
     <activity
       android:name=".activities.TerminalActivity"
       android:windowSoftInputMode="adjustResize" />
