@@ -171,3 +171,8 @@ Three Kotlin compile blockers from GitHub Actions were fixed on `dev`: protobuf 
 The most recent verification run reached Kotlin test compilation but failed in `FernflowerIntegrationTest.kt`: direct imports of `javax.tools.ToolProvider` and calls through `JavaCompiler` are not visible to the Android plugin's test compile classpath. The integration test now resolves `javax.tools.ToolProvider` reflectively and invokes the host JDK compiler without compile-time references to the `java.compiler` API. The debug APK build and static safety/manifest job passed on the same commit; the unit-test job did not reach test execution.
 
 The paired CodeQL run built the debug app and Tooling API successfully, but its analysis job ended after the runner received a shutdown signal during result upload. This is recorded as an interrupted scan, not a security finding or a successful scan. Both workflows now avoid canceling an in-progress run when another commit is pushed. Fresh verification and CodeQL runs on the corrective commit must be reviewed before acceptance can be marked complete.
+
+
+## Follow-up: reflective compiler access (2026-10-14)
+
+The first reflective fix removed the Kotlin compile-time errors, and the test suite then ran 42 tests, but the Fernflower integration test failed with `IllegalAccessException`: invoking the method through the JDK's concrete compiler implementation class is blocked by module access. The invocation now resolves `run(InputStream, OutputStream, OutputStream, String[])` through the public `javax.tools.JavaCompiler` interface instead. The static checks and debug APK build passed in that run; the test failure is not yet considered fixed until the next CI run passes.

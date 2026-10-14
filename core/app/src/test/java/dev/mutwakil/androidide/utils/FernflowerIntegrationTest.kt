@@ -25,7 +25,7 @@ class FernflowerIntegrationTest {
                 "public class Sample { public int add(int left, int right) { return left + right; } }"
             )
             val classes = File(root, "classes").apply { mkdirs() }
-            val run = compiler!!.javaClass.getMethod(
+            val run = Class.forName("javax.tools.JavaCompiler").getMethod(
                 "run",
                 InputStream::class.java,
                 OutputStream::class.java,
