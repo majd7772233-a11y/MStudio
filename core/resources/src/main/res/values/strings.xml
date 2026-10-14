@@ -859,4 +859,5 @@
     <string name="cloud_build_artifact_select">Choose an artifact</string>
     <string name="cloud_build_apk_select">Choose an APK to install</string>
     <string name="cloud_build_not_ready">Inspect the repository and add the approved workflow before starting a build.</string>
+    <string name="permission_settings_unavailable">Could not open permission settings. Open MStudio app info in device settings and enable the required permission.</string>
 </resources>
