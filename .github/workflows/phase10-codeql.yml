@@ -3,6 +3,17 @@ name: Phase 10 — CodeQL security analysis
 # Intentionally manual so source verification can be scheduled after Phase 10 review.
 on:
   workflow_dispatch: {}
+  push:
+    branches: [ "dev" ]
+    paths:
+      - ".github/workflows/phase10-codeql.yml"
+      - "settings.gradle.kts"
+      - "build.gradle.kts"
+      - "gradle/**"
+      - "composite-builds/**"
+      - "core/**"
+      - "subprojects/**"
+      - "tooling/**"
 
 permissions:
   contents: read
