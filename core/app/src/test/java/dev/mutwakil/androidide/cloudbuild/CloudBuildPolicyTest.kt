@@ -41,7 +41,7 @@ class CloudBuildPolicyTest {
         assertTrue(yaml.contains("contents: read"))
         assertTrue(yaml.contains("persist-credentials: false"))
         assertTrue(yaml.contains("timeout-minutes: 45"))
-        assertTrue(yaml.contains("actions/upload-artifact@v4"))
+        assertTrue(yaml.contains("actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02"))
         assertFalse(yaml.contains("GH_TOKEN"))
         assertFalse(yaml.contains("secrets."))
     }
