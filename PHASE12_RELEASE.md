@@ -51,3 +51,8 @@ No secret values are written to the repository or intentionally printed in logs.
 - [ ] SHA-256 checksums are uploaded with the APKs.
 - [ ] The signed APK installs and launches on the target device.
 - [ ] Phase 9 decompiler, Phase 10 security/performance, and Phase 11 cloud-build runtime acceptance items are separately recorded; do not infer them from Release build success.
+
+
+## Latest pre-release compile correction
+
+The first compile fix used `isTextSelectable = true`, which CI rejected as a read-only property. The three sites now call `setTextIsSelectable(true)` explicitly in commit `408158241f19c40093a1ce8db4639d9a7a1a5fed`. The verification and CodeQL workflows have been queued on that commit. Do not dispatch the signed Release workflow until the verification gate passes; the Release workflow itself remains manual-only.
