@@ -1,0 +1,126 @@
+name: Phase 12 — signed Release build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mstudio-phase12-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release-apk:
+    name: Validate signing key and build signed Release APKs
+    if: ${{ github.ref == 'refs/heads/dev' || startsWith(github.ref, 'refs/heads/release/') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout complete source and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Validate release signing secrets and keystore
+        shell: bash
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.MY_KEYSTORE_JKS }}
+          RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for name in RELEASE_KEYSTORE_BASE64 RELEASE_STORE_PASSWORD RELEASE_KEY_ALIAS RELEASE_KEY_PASSWORD; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::A required release-signing secret is missing: ${name}"
+              exit 1
+            fi
+          done
+
+          KEYSTORE_PATH="$RUNNER_TEMP/mstudio-release.jks"
+          umask 077
+          printf '%s' "$RELEASE_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+          test -s "$KEYSTORE_PATH"
+          keytool -list -keystore "$KEYSTORE_PATH" -storepass "$RELEASE_STORE_PASSWORD" \
+            -alias "$RELEASE_KEY_ALIAS" >/dev/null
+          echo "Release keystore is valid and contains the configured alias."
+          rm -f "$KEYSTORE_PATH"
+
+      - name: Restore Gradle cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-phase12-release-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', 'gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-phase12-release-
+            ${{ runner.os }}-gradle-
+
+      - name: Assemble signed Release APKs
+        env:
+          IDE_SIGNING_ALIAS: ${{ secrets.KEY_ALIAS }}
+          IDE_SIGNING_KEY_PASS: ${{ secrets.KEY_PASSWORD }}
+          IDE_SIGNING_STORE_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
+          IDE_SIGNING_KEY_BIN: ${{ secrets.MY_KEYSTORE_JKS }}
+        run: ./gradlew :core:app:assembleRelease --no-daemon --stacktrace
+
+      - name: Verify signatures and create SHA-256 checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release-output
+          mapfile -d '' apks < <(find core/app/build/outputs/apk/release -type f -name '*.apk' -print0 | sort -z)
+          if [[ ${#apks[@]} -eq 0 ]]; then
+            echo "::error::No Release APKs were generated."
+            exit 1
+          fi
+
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner -print | sort -V | tail -n 1)"
+          if [[ -z "$APKSIGNER" || ! -x "$APKSIGNER" ]]; then
+            echo "::error::Android apksigner was not found in the installed SDK."
+            exit 1
+          fi
+
+          for apk in "${apks[@]}"; do
+            "$APKSIGNER" verify --verbose --print-certs "$apk"
+            cp "$apk" release-output/
+          done
+
+          (cd release-output && sha256sum *.apk > SHA256SUMS.txt)
+          cat release-output/SHA256SUMS.txt
+
+      - name: Upload signed Release APKs and checksums
+        uses: actions/upload-artifact@v4
+        with:
+          name: mstudio-signed-release-apks-${{ github.run_number }}
+          path: release-output/*
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Report commit identity
+        run: |
+          echo "Built source commit: $GITHUB_SHA"
+          echo "Workflow run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+  reject-unsupported-ref:
+    name: Reject unsupported build ref
+    if: ${{ github.ref != 'refs/heads/dev' && !startsWith(github.ref, 'refs/heads/release/') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Explain supported refs
+        run: |
+          echo "::error::Dispatch this workflow from dev or a release/* branch so the signed artifact has an explicit source ref."
+          exit 1
