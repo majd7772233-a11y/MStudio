@@ -103,7 +103,7 @@ class CloudBuildActivity : AppCompatActivity() {
         body.addView(approveWorkflowButton)
         body.addView(section(getString(string.cloud_build_preview)))
         preview = TextView(this).apply {
-            isTextSelectable = true
+            setTextIsSelectable(true)
             textSize = 12f
             typeface = android.graphics.Typeface.MONOSPACE
             setPadding(dp(12), dp(12), dp(12), dp(12))
@@ -125,7 +125,7 @@ class CloudBuildActivity : AppCompatActivity() {
         body.addView(openRunButton)
         status = TextView(this).apply {
             textSize = 14f
-            isTextSelectable = true
+            setTextIsSelectable(true)
             setPadding(dp(12), dp(14), dp(12), dp(14))
         }
         body.addView(status)
@@ -271,7 +271,7 @@ class CloudBuildActivity : AppCompatActivity() {
         }) {
             val text = TextView(this).apply {
                 this.text = pendingLogs
-                isTextSelectable = true
+                setTextIsSelectable(true)
                 typeface = android.graphics.Typeface.MONOSPACE
                 textSize = 11f
                 setPadding(dp(12), dp(12), dp(12), dp(12))
