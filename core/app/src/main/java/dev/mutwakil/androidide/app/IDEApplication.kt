@@ -98,6 +98,7 @@ class IDEApplication : TermuxApplication() {
     super.onCreate()
     
     ensureKoinStarted()
+    applyFirstLaunchLocale()
 
 //    SentryAndroid.init(this) { options: SentryAndroidOptions ->
 //      // Reduce replay quality to LOW to prevent OOM
@@ -149,6 +150,23 @@ class IDEApplication : TermuxApplication() {
 			androidContext(this@IDEApplication)
 			modules(coreModule)
 		}
+  }
+
+  private fun applyFirstLaunchLocale() {
+    if (!GeneralPreferences.defaultLocaleInitialized) {
+      // Keep a locale explicitly selected before this initialization, but use Arabic for new
+      // installations and existing installations that never selected an app language.
+      if (GeneralPreferences.selectedLocale == null) {
+        GeneralPreferences.selectedLocale = "ar-rSA"
+      }
+      GeneralPreferences.defaultLocaleInitialized = true
+    }
+
+    val selectedLocale = GeneralPreferences.selectedLocale
+    val locales = selectedLocale?.let {
+      LocaleListCompat.create(LocaleProvider.getLocale(it))
+    } ?: LocaleListCompat.getEmptyLocaleList()
+    AppCompatDelegate.setApplicationLocales(locales)
   }
 
   fun showChangelog() {
