@@ -861,3 +861,15 @@ Run `38582488392` failed the newly added static job because the check expected l
 - Commits: `550d855985528128ad0f7fba779f5a3425968037`, `97e0d68558746a56b46ffb23f1b9f596a26ee96a`, `6a50780245318915d3680d6e1d59be6fb4c82c8e`, `588558241e49c25a1a2431337ede5dd4528bde0e`, `7dc457cfc02e41115e83525e10d6b4de3fc88821`, `2d37c54eb84000fe93a7d58128027c096dd519b4`, `f55d6d892fa1deeca7b818256606cb3e844722e4`.
 - Intermediate run `38604431592` compiled an earlier commit that did not yet contain the new resource string and failed on that missing resource; do not treat it as verification of the final source. Latest run `38604647746` includes the resource, its static audit passed, and build/test jobs were still in progress at handoff. Do not claim final build/test success until it finishes.
 - Earlier signed Release run `38589235744` succeeded before this fix. The Release workflow remains manual-only, and a new signed artifact from the fix commit has not been produced. Device testing of the permission pages remains unverified.
+
+
+## MStudio package-identity audit follow-up — 2026-10-14
+
+- User reported an Android install/startup error: `Failed to get package context for the "dev.mutwakil.androidide" package`.
+- Root cause confirmed in `core/app/src/main/java/dev/mutwakil/androidide/utils/ApkInstaller.kt`: on Android U+, `PackageInstaller.SessionParams.setInstallerPackageName(BuildInfo.PACKAGE_NAME)` advertised the inherited namespace (`dev.mutwakil.androidide`) as the installer identity instead of the installed MStudio application ID (`com.magd.mstudio`). Changed it to `context.packageName`.
+- Found a second package-identity collision risk in `AndroidManifest.xml`: DocumentsProvider authority was hard-coded as `dev.mutwakil.androidide.documents`. Changed it to `${applicationId}.documents` so it resolves to MStudio's own identity.
+- Centralized the application ID as `BuildConfig.APPLICATION_ID = "com.magd.mstudio"`, clarified that `BuildConfig.PACKAGE_NAME` is only the inherited implementation namespace, and changed `core/app/build.gradle.kts` to consume the centralized ID.
+- Fixed two nearby user-visible installer logic bugs during the same audit: fallback installation no longer reports success when its intent fails to launch, and APK extension validation is case-insensitive.
+- Extended `scripts/ci/phase10_static_checks.py` to guard the application-ID/namespace boundary, PackageInstaller identity, DocumentsProvider authority, fallback result and APK extension.
+- Commits: `0391fb1f29e3458acf042e4c816cb07f28bedb6d`, `29130ada3f1ff2bf7d4dce2abfec3b586a72fd3d`, `795faebe34a3f41ba108bfdf916ec5bae948a9e5`, `9c71dbbe23f3ba50ebe618c2b7a7f6ac2f649842`, `5b49ee9462a0aa81f5a6dd6f7012c0e9a49e8e4d`, `3125b253cd88137e57049d1d605ac14e0695766b`.
+- Verification pending: the updated static checks and full APK/JVM workflows must run against the consolidated source. No device test is claimed. Preserve the distinction between source namespace and application ID; do not mass-rename Kotlin/Java packages.
