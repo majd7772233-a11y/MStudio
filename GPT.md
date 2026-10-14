@@ -835,3 +835,8 @@ Phase 11 source now includes optional CloudBuildActivity/navigation, Android Key
 ### Phase 12 build-fix correction — 2026-10-14
 
 The initial fix using `isTextSelectable = true` was itself invalid: CI reported `val cannot be reassigned` at all three sites. Corrected the code to call `setTextIsSelectable(true)` directly in `CloudBuildActivity.kt`, commit `408158241f19c40093a1ce8db4639d9a7a1a5fed`. The fresh verification and CodeQL runs on this commit must be checked before proceeding to signed Release acceptance.
+
+
+### Phase 12 static checker follow-up
+
+Run `38582488392` failed the newly added static job because the check expected literal `apksigner verify`, but the workflow calls `"$APKSIGNER" verify`. This was a brittle checker assertion, not a signature verification result. Fixed the assertion in `53e7781dd9f5300873296e4d8d6cd37ef9573849`; fresh verification run `38582699324` is queued. Keep Phase 12 pending until that run and the tests/build/CodeQL finish.
