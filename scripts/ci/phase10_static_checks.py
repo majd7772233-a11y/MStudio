@@ -84,6 +84,33 @@ def main() -> None:
     print("\nExported Android components requiring human review:")
     for kind, name, permission in exported:
         print(f"  {kind}: {name} (permission={permission or 'none'})")
+    release_workflow = ROOT / ".github/workflows/phase12-release.yml"
+    require(release_workflow.is_file(), "final signed Release workflow exists")
+    release_text = release_workflow.read_text(encoding="utf-8")
+    require("workflow_dispatch:" in release_text and "\\n  push:" not in release_text,
+            "signed Release build is manual-only")
+    for secret in (
+        "secrets.MY_KEYSTORE_JKS",
+        "secrets.KEYSTORE_PASSWORD",
+        "secrets.KEY_ALIAS",
+        "secrets.KEY_PASSWORD",
+    ):
+        require(secret in release_text, f"Release workflow consumes configured secret: {secret}")
+    for signing_env in (
+        "IDE_SIGNING_ALIAS",
+        "IDE_SIGNING_KEY_PASS",
+        "IDE_SIGNING_STORE_PASS",
+        "IDE_SIGNING_KEY_BIN",
+    ):
+        require(signing_env in release_text, f"Release signing environment is wired: {signing_env}")
+    require("assembleRelease" in release_text, "Release workflow assembles the Release variant")
+    require("apksigner verify" in release_text, "Release workflow verifies generated APK signatures")
+    require("SHA256SUMS.txt" in release_text, "Release workflow emits SHA-256 checksums")
+    require("permissions:\\n  contents: read" in release_text,
+            "Release workflow has read-only repository permissions")
+    require("gh release create" not in release_text and "contents: write" not in release_text,
+            "Release workflow uploads artifacts only and does not publish a GitHub Release")
+
     print("\nStatic checks passed. This is not a substitute for merged-manifest, runtime, or device testing.")
 
 
