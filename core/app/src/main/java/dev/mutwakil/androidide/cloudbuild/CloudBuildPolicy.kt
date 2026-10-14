@@ -47,7 +47,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: mstudio-cloud-build-${{ github.ref }}
+  group: mstudio-cloud-build-${'$'}{{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -58,13 +58,13 @@ jobs:
       contents: read
     steps:
       - name: Checkout selected source ref
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          ref: ${{ github.ref }}
+          ref: ${'$'}{{ github.ref }}
           persist-credentials: false
 
       - name: Set up JDK $javaVersion
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165
         with:
           distribution: temurin
           java-version: '$javaVersion'
@@ -92,9 +92,9 @@ jobs:
           test -n "$(find cloud-build-apks -maxdepth 1 -type f -name '*.apk' -print -quit)"
 
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: mstudio-apk-${{ github.run_id }}
+          name: mstudio-apk-${'$'}{{ github.run_id }}
           path: cloud-build-apks/*.apk
           if-no-files-found: error
           retention-days: 7
