@@ -1266,3 +1266,19 @@ Acceptance: both permission Settings flows use the actual installed app ID; no b
 - Commits: `550d855985528128ad0f7fba779f5a3425968037`, `97e0d68558746a56b46ffb23f1b9f596a26ee96a`, `6a50780245318915d3680d6e1d59be6fb4c82c8e`, `588558241e49c25a1a2431337ede5dd4528bde0e`, `7dc457cfc02e41115e83525e10d6b4de3fc88821`, `2d37c54eb84000fe93a7d58128027c096dd519b4`, `f55d6d892fa1deeca7b818256606cb3e844722e4`.
 - Verification run `38604431592` tested an intermediate commit before the new string resource had been committed, so its app compile failed on the missing `permission_settings_unavailable` resource. The final source commit `f55d6d892fa1deeca7b818256606cb3e844722e4` includes that resource; its verification run is `38604647746`. The static safety job has passed, while the debug APK build and JVM/Tooling API job were still running at the time of this note. Do not claim build/tests passed until that run completes.
 - Signed Release run `38589235744` succeeded on the previous source commit, before these fixes. The signed Release workflow remains manual-only; no new signed Release artifact has been built from the fix commit in this session. Device installation and actual Settings navigation still require on-device verification.
+
+
+## Package identity and user-visible installation blocker — 2026-10-14
+
+A new user report exposed an additional identity bug beyond onboarding Settings: Android reported `Failed to get package context for the "dev.mutwakil.androidide" package`.
+
+Implemented:
+- `ApkInstaller.kt` now sets the PackageInstaller installer identity from `context.packageName` (actual installed app ID), not the inherited `BuildInfo.PACKAGE_NAME`.
+- `IDEDocumentsProvider` authority is now `${applicationId}.documents` to avoid collisions with the upstream AndroidIDE package.
+- Centralized `com.magd.mstudio` as `BuildConfig.APPLICATION_ID`; retained `PACKAGE_NAME = dev.mutwakil.androidide` strictly for the source namespace and clarified its comment. The app Gradle config consumes the centralized constant.
+- Corrected the intent-based installer fallback to return failure if launching the installer fails, and accept uppercase/mixed-case `.APK` file extensions.
+- Added static regression checks for these invariants.
+
+Commits: `0391fb1f29e3458acf042e4c816cb07f28bedb6d`, `29130ada3f1ff2bf7d4dce2abfec3b586a72fd3d`, `795faebe34a3f41ba108bfdf916ec5bae948a9e5`, `9c71dbbe23f3ba50ebe618c2b7a7f6ac2f649842`, `5b49ee9462a0aa81f5a6dd6f7012c0e9a49e8e4d`, `3125b253cd88137e57049d1d605ac14e0695766b`.
+
+Acceptance remains pending until the new static checker, full debug APK build, JVM/Tooling API tests and an on-device install/startup path are verified. This change does not rename inherited source packages and does not prove a physical-device fix by itself.
