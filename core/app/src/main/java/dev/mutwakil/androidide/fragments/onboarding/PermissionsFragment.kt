@@ -19,6 +19,7 @@ package dev.mutwakil.androidide.fragments.onboarding
 
 import android.Manifest
 import android.content.Context
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -31,7 +32,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.appintro.SlidePolicy
 import dev.mutwakil.androidide.R
 import dev.mutwakil.androidide.adapters.onboarding.OnboardingPermissionsAdapter
-import dev.mutwakil.androidide.buildinfo.BuildInfo
 import dev.mutwakil.androidide.models.OnboardingPermissionItem
 import dev.mutwakil.androidide.utils.flashError
 import dev.mutwakil.androidide.utils.isAtLeastR
@@ -149,9 +149,34 @@ class PermissionsFragment : OnboardingMultiActionFragment(), SlidePolicy {
   }
 
   private fun requestSettingsTogglePermission(action: String) {
-    val intent = Intent(action)
-    intent.setData(Uri.fromParts("package", BuildInfo.PACKAGE_NAME, null))
-    settingsTogglePermissionRequestLauncher.launch(intent)
+    val context = requireContext()
+    // BuildInfo.PACKAGE_NAME is the inherited source namespace, not necessarily the installed
+    // applicationId. Package-scoped Settings screens must receive the real runtime package name.
+    val packageUri = Uri.fromParts("package", context.packageName, null)
+    val intent = Intent(action).setData(packageUri)
+    val fallback = when (action) {
+      Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION ->
+        Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+      else -> Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).setData(packageUri)
+    }
+
+    try {
+      settingsTogglePermissionRequestLauncher.launch(intent)
+    } catch (_: ActivityNotFoundException) {
+      launchSettingsFallback(fallback)
+    } catch (_: SecurityException) {
+      launchSettingsFallback(fallback)
+    }
+  }
+
+  private fun launchSettingsFallback(intent: Intent) {
+    try {
+      settingsTogglePermissionRequestLauncher.launch(intent)
+    } catch (_: ActivityNotFoundException) {
+      activity?.flashError(R.string.permission_settings_unavailable)
+    } catch (_: SecurityException) {
+      activity?.flashError(R.string.permission_settings_unavailable)
+    }
   }
 
   override val isPolicyRespected: Boolean
