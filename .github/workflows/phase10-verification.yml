@@ -3,6 +3,18 @@ name: Phase 10 — verification gate
 # Intentionally manual: the owner should dispatch this only after reviewing Phase 10.
 on:
   workflow_dispatch: {}
+  push:
+    branches: [ "dev" ]
+    paths:
+      - ".github/workflows/phase10-verification.yml"
+      - "settings.gradle.kts"
+      - "build.gradle.kts"
+      - "gradle/**"
+      - "composite-builds/**"
+      - "core/**"
+      - "subprojects/**"
+      - "tooling/**"
+      - "scripts/ci/phase10_static_checks.py"
 
 permissions:
   contents: read
