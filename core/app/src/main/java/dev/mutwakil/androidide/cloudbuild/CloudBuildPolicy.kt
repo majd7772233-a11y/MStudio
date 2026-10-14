@@ -87,15 +87,18 @@ jobs:
         shell: bash
         run: |
           mkdir -p cloud-build-apks
-          find . -type f -path '*/build/outputs/apk/*/*.apk' -not -path '*/build/intermediates/*' -print0 |
-            while IFS= read -r -d '' file; do cp "$file" cloud-build-apks/; done
-          test -n "$(find cloud-build-apks -maxdepth 1 -type f -name '*.apk' -print -quit)"
+          find . -type f -path '*/build/outputs/apk/*/*.apk' \
+            -not -path '*/build/outputs/apk/androidTest/*' \
+            -not -path '*/build/outputs/apk/test/*' \
+            -not -path '*/build/intermediates/*' -print0 |
+            while IFS= read -r -d '' file; do cp --parents "$file" cloud-build-apks/; done
+          test -n "$(find cloud-build-apks -type f -name '*.apk' -print -quit)"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: mstudio-apk-${'$'}{{ github.run_id }}
-          path: cloud-build-apks/*.apk
+          path: cloud-build-apks/**/*.apk
           if-no-files-found: error
           retention-days: 7
 """
