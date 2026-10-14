@@ -49,3 +49,14 @@ Record the exact device model, Android API, ABI, app version, commit SHA and res
 ## Current status
 
 Source-level hardening and workflow preparation are committed. No tests, builds, Actions, CodeQL scans, APK installs, or device checks have been run. Phase 9 runtime acceptance and Phase 10 acceptance remain **pending**.
+
+
+## Failure analysis and corrective changes (2026-10-14)
+
+The latest completed verification/CodeQL attempts failed during Kotlin compilation, before unit tests could run. The first causal failures were:
+
+1. `:tooling:impl:compileKotlin` — `RootModelBuilder.kt` constructed generated protobuf `GradleModels.SyncIssue` using Kotlin named constructor arguments. Generated protobuf messages are Java classes and must be created through `newBuilder()`; the conversion now uses the generated builder setters and `build()`.
+2. `:utilities:templates-api:compileDebugKotlin` — `projectNameParameter()` referenced `PROJECT_NAME` without importing `ParameterConstraint.PROJECT_NAME`; the import is now present.
+3. `:xml:lsp:compileDebugKotlin` — two references used `module.delegate.projectDir`, but the delegate is a generated protobuf model with no `projectDir` property. Both now use the cached `module.projectDir`.
+
+The debug APK job and CodeQL analysis were blocked by these same compile failures; no APK/checksum artifact was produced and the test job did not reach test execution. The Python static safety/manifest job passed. Corrective commits are on `dev`; rerun the full verification and CodeQL workflows against the final corrected head before treating the failures as resolved. These source changes alone are not evidence of a passing build or tests.
