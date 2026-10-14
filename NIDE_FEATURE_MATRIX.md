@@ -180,3 +180,10 @@ The first reflective fix removed the Kotlin compile-time errors, and the test su
 
 ## Phase 11 — optional GitHub Cloud Build (2026-10-14)
 Source implementation added in `core/app/.../cloudbuild` and `CloudBuildActivity`: Android Keystore AES-GCM token storage; GitHub REST repository/branch/tree inspection; conservative Gradle task selection; reviewed manual-only workflow; explicit no-overwrite approval; dispatch; run/job/step status; downloadable logs and artifacts; APK-only safe extraction and installer handoff. The build job uses read-only contents permissions, checkout credential persistence is disabled, timeout is bounded, and artifacts expire after seven days. Local build remains independent. CI and real public/private repository/device acceptance remain pending.
+
+
+## Phase 12 final build gate — 2026-10-14
+
+The final signed Release build is defined in `.github/workflows/phase12-release.yml` and documented in `PHASE12_RELEASE.md`. It validates `MY_KEYSTORE_JKS`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, and `KEY_PASSWORD`; assembles Release APKs; verifies signatures; and uploads APKs with SHA-256 checksums. This is not a feature-port acceptance test and does not close the earlier phases' runtime gates.
+
+The latest inspected pre-fix CI run failed while compiling the Phase 11 Cloud Build UI: `textIsSelectable` was unresolved and the `approveWorkflow` field/method names collided. Source correction committed at `aeeae203d5fae4f23d96930a4d9a68ee57b22024`; verification is pending. Phase 9 decompiler runtime/packaging checks, Phase 10 device/security/performance acceptance, and Phase 11 cloud workflow/device acceptance remain pending and must be reported separately.
