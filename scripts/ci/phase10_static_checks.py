@@ -53,6 +53,14 @@ def main() -> None:
     require(app is not None, "Android manifest has an application element")
     require(app.get(ANDROID + "allowBackup") == "false", "application backup is disabled")
 
+    provider_authorities = []
+    for provider in app.findall("provider"):
+        authorities = provider.get(ANDROID + "authorities", "").split(";")
+        require(all(authorities), "every content provider declares a non-empty authority")
+        provider_authorities.extend(authorities)
+    require(len(provider_authorities) == len(set(provider_authorities)),
+            "content provider authorities are unique and cannot collide at install time")
+
     exported = []
     component_tags = {"activity", "activity-alias", "receiver", "service", "provider"}
     for component in app:
