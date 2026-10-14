@@ -94,7 +94,11 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath("com.mooltiverse.oss.nyx:gradle:2.5.2")
+    classpath("com.mooltiverse.oss.nyx:gradle:2.5.2") {
+      // Keep Nyx's transitive Bouncy Castle jars from shadowing the version used by AGP.
+      // AGP's debug-keystore generation otherwise can fail with BCObjectIdentifiers NoSuchFieldError.
+      exclude(group = "org.bouncycastle")
+    }
   }
 }
 
