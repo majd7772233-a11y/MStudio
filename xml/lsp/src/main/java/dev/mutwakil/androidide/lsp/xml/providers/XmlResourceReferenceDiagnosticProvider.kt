@@ -40,7 +40,7 @@ internal class XmlResourceReferenceDiagnosticProvider {
 
   fun invalidate(file: Path, workspace: Workspace?) {
     val module = workspace?.findModuleForFile(file)?.let { it as? AndroidModule } ?: return
-    val moduleRoot = module.projectDir
+    val moduleRoot = File(module.projectDirPath)
     // Editing a layout does not change the module's resource-name index. Only edits beneath an
     // Android source-set res directory invalidate it; this avoids a full module tree walk on each
     // keystroke while still refreshing diagnostics after resources are added, renamed or removed.
@@ -71,7 +71,7 @@ internal class XmlResourceReferenceDiagnosticProvider {
     val diagnostics = mutableListOf<DiagnosticItem>()
     val comments = xmlCommentRanges(source)
     val locallyDeclaredIds = declaredIds(source, comments)
-    val moduleRoot = module.projectDir
+    val moduleRoot = File(module.projectDirPath)
     val sourceResources =
         sourceResourceCache.computeIfAbsent(moduleRoot.absolutePath) {
           collectSourceResources(moduleRoot)
