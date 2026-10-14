@@ -187,3 +187,8 @@ Source implementation added in `core/app/.../cloudbuild` and `CloudBuildActivity
 The final signed Release build is defined in `.github/workflows/phase12-release.yml` and documented in `PHASE12_RELEASE.md`. It validates `MY_KEYSTORE_JKS`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, and `KEY_PASSWORD`; assembles Release APKs; verifies signatures; and uploads APKs with SHA-256 checksums. This is not a feature-port acceptance test and does not close the earlier phases' runtime gates.
 
 The latest inspected pre-fix CI run failed while compiling the Phase 11 Cloud Build UI: `textIsSelectable` was unresolved and the `approveWorkflow` field/method names collided. Source correction committed at `aeeae203d5fae4f23d96930a4d9a68ee57b22024`; verification is pending. Phase 9 decompiler runtime/packaging checks, Phase 10 device/security/performance acceptance, and Phase 11 cloud workflow/device acceptance remain pending and must be reported separately.
+
+
+### Phase 12 compile-fix follow-up (2026-10-14)
+
+The intermediate `isTextSelectable = true` fix failed because Kotlin treated it as a read-only property. All three sites now call `setTextIsSelectable(true)` explicitly in commit `408158241f19c40093a1ce8db4639d9a7a1a5fed`. Fresh CI/CodeQL results remain pending.
