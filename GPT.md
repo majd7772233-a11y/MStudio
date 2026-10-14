@@ -840,3 +840,14 @@ The initial fix using `isTextSelectable = true` was itself invalid: CI reported 
 ### Phase 12 static checker follow-up
 
 Run `38582488392` failed the newly added static job because the check expected literal `apksigner verify`, but the workflow calls `"$APKSIGNER" verify`. This was a brittle checker assertion, not a signature verification result. Fixed the assertion in `53e7781dd9f5300873296e4d8d6cd37ef9573849`; fresh verification run `38582699324` is queued. Keep Phase 12 pending until that run and the tests/build/CodeQL finish.
+
+
+### Phase 12 verification result — 2026-10-14 (follow-up)
+
+- Rechecked live `dev` HEAD: `c4d03573763ddbddca521a00ed410c5c6e4c7040` (documentation-only commit atop the tested source commit).
+- Verification run `38582699324` completed successfully on source commit `53e7781dd9f5300873296e4d8d6cd37ef9573849`: all three jobs passed — static safety/manifest checks, JVM unit tests plus Tooling API build/tests, and debug APK assembly with SHA-256 fingerprinting/artifact upload.
+- The corrected static checker now matches the workflow's actual resolved `$APKSIGNER verify --verbose --print-certs` invocation. This verifies the checker and debug/Tooling pipeline, not a Release signature.
+- Retried failed CodeQL job in run `38582489204` (attempt 2); it was still in progress at the time of this note. Do not call CodeQL clean until the analysis upload succeeds and findings are reviewed.
+- Source-level pre-release audit: release workflow is manual-only on `dev` or `release/*`, checks the four requested secrets, validates the Base64 JKS and alias before Gradle, maps to the existing `IDE_SIGNING_*` contract, verifies each generated Release APK, and uploads checksums. No secret values were read or logged.
+- Remaining Phase 12 blocker: the signed Release workflow has not yet been dispatched; no signed APK/checksum artifact or device-install evidence exists. Dispatch the workflow from GitHub Actions on `dev` after confirming all four repository secrets are configured. Keep Phase 12 acceptance pending until that run passes and the APK is installed/launched on-device.
+- Prior-phase runtime carry-overs remain open as recorded above; a green verification workflow does not replace device acceptance or close the Cloud Build/decompiler security and UX gates.
