@@ -22,7 +22,7 @@ import dev.mutwakil.androidide.builder.model.shouldBeIgnored
 import dev.mutwakil.androidide.project.GradleBuild
 import dev.mutwakil.androidide.project.GradleModels
 import dev.mutwakil.androidide.project.ProjectModelInfo
-import dev.mutwakil.androidide.project.SyncIssue as ProjectSyncIssue
+import dev.mutwakil.androidide.project.GradleModels.SyncIssue as ProjectSyncIssue
 import dev.mutwakil.androidide.projects.models.projectDir
 import dev.mutwakil.androidide.tooling.api.IAndroidProject
 import dev.mutwakil.androidide.tooling.api.messages.InitializeProjectParams
