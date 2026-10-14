@@ -1219,3 +1219,8 @@ See `PHASE12_RELEASE.md`. The workflow consumes GitHub Secrets `MY_KEYSTORE_JKS`
 ### Current status
 
 **Phase 12 implementation is in progress; final acceptance is pending.** The Cloud Build Kotlin correction and Release workflow/static checks are committed, but the fresh verification and CodeQL outcomes must be reviewed. The Phase 12 signing workflow has not yet been dispatched, and no signed Release artifact or device-install evidence is claimed. Do not mark Phase 12 complete until the tests, debug build, CodeQL, signed Release job, checksum/signature checks, and required device acceptance are recorded.
+
+
+### Phase 12 correction — Kotlin setter mapping (2026-10-14)
+
+The first attempted UI correction changed `textIsSelectable` to `isTextSelectable`, but the next Actions run showed that the latter resolves as a read-only property and cannot be assigned. Replaced the three assignments with the explicit Java setter call `setTextIsSelectable(true)` in commit `408158241f19c40093a1ce8db4639d9a7a1a5fed`. New verification and CodeQL runs are now queued for that commit; no passing result is claimed yet.
