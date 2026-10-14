@@ -104,7 +104,8 @@ def main() -> None:
     ):
         require(signing_env in release_text, f"Release signing environment is wired: {signing_env}")
     require("assembleRelease" in release_text, "Release workflow assembles the Release variant")
-    require("apksigner verify" in release_text, "Release workflow verifies generated APK signatures")
+    require("verify --verbose --print-certs" in release_text and "APKSIGNER" in release_text,
+            "Release workflow verifies generated APK signatures")
     require("SHA256SUMS.txt" in release_text, "Release workflow emits SHA-256 checksums")
     require("permissions:\n  contents: read" in release_text,
             "Release workflow has read-only repository permissions")
