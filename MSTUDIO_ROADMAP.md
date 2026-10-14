@@ -1229,3 +1229,13 @@ The first attempted UI correction changed `textIsSelectable` to `isTextSelectabl
 ### Phase 12 static-audit correction — 2026-10-14
 
 The first run of the new static Release checks failed because the checker searched for the literal text `apksigner verify`, while the workflow correctly invokes the resolved `$APKSIGNER verify` executable. This was a checker false negative, not an APK-signature failure. Updated the assertion to verify the actual `APKSIGNER` variable and `verify --verbose --print-certs` arguments in commit `53e7781dd9f5300873296e4d8d6cd37ef9573849`. Verification run `38582699324` is queued to validate the corrected checker and full pipeline.
+
+
+### Phase 12 verification result — 2026-10-14 follow-up
+
+- Verification run `38582699324` succeeded on tested source commit `53e7781dd9f5300873296e4d8d6cd37ef9573849`: static safety/manifest checks, JVM unit tests + Tooling API build/tests, and debug APK build/fingerprinting all passed. Current branch HEAD is documentation-only descendant `c4d03573763ddbddca521a00ed410c5c6e4c7040`.
+- The static-check false negative was fixed by checking the actual resolved `$APKSIGNER` variable and `verify --verbose --print-certs` arguments. This is not evidence that a Release APK has been signed.
+- CodeQL run `38582489204` failed during result upload on its first attempt; failed job was retried (attempt 2) and was still in progress when this update was recorded. Security scan acceptance remains pending until the rerun completes and findings are reviewed.
+- The four requested signing secrets are wired to the inherited plugin contract; the manual workflow validates the Base64 JKS and alias before Gradle and verifies signatures/checksums after assembly. No secret values were accessed.
+- **Still pending:** dispatch `.github/workflows/phase12-release.yml` on `dev`, confirm successful keystore preflight and signed Release assembly, download/verify `SHA256SUMS.txt`, and install/launch the APK on-device. Do not mark Phase 12 complete before this evidence exists.
+- Phase 9 decompiler, Phase 10 security/performance/device matrix, Phase 11 Cloud Build runtime acceptance, and other earlier-phase device gates remain explicitly open; the green verification gate does not waive them.
