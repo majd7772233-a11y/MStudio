@@ -38,7 +38,7 @@ class CloudBuildActivity : AppCompatActivity() {
     private lateinit var javaInput: EditText
     private lateinit var status: TextView
     private lateinit var preview: TextView
-    private lateinit var approveWorkflow: MaterialButton
+    private lateinit var approveWorkflowButton: MaterialButton
     private lateinit var dispatchButton: MaterialButton
     private lateinit var refreshButton: MaterialButton
     private lateinit var logsButton: MaterialButton
@@ -99,11 +99,11 @@ class CloudBuildActivity : AppCompatActivity() {
         body.addView(taskInput)
         body.addView(javaInput)
         body.addView(button(string.cloud_build_inspect) { inspect() })
-        approveWorkflow = button(string.cloud_build_install_workflow) { approveWorkflow() }
-        body.addView(approveWorkflow)
+        approveWorkflowButton = button(string.cloud_build_install_workflow) { approveWorkflow() }
+        body.addView(approveWorkflowButton)
         body.addView(section(getString(string.cloud_build_preview)))
         preview = TextView(this).apply {
-            textIsSelectable = true
+            isTextSelectable = true
             textSize = 12f
             typeface = android.graphics.Typeface.MONOSPACE
             setPadding(dp(12), dp(12), dp(12), dp(12))
@@ -125,7 +125,7 @@ class CloudBuildActivity : AppCompatActivity() {
         body.addView(openRunButton)
         status = TextView(this).apply {
             textSize = 14f
-            textIsSelectable = true
+            isTextSelectable = true
             setPadding(dp(12), dp(14), dp(12), dp(14))
         }
         body.addView(status)
@@ -271,7 +271,7 @@ class CloudBuildActivity : AppCompatActivity() {
         }) {
             val text = TextView(this).apply {
                 this.text = pendingLogs
-                textIsSelectable = true
+                isTextSelectable = true
                 typeface = android.graphics.Typeface.MONOSPACE
                 textSize = 11f
                 setPadding(dp(12), dp(12), dp(12), dp(12))
@@ -353,7 +353,7 @@ class CloudBuildActivity : AppCompatActivity() {
 
     private fun updateControls() {
         val enabled = !busy
-        if (::approveWorkflow.isInitialized) approveWorkflow.isEnabled = enabled && defaultBranch != null && !workflowExists && !workflowInstalled
+        if (::approveWorkflowButton.isInitialized) approveWorkflowButton.isEnabled = enabled && defaultBranch != null && !workflowExists && !workflowInstalled
         if (::dispatchButton.isInitialized) dispatchButton.isEnabled = enabled && workflowInstalled
         if (::refreshButton.isInitialized) refreshButton.isEnabled = enabled && currentRun != null
         if (::logsButton.isInitialized) logsButton.isEnabled = enabled && currentRun != null
