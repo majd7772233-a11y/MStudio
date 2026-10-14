@@ -23,6 +23,7 @@ import dev.mutwakil.androidide.templates.Language.Java
 import dev.mutwakil.androidide.templates.Language.Kotlin
 import dev.mutwakil.androidide.templates.ParameterConstraint.NONEMPTY
 import dev.mutwakil.androidide.templates.ParameterConstraint.PACKAGE
+import dev.mutwakil.androidide.templates.ParameterConstraint.PROJECT_NAME
 import dev.mutwakil.androidide.templates.R.string
 import dev.mutwakil.androidide.templates.R
 import java.util.concurrent.locks.ReentrantLock
