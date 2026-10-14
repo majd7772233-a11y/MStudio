@@ -27,8 +27,11 @@ object BuildConfig {
   /** The internal name for the IDE */
   const val INTERNAL_NAME = "MStudio"
 
-  /** AndroidIDE's package name. */
+  /** Kotlin/Java namespace retained from the AndroidIDE codebase; not the installed app ID. */
   const val PACKAGE_NAME = "dev.mutwakil.androidide"
+
+  /** Installed Android package ID used for app identity and PackageManager operations. */
+  const val APPLICATION_ID = "com.magd.mstudio"
 
   /** The compile SDK version. */
   const val COMPILE_SDK = 36
