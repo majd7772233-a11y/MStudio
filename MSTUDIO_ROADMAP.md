@@ -1185,3 +1185,37 @@ The first reflective fix removed the Kotlin compile-time errors, and the test su
 - Added optional Cloud Build UI and navigation, Android Keystore AES-GCM token storage, GitHub REST repository/branch/tree inspection, conservative Gradle assemble-task detection, a manual-only workflow template, explicit workflow preview/approval, no-overwrite behavior, dispatch, run/job/step status, log archive download, artifact download, safe APK-only extraction and the existing APK installer handoff.
 - The generated build job has `contents: read`, disables checkout credential persistence, receives no personal token or release secrets, times out after 45 minutes and retains APK artifacts for seven days. Local build remains independent of GitHub.
 - **Acceptance remains pending:** current CI must compile and pass the new tests. Then validate token permissions, public/private repositories, workflow commit/dispatch, status/log/artifact APIs, APK installation, token revocation, rate limits and interrupted network operations on-device. Do not claim runtime acceptance from source alone.
+
+
+## Phase 12 — final pre-build audit and signed Release (2026-10-14)
+
+### Pre-build audit result
+
+Latest source inspected before the fix: `23a0175c250a64e3d7472071bf5eb56bb9ba85ca`. The most recent verification run `38576235891` and CodeQL run `38576235807` both stopped at `:core:app:compileDebugKotlin`, not at the decompiler or Tooling API:
+
+- Three `CloudBuildActivity.kt` errors used `textIsSelectable`, which is not the correct Kotlin synthetic property for `TextView.setTextIsSelectable`; changed to `isTextSelectable`.
+- A property and function were both named `approveWorkflow`, causing an ambiguous property reference; renamed the button field to `approveWorkflowButton`.
+- The verification test job and CodeQL build were consequently blocked before meaningful acceptance; the static safety job passed. No APK/checksum artifact was produced in that run.
+- The previous release signing integration was inspected against `SigningConfigPlugin` and `SigningKeyUtils`: the required environment contract is `IDE_SIGNING_KEY_BIN`, `IDE_SIGNING_STORE_PASS`, `IDE_SIGNING_ALIAS`, and `IDE_SIGNING_KEY_PASS`. The user-provided secret names are mapped explicitly in the new workflow; `MY_KEYSTORE_JKS` must be Base64-encoded bytes because the existing Gradle plugin decodes it using Java Base64.
+- Added a read-only, manual-only Release workflow with keystore/alias preflight, Release assembly, `apksigner verify`, SHA-256 checksums, and artifact upload. It does not create a GitHub Release or publish Maven packages. Static checks now verify the signing workflow's safety/wiring.
+
+### Phase 12 source commits
+
+- `aeeae203d5fae4f23d96930a4d9a68ee57b22024` — correct Cloud Build UI Kotlin property and field/method name collision.
+- `8bb0158041d29751eff10a0d2832896d76b2cd90` — add manual signed Release workflow.
+- `32ac647aae053e3124e53a0b9ad0ef54d59b419a`, `1c6bf6646ad3230052666fc9175c3bd530bf3dee`, `050b65341faec8b204e5778db244b6f969df8cc8`, `83fe9b096524ac6f1a9fb05ed30e02bda0d21d3a` — static Release workflow invariants and verification/CodeQL triggers, followed by correction of newline checks.
+
+### Release signing contract
+
+See `PHASE12_RELEASE.md`. The workflow consumes GitHub Secrets `MY_KEYSTORE_JKS`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`; maps them to the existing Gradle plugin's `IDE_SIGNING_*` environment names; checks the keystore/alias before building; verifies every output signature; and uploads checksummed APKs for 30 days.
+
+### Carry-over items from earlier phases — not waived by Phase 12
+
+- **Phase 9:** Vineflower dependency packaging/D8 compatibility, class/JAR sample outputs, malformed/oversized archive handling, managed-JVM runtime and resource profiling, device tests remain pending.
+- **Phase 10:** merged-manifest review, install-result callback behavior, supported API/ABI matrix, low-storage/recovery, performance and security/device checks remain pending. Static checks alone are not a security acceptance.
+- **Phase 11:** Cloud Build token permission matrix, public/private repo behavior, workflow creation/dispatch, run/job/step status, log and artifact downloads, APK install, revocation/rate-limit/network interruption/device checks remain pending.
+- Earlier phases also retain their explicitly documented runtime acceptance gates (template sync/build/install/launch, local Tooling API and editor/designer/template UX). A successful signed Release build does not retroactively close them.
+
+### Current status
+
+**Phase 12 implementation is in progress; final acceptance is pending.** The Cloud Build Kotlin correction and Release workflow/static checks are committed, but the fresh verification and CodeQL outcomes must be reviewed. The Phase 12 signing workflow has not yet been dispatched, and no signed Release artifact or device-install evidence is claimed. Do not mark Phase 12 complete until the tests, debug build, CodeQL, signed Release job, checksum/signature checks, and required device acceptance are recorded.
