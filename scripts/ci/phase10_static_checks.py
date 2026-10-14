@@ -14,6 +14,8 @@ POLICY = ROOT / "core/app/src/main/java/dev/mutwakil/androidide/utils/Decompiler
 PERMISSIONS = ROOT / "core/app/src/main/java/dev/mutwakil/androidide/fragments/onboarding/PermissionsFragment.kt"
 APPLICATION = ROOT / "core/app/src/main/java/dev/mutwakil/androidide/app/IDEApplication.kt"
 GENERAL_PREFERENCES = ROOT / "utilities/preferences/src/main/java/dev/mutwakil/androidide/preferences/internal/GeneralPreferences.kt"
+BUILD_IDENTITY = ROOT / "composite-builds/build-logic/common/src/main/java/dev/mutwakil/androidide/build/config/BuildConfig.kt"
+APP_GRADLE = ROOT / "core/app/build.gradle.kts"
 APK_INSTALLER = ROOT / "core/app/src/main/java/dev/mutwakil/androidide/utils/ApkInstaller.kt"
 ARABIC_STRINGS = ROOT / "core/resources/src/main/res/values-ar-rSA/strings.xml"
 
@@ -36,6 +38,15 @@ def main() -> None:
         "validateDistributionUrl=true" in wrapper.splitlines(),
         "Gradle wrapper distribution URL validation is enabled",
     )
+
+    build_identity = BUILD_IDENTITY.read_text(encoding="utf-8")
+    app_gradle = APP_GRADLE.read_text(encoding="utf-8")
+    require('const val PACKAGE_NAME = "dev.mutwakil.androidide"' in build_identity,
+            "implementation namespace remains stable for inherited source packages")
+    require('const val APPLICATION_ID = "com.magd.mstudio"' in build_identity,
+            "MStudio application ID is defined centrally and separately from source namespace")
+    require("applicationId = BuildConfig.APPLICATION_ID" in app_gradle,
+            "Android applicationId uses the centralized MStudio identity constant")
 
     root = ET.parse(MANIFEST).getroot()
     app = root.find("application")
