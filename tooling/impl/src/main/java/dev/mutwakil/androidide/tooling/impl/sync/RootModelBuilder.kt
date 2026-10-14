@@ -40,18 +40,19 @@ import java.io.Serializable
 
 /** Converts an AGP sync issue to the cached project-model representation. */
 internal fun AndroidSyncIssue.toProjectSyncIssue(): ProjectSyncIssue =
-  ProjectSyncIssue(
-    data = data,
-    message = message,
-    multilineMessageList = multiLineMessage?.filterNotNull() ?: emptyList(),
-    type = type,
-    severity =
+  ProjectSyncIssue.newBuilder()
+    .setData(data)
+    .setMessage(message)
+    .addAllMultilineMessage(multiLineMessage?.filterNotNull() ?: emptyList())
+    .setType(type)
+    .setSeverity(
       when (severity) {
         AndroidSyncIssue.SEVERITY_ERROR -> GradleModels.SyncIssueSeverity.SeverityError
         AndroidSyncIssue.SEVERITY_WARNING -> GradleModels.SyncIssueSeverity.SeverityWarning
         else -> throw IllegalArgumentException("Unknown sync issue severity: $severity")
       },
-  )
+    )
+    .build()
 
 /**
  * Maps IDEA module names to paths only when the name is unique. IDEA module dependencies expose
