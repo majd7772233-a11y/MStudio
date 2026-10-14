@@ -77,7 +77,7 @@ jobs:
           test -f ./gradle/wrapper/gradle-wrapper.jar
           test -f ./gradle/wrapper/gradle-wrapper.properties
           chmod +x ./gradlew
-          grep -Eq '^distributionUrl=https://services\.gradle\.org/distributions/gradle-[^[:space:]]+\.zip$' gradle/wrapper/gradle-wrapper.properties
+          grep -Eq '^distributionUrl=https\\?://services\.gradle\.org/distributions/gradle-[^[:space:]]+\.zip$' gradle/wrapper/gradle-wrapper.properties
 
       - name: Build debug APK
         shell: bash
