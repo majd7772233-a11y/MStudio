@@ -56,6 +56,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.jar.JarFile;
+import java.util.regex.Pattern;
 
 import kotlin.io.FilesKt;
 
@@ -655,7 +656,7 @@ public class ToolsManager {
         }
       }
       final String versionOutput = versionText.toString();
-      final var versionMatcher = java.util.regex.Pattern
+      final var versionMatcher = Pattern
           .compile("version\\s+\\\"(?:1\\.)?(\\d+)")
           .matcher(versionOutput);
       if (!versionMatcher.find()) {
