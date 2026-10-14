@@ -1224,3 +1224,8 @@ See `PHASE12_RELEASE.md`. The workflow consumes GitHub Secrets `MY_KEYSTORE_JKS`
 ### Phase 12 correction — Kotlin setter mapping (2026-10-14)
 
 The first attempted UI correction changed `textIsSelectable` to `isTextSelectable`, but the next Actions run showed that the latter resolves as a read-only property and cannot be assigned. Replaced the three assignments with the explicit Java setter call `setTextIsSelectable(true)` in commit `408158241f19c40093a1ce8db4639d9a7a1a5fed`. New verification and CodeQL runs are now queued for that commit; no passing result is claimed yet.
+
+
+### Phase 12 static-audit correction — 2026-10-14
+
+The first run of the new static Release checks failed because the checker searched for the literal text `apksigner verify`, while the workflow correctly invokes the resolved `$APKSIGNER verify` executable. This was a checker false negative, not an APK-signature failure. Updated the assertion to verify the actual `APKSIGNER` variable and `verify --verbose --print-certs` arguments in commit `53e7781dd9f5300873296e4d8d6cd37ef9573849`. Verification run `38582699324` is queued to validate the corrected checker and full pipeline.
