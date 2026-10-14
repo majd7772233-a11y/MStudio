@@ -851,3 +851,13 @@ Run `38582488392` failed the newly added static job because the check expected l
 - Source-level pre-release audit: release workflow is manual-only on `dev` or `release/*`, checks the four requested secrets, validates the Base64 JKS and alias before Gradle, maps to the existing `IDE_SIGNING_*` contract, verifies each generated Release APK, and uploads checksums. No secret values were read or logged.
 - Remaining Phase 12 blocker: the signed Release workflow has not yet been dispatched; no signed APK/checksum artifact or device-install evidence exists. Dispatch the workflow from GitHub Actions on `dev` after confirming all four repository secrets are configured. Keep Phase 12 acceptance pending until that run passes and the APK is installed/launched on-device.
 - Prior-phase runtime carry-overs remain open as recorded above; a green verification workflow does not replace device acceptance or close the Cloud Build/decompiler security and UX gates.
+
+
+## Onboarding permission blocker and Arabic default — 2026-10-14
+
+- Found that `PermissionsFragment.kt` built package-scoped Settings URIs from the inherited source namespace even though MStudio's installed application ID is `com.magd.mstudio`. Changed both permission Settings paths to use the runtime `context.packageName`, added fallback intents and a localized failure message.
+- Added a first-launch-only Arabic default (`ar-rSA`) in `IDEApplication`, guarded by a persisted initialization flag so future explicit language/System Default selections are not overwritten.
+- Translated the permission/onboarding strings and locale-selector labels into Arabic. Added CI static assertions for runtime package targeting, Settings fallback, first-launch locale behavior, and Arabic strings.
+- Commits: `550d855985528128ad0f7fba779f5a3425968037`, `97e0d68558746a56b46ffb23f1b9f596a26ee96a`, `6a50780245318915d3680d6e1d59be6fb4c82c8e`, `588558241e49c25a1a2431337ede5dd4528bde0e`, `7dc457cfc02e41115e83525e10d6b4de3fc88821`, `2d37c54eb84000fe93a7d58128027c096dd519b4`, `f55d6d892fa1deeca7b818256606cb3e844722e4`.
+- Intermediate run `38604431592` compiled an earlier commit that did not yet contain the new resource string and failed on that missing resource; do not treat it as verification of the final source. Latest run `38604647746` includes the resource, its static audit passed, and build/test jobs were still in progress at handoff. Do not claim final build/test success until it finishes.
+- Earlier signed Release run `38589235744` succeeded before this fix. The Release workflow remains manual-only, and a new signed artifact from the fix commit has not been produced. Device testing of the permission pages remains unverified.
