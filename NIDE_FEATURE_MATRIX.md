@@ -135,3 +135,27 @@ Prepared, not dispatched: `.github/workflows/phase10-verification.yml` (static c
 
 
 Phase 10 runbook: see PHASE10_VERIFICATION.md for manual workflow order, device matrix, evidence requirements, and the current unverified status.
+
+
+## CI failure investigation — 2026-10-14
+
+Reviewed GitHub Actions runs on `dev` at `a394dce49dad2fd90c2df4c43f87d444692be661`:
+- Verification gate run: https://github.com/majd7772233-a11y/MStudio/actions/runs/38542138006
+- CodeQL run: https://github.com/majd7772233-a11y/MStudio/actions/runs/38542775833
+
+The logs showed four primary source/build blockers and one independent build-environment collision:
+1. `RootModelBuilder.kt` imported `dev.mutwakil.androidide.project.SyncIssue` as a top-level type, but protobuf generates it as `GradleModels.SyncIssue`.
+2. `ToolsManager.java` declared a local variable named `java`, shadowing the package prefix in `java.util.regex.Pattern`; Javac therefore resolved `util` as a missing field on `File`.
+3. Turkish `msg_install_tools` contained unescaped apostrophes; AAPT2 failed while flattening the resource.
+4. The app asset-copy task expected `tooling-api-all.jar` even when tooling compilation had failed. The tooling `copyJar` task also lacked an explicit dependency on `shadowJar`, making the output ordering fragile.
+5. AGP debug-keystore creation failed with `NoSuchFieldError: BCObjectIdentifiers.xmss_SHAKE128_512ph`, consistent with mismatched Bouncy Castle classes visible to the build. The Nyx settings classpath now excludes its transitive Bouncy Castle group to prevent it shadowing AGP's matching signing dependencies.
+
+Fixes committed on `dev`:
+- `759e632`: use the generated nested protobuf SyncIssue type.
+- `3849b16`: use an imported `Pattern` instead of a package reference shadowed by the `java` variable.
+- `82f0470`: escape apostrophes in Turkish setup text.
+- `9d34d0e`: make `copyJar` depend explicitly on `shadowJar`.
+- `a2b6ed2`: isolate Nyx's transitive Bouncy Castle dependencies from AGP.
+- `bdfc189` and `2907ef5`: trigger Phase 10 verification and CodeQL on relevant `dev` source pushes as well as manual dispatch.
+
+The initial CodeQL failure was a build/configuration failure, not a completed clean security analysis. The failed test run produced no test reports because compilation stopped before tests could execute. The fixes are not considered verified until the new Actions runs finish and their logs/artifacts are reviewed.
