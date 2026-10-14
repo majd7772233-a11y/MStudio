@@ -11,6 +11,10 @@ ANDROID = "{http://schemas.android.com/apk/res/android}"
 MANIFEST = ROOT / "core/app/src/main/AndroidManifest.xml"
 WRAPPER = ROOT / "gradle/wrapper/gradle-wrapper.properties"
 POLICY = ROOT / "core/app/src/main/java/dev/mutwakil/androidide/utils/DecompilerInputPolicy.kt"
+PERMISSIONS = ROOT / "core/app/src/main/java/dev/mutwakil/androidide/fragments/onboarding/PermissionsFragment.kt"
+APPLICATION = ROOT / "core/app/src/main/java/dev/mutwakil/androidide/app/IDEApplication.kt"
+GENERAL_PREFERENCES = ROOT / "utilities/preferences/src/main/java/dev/mutwakil/androidide/preferences/internal/GeneralPreferences.kt"
+ARABIC_STRINGS = ROOT / "core/resources/src/main/res/values-ar-rSA/strings.xml"
 
 
 def require(condition: bool, message: str) -> None:
@@ -80,6 +84,36 @@ def main() -> None:
         "isWithinOutputLimits",
     ):
         require(invariant in policy, f"decompiler safety invariant exists: {invariant}")
+
+    permission_source = PERMISSIONS.read_text(encoding="utf-8")
+    require("context.packageName" in permission_source,
+            "permission Settings intents target the installed applicationId")
+    require("BuildInfo.PACKAGE_NAME" not in permission_source,
+            "permission Settings intents do not use the inherited source namespace")
+    require("ActivityNotFoundException" in permission_source
+            and "ACTION_APPLICATION_DETAILS_SETTINGS" in permission_source,
+            "permission Settings navigation has a safe fallback")
+
+    application_source = APPLICATION.read_text(encoding="utf-8")
+    general_preferences = GENERAL_PREFERENCES.read_text(encoding="utf-8")
+    require('GeneralPreferences.selectedLocale = "ar-rSA"' in application_source,
+            "Arabic is selected as the first-launch default locale")
+    require("defaultLocaleInitialized" in application_source
+            and "defaultLocaleInitialized" in general_preferences,
+            "first-launch locale default does not overwrite later user choices")
+    arabic_strings = ARABIC_STRINGS.read_text(encoding="utf-8")
+    for string_name in (
+        "permission_settings_unavailable",
+        "permission_title_storage",
+        "permission_desc_storage",
+        "permission_title_install_packages",
+        "permission_desc_install_packages",
+        "onboarding_title_permissions",
+        "onboarding_subtitle_permissions",
+        "msg_grant_permissions",
+    ):
+        require(f'name="{string_name}"' in arabic_strings,
+                f"Arabic translation exists for {string_name}")
 
     print("\nExported Android components requiring human review:")
     for kind, name, permission in exported:
