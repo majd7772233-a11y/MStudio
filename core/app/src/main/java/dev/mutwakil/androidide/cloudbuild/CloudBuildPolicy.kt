@@ -91,7 +91,7 @@ jobs:
             -not -path '*/build/outputs/apk/androidTest/*' \
             -not -path '*/build/outputs/apk/test/*' \
             -not -path '*/build/intermediates/*' -print0 |
-            while IFS= read -r -d '' file; do cp --parents "$file" cloud-build-apks/; done
+            while IFS= read -r -d '' file; do cp --parents "${'$'}file" cloud-build-apks/; done
           test -n "$(find cloud-build-apks -type f -name '*.apk' -print -quit)"
 
       - name: Upload APK artifact
