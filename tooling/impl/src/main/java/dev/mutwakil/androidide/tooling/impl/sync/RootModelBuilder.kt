@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.Serializable
 
-/** Converts an AGP sync issue to the cached project-model representation. */
+/** Converts an AGP sync issue to the cached protobuf model using its generated Java builder API. */
 internal fun AndroidSyncIssue.toProjectSyncIssue(): ProjectSyncIssue =
   ProjectSyncIssue.newBuilder()
     .setData(data)
