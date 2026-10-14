@@ -830,3 +830,8 @@ Phase 11 source now includes optional CloudBuildActivity/navigation, Android Key
 - Static checker now verifies release workflow safety/wiring. Verification and CodeQL workflow path filters include Phase 12 workflow changes.
 - Prior-phase acceptance remains open: Phase 9 decompiler needs runtime/packaging/device checks; Phase 10 needs full final CI, CodeQL result review and device/performance/security matrix; Phase 11 Cloud Build needs token/repository/workflow/status/log/artifact/install/device acceptance. A Release build does not close those gates.
 - Release workflow has not been dispatched and no Phase 12 signed APK exists yet. Keep status pending until fresh Actions logs/artifacts and device install evidence exist.
+
+
+### Phase 12 build-fix correction — 2026-10-14
+
+The initial fix using `isTextSelectable = true` was itself invalid: CI reported `val cannot be reassigned` at all three sites. Corrected the code to call `setTextIsSelectable(true)` directly in `CloudBuildActivity.kt`, commit `408158241f19c40093a1ce8db4639d9a7a1a5fed`. The fresh verification and CodeQL runs on this commit must be checked before proceeding to signed Release acceptance.
