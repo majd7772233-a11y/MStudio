@@ -88,7 +88,7 @@ def main() -> None:
     permission_source = PERMISSIONS.read_text(encoding="utf-8")
     require("context.packageName" in permission_source,
             "permission Settings intents target the installed applicationId")
-    require("BuildInfo.PACKAGE_NAME" not in permission_source,
+    require('Uri.fromParts("package", BuildInfo.PACKAGE_NAME' not in permission_source,
             "permission Settings intents do not use the inherited source namespace")
     require("ActivityNotFoundException" in permission_source
             and "ACTION_APPLICATION_DETAILS_SETTINGS" in permission_source,
