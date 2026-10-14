@@ -791,3 +791,13 @@ Fixes committed on `dev`:
 - `bdfc189` and `2907ef5`: trigger Phase 10 verification and CodeQL on relevant `dev` source pushes as well as manual dispatch.
 
 The initial CodeQL failure was a build/configuration failure, not a completed clean security analysis. The failed test run produced no test reports because compilation stopped before tests could execute. The fixes are not considered verified until the new Actions runs finish and their logs/artifacts are reviewed.
+
+
+## Phase 10 CI failure follow-up (2026-10-14)
+
+Three source compilation errors were identified from GitHub Actions and fixed on `dev`:
+- `RootModelBuilder.kt`: protobuf `GradleModels.SyncIssue` is generated Java; replaced named-argument construction with `newBuilder()`, setters, and `build()`.
+- `utilities/templates-api/.../parameters.kt`: imported the missing `ParameterConstraint.PROJECT_NAME`.
+- `XmlResourceReferenceDiagnosticProvider.kt`: replaced both invalid `module.delegate.projectDir` accesses with `module.projectDir`.
+
+The static safety/manifest job passed, but tests did not start because Kotlin compilation failed. Debug APK generation and CodeQL were blocked by the same failures. Do not call Phase 10 verified until fresh Actions runs on the final corrected commit pass and their logs/artifacts are reviewed.
