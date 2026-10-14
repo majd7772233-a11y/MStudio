@@ -14,6 +14,7 @@ POLICY = ROOT / "core/app/src/main/java/dev/mutwakil/androidide/utils/Decompiler
 PERMISSIONS = ROOT / "core/app/src/main/java/dev/mutwakil/androidide/fragments/onboarding/PermissionsFragment.kt"
 APPLICATION = ROOT / "core/app/src/main/java/dev/mutwakil/androidide/app/IDEApplication.kt"
 GENERAL_PREFERENCES = ROOT / "utilities/preferences/src/main/java/dev/mutwakil/androidide/preferences/internal/GeneralPreferences.kt"
+APK_INSTALLER = ROOT / "core/app/src/main/java/dev/mutwakil/androidide/utils/ApkInstaller.kt"
 ARABIC_STRINGS = ROOT / "core/resources/src/main/res/values-ar-rSA/strings.xml"
 
 
@@ -68,6 +69,10 @@ def main() -> None:
     )
 
     manifest_text = MANIFEST.read_text(encoding="utf-8")
+    require('android:authorities="${applicationId}.documents"' in manifest_text,
+            "DocumentsProvider authority follows MStudio applicationId and avoids upstream collisions")
+    require('android:authorities="dev.mutwakil.androidide.documents"' not in manifest_text,
+            "DocumentsProvider does not hard-code the inherited package authority")
     require("android:allowBackup=\"true\"" not in manifest_text,
             "manifest does not opt into app-data backup")
     require("android:usesCleartextTraffic=\"true\"" not in manifest_text,
@@ -93,6 +98,17 @@ def main() -> None:
     require("ActivityNotFoundException" in permission_source
             and "ACTION_APPLICATION_DETAILS_SETTINGS" in permission_source,
             "permission Settings navigation has a safe fallback")
+
+    installer_source = APK_INSTALLER.read_text(encoding="utf-8")
+    require("setInstallerPackageName(context.packageName)" in installer_source,
+            "PackageInstaller identifies the actual installed MStudio installer package")
+    require("setInstallerPackageName(BuildInfo.PACKAGE_NAME)" not in installer_source,
+            "PackageInstaller never advertises the uninstalled inherited package")
+    require("private fun installUsingIntent(context: Context, apk: File): Boolean" in installer_source
+            and "return installUsingIntent(context, apk)" in installer_source,
+            "fallback installer reports launch failure instead of false success")
+    require('apk.extension.equals("apk", ignoreCase = true)' in installer_source,
+            "APK validation accepts the normal case-insensitive extension")
 
     application_source = APPLICATION.read_text(encoding="utf-8")
     general_preferences = GENERAL_PREFERENCES.read_text(encoding="utf-8")
