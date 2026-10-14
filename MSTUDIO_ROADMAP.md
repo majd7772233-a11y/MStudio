@@ -1153,3 +1153,14 @@ Fixes committed on `dev`:
 - `bdfc189` and `2907ef5`: trigger Phase 10 verification and CodeQL on relevant `dev` source pushes as well as manual dispatch.
 
 The initial CodeQL failure was a build/configuration failure, not a completed clean security analysis. The failed test run produced no test reports because compilation stopped before tests could execute. The fixes are not considered verified until the new Actions runs finish and their logs/artifacts are reviewed.
+
+
+## Follow-up: Phase 10 verification failures (2026-10-14)
+
+The latest GitHub Actions runs exposed three Kotlin compile blockers, all corrected on `dev`:
+
+- `:tooling:impl:compileKotlin`: `RootModelBuilder.kt` used named arguments to construct generated Java protobuf `GradleModels.SyncIssue`. Switched to `ProjectSyncIssue.newBuilder()`, setters, and `build()`.
+- `:utilities:templates-api:compileDebugKotlin`: missing import for `ParameterConstraint.PROJECT_NAME`; added the import.
+- `:xml:lsp:compileDebugKotlin`: `module.delegate.projectDir` incorrectly accessed a non-existent property on the protobuf delegate; changed both references to `module.projectDir`.
+
+The static safety/manifest job passed. Unit tests did not execute because compilation failed first; debug APK creation and CodeQL analysis were also blocked by the same source compilation failures. The failed APK job produced no APK/checksum artifact. The corrected head must pass a fresh full verification and CodeQL run before these issues are marked verified.
