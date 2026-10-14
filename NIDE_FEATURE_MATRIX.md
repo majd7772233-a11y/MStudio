@@ -164,3 +164,10 @@ The initial CodeQL failure was a build/configuration failure, not a completed cl
 ## Phase 10 CI failure follow-up (2026-10-14)
 
 Three Kotlin compile blockers from GitHub Actions were fixed on `dev`: protobuf SyncIssue construction now uses the generated Java builder in `RootModelBuilder.kt`; the missing `PROJECT_NAME` enum import was added in template parameters; and both invalid `module.delegate.projectDir` references now use `module.projectDir`. Static safety/manifest checks passed, but unit tests did not run and APK/CodeQL jobs were blocked by compilation. Acceptance remains pending until fresh verification and CodeQL runs pass on the final corrected commit.
+
+
+## Latest CI failure and correction (2026-10-14)
+
+The most recent verification run reached Kotlin test compilation but failed in `FernflowerIntegrationTest.kt`: direct imports of `javax.tools.ToolProvider` and calls through `JavaCompiler` are not visible to the Android plugin's test compile classpath. The integration test now resolves `javax.tools.ToolProvider` reflectively and invokes the host JDK compiler without compile-time references to the `java.compiler` API. The debug APK build and static safety/manifest job passed on the same commit; the unit-test job did not reach test execution.
+
+The paired CodeQL run built the debug app and Tooling API successfully, but its analysis job ended after the runner received a shutdown signal during result upload. This is recorded as an interrupted scan, not a security finding or a successful scan. Both workflows now avoid canceling an in-progress run when another commit is pushed. Fresh verification and CodeQL runs on the corrective commit must be reviewed before acceptance can be marked complete.

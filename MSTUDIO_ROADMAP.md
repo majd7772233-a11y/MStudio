@@ -1164,3 +1164,10 @@ The latest GitHub Actions runs exposed three Kotlin compile blockers, all correc
 - `:xml:lsp:compileDebugKotlin`: `module.delegate.projectDir` incorrectly accessed a non-existent property on the protobuf delegate; changed both references to `module.projectDir`.
 
 The static safety/manifest job passed. Unit tests did not execute because compilation failed first; debug APK creation and CodeQL analysis were also blocked by the same source compilation failures. The failed APK job produced no APK/checksum artifact. The corrected head must pass a fresh full verification and CodeQL run before these issues are marked verified.
+
+
+## Latest CI failure and correction (2026-10-14)
+
+The most recent verification run reached Kotlin test compilation but failed in `FernflowerIntegrationTest.kt`: direct imports of `javax.tools.ToolProvider` and calls through `JavaCompiler` are not visible to the Android plugin's test compile classpath. The integration test now resolves `javax.tools.ToolProvider` reflectively and invokes the host JDK compiler without compile-time references to the `java.compiler` API. The debug APK build and static safety/manifest job passed on the same commit; the unit-test job did not reach test execution.
+
+The paired CodeQL run built the debug app and Tooling API successfully, but its analysis job ended after the runner received a shutdown signal during result upload. This is recorded as an interrupted scan, not a security finding or a successful scan. Both workflows now avoid canceling an in-progress run when another commit is pushed. Fresh verification and CodeQL runs on the corrective commit must be reviewed before acceptance can be marked complete.

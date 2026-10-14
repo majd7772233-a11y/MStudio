@@ -60,3 +60,10 @@ The latest completed verification/CodeQL attempts failed during Kotlin compilati
 3. `:xml:lsp:compileDebugKotlin` — two references used `module.delegate.projectDir`, but the delegate is a generated protobuf model with no `projectDir` property. Both now use the cached `module.projectDir`.
 
 The debug APK job and CodeQL analysis were blocked by these same compile failures; no APK/checksum artifact was produced and the test job did not reach test execution. The Python static safety/manifest job passed. Corrective commits are on `dev`; rerun the full verification and CodeQL workflows against the final corrected head before treating the failures as resolved. These source changes alone are not evidence of a passing build or tests.
+
+
+## Latest CI failure and correction (2026-10-14)
+
+The most recent verification run reached Kotlin test compilation but failed in `FernflowerIntegrationTest.kt`: direct imports of `javax.tools.ToolProvider` and calls through `JavaCompiler` are not visible to the Android plugin's test compile classpath. The integration test now resolves `javax.tools.ToolProvider` reflectively and invokes the host JDK compiler without compile-time references to the `java.compiler` API. The debug APK build and static safety/manifest job passed on the same commit; the unit-test job did not reach test execution.
+
+The paired CodeQL run built the debug app and Tooling API successfully, but its analysis job ended after the runner received a shutdown signal during result upload. This is recorded as an interrupted scan, not a security finding or a successful scan. Both workflows now avoid canceling an in-progress run when another commit is pushed. Fresh verification and CodeQL runs on the corrective commit must be reviewed before acceptance can be marked complete.

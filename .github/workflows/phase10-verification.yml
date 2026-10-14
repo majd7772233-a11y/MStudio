@@ -36,7 +36,7 @@ permissions:
 
 concurrency:
   group: phase10-verification-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   static-audit:
