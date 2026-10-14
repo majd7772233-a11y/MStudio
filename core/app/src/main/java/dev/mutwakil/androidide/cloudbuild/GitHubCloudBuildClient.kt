@@ -241,13 +241,13 @@ internal class GitHubCloudBuildClient(private val token: String) {
                         if (count < 0) break
                         total += count
                         if (total > 2 * 1024 * 1024) break
-                        if (output.length() < 120_000) {
+                        if (output.length < 120_000) {
                             output.append(String(buffer, 0, count, StandardCharsets.UTF_8))
                         }
                     }
                 }
                 zip.closeEntry()
-                if (output.length() >= 120_000) break
+                if (output.length >= 120_000) break
             }
         }
         return output.toString().takeLast(30_000).ifBlank { "No readable text was returned in the log archive." }
