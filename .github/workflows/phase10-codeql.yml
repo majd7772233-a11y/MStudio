@@ -1,12 +1,13 @@
 name: Phase 10 — CodeQL security analysis
 
-# Intentionally manual so source verification can be scheduled after Phase 10 review.
+# Runs on reviewed source changes and can also be dispatched manually.
 on:
   workflow_dispatch: {}
   push:
     branches: [ "dev" ]
     paths:
       - ".github/workflows/phase10-codeql.yml"
+      - ".github/workflows/phase12-release.yml"
       - "settings.gradle.kts"
       - "build.gradle.kts"
       - "gradle/**"
@@ -71,5 +72,5 @@ jobs:
         with:
           category: /language:java-kotlin
 
-# This workflow is prepared but has not been dispatched. Findings must be reviewed,
+# Review and triage findings from every completed scan; a completed scan is not proof that all findings are harmless. Findings must be reviewed,
 # triaged, and fixed; a completed scan alone is not proof of security.
