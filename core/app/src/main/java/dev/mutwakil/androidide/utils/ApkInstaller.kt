@@ -9,7 +9,6 @@ import android.content.pm.PackageManager
 import android.os.Process
 import androidx.core.app.PendingIntentCompat
 import androidx.core.content.FileProvider
-import dev.mutwakil.androidide.buildinfo.BuildInfo
 import dev.mutwakil.androidide.services.InstallationResultReceiver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -38,7 +37,7 @@ object ApkInstaller {
         apk: File,
         debugFallbackInstaller: Boolean = DEBUG_FALLBACK_INSTALLER,
     ): Boolean {
-        if (!apk.exists() || !apk.isFile || apk.extension != "apk") {
+        if (!apk.exists() || !apk.isFile || !apk.extension.equals("apk", ignoreCase = true)) {
             log.error("File is not an APK: {}", apk)
             return false
         }
@@ -51,8 +50,7 @@ object ApkInstaller {
                         " Falling back to intent-based installer."
             )
 
-            installUsingIntent(context, apk)
-            return true
+            return installUsingIntent(context, apk)
         }
 
         return installUsingSession(
@@ -62,7 +60,7 @@ object ApkInstaller {
     }
 
     @Suppress("DEPRECATION", "RequestInstallPackagesPolicy")
-    private fun installUsingIntent(context: Context, apk: File) {
+    private fun installUsingIntent(context: Context, apk: File): Boolean {
         val intent = Intent(Intent.ACTION_INSTALL_PACKAGE)
         val authority = "${context.packageName}.providers.fileprovider"
         val uri = FileProvider.getUriForFile(context, authority, apk)
@@ -71,8 +69,10 @@ object ApkInstaller {
 
         try {
             context.startActivity(intent)
+            return true
         } catch (e: Exception) {
-            log.warn("Failed to start installation intent", e)
+            log.error("Failed to start installation intent", e)
+            return false
         }
     }
 
@@ -82,7 +82,7 @@ object ApkInstaller {
         apk: File,
     ): Boolean {
         val installer = context.packageManager.packageInstaller
-        val params = createSessionParams()
+        val params = createSessionParams(context)
         val sessionId = installer.createSession(params)
         val session = installer.openSession(sessionId)
         val callback = getCallbackIntent(context, sessionId)
@@ -100,11 +100,8 @@ object ApkInstaller {
         }.isSuccess
     }
 
-    private fun createSessionParams(appPackageName: String? = null): PackageInstaller.SessionParams =
+    private fun createSessionParams(context: Context): PackageInstaller.SessionParams =
         PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL).apply {
-            if (appPackageName != null) {
-                setAppPackageName(appPackageName)
-            }
 
             setInstallLocation(PackageInfo.INSTALL_LOCATION_AUTO)
             setInstallReason(PackageManager.INSTALL_REASON_USER)
@@ -121,7 +118,7 @@ object ApkInstaller {
             }
 
             if (isAtLeastU()) {
-                setInstallerPackageName(BuildInfo.PACKAGE_NAME)
+                setInstallerPackageName(context.packageName)
                 setRequestUpdateOwnership(true)
                 setApplicationEnabledSettingPersistent()
             }
