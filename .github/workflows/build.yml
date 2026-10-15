@@ -116,13 +116,13 @@ jobs:
     name: Build and test Tooling API
     runs-on: ubuntu-latest
     steps:
-      - name: Run MStudio package identity and security regression checks
-        run: python3 scripts/ci/phase10_static_checks.py
       - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: 'recursive'
           fetch-depth: 0
+      - name: Run MStudio package identity and security regression checks
+        run: python3 scripts/ci/phase10_static_checks.py
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
