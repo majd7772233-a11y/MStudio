@@ -50,8 +50,6 @@ jobs:
         with:
           java-version: ${{ env.BUILD_JAVA_VERSION }}
           distribution: ${{ env.BUILD_JAVA_DIST }}
-      - name: Run MStudio package identity and security regression checks
-        run: python3 scripts/ci/phase10_static_checks.py
       - name: Change Gradle wrapper permissions
         run: chmod +x ./gradlew
       - name: Restore cache
@@ -118,6 +116,8 @@ jobs:
     name: Build and test Tooling API
     runs-on: ubuntu-latest
     steps:
+      - name: Run MStudio package identity and security regression checks
+        run: python3 scripts/ci/phase10_static_checks.py
       - name: Checkout
         uses: actions/checkout@v4
         with:
