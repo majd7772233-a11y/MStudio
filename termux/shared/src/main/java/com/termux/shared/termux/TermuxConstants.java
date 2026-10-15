@@ -341,7 +341,7 @@ public final class TermuxConstants {
     /** Termux app name */
     public static final String TERMUX_APP_NAME = "AndroidIDE-Dev"; // Default: "Termux"
     /** Termux package name */
-    public static final String TERMUX_PACKAGE_NAME = "dev.mutwakil.androidide"; // Default: "com.termux"
+    public static final String TERMUX_PACKAGE_NAME = "com.magd.mstudio"; // Must match the installed MStudio applicationId.
     /** Termux GitHub repo name */
     public static final String TERMUX_GITHUB_REPO_NAME = "AndroidIDE-Dev"; // Default: "termux-app"
     /** Termux GitHub repo url */

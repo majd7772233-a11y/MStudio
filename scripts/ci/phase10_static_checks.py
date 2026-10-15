@@ -15,6 +15,7 @@ PERMISSIONS = ROOT / "core/app/src/main/java/dev/mutwakil/androidide/fragments/o
 APPLICATION = ROOT / "core/app/src/main/java/dev/mutwakil/androidide/app/IDEApplication.kt"
 GENERAL_PREFERENCES = ROOT / "utilities/preferences/src/main/java/dev/mutwakil/androidide/preferences/internal/GeneralPreferences.kt"
 BUILD_IDENTITY = ROOT / "composite-builds/build-logic/common/src/main/java/dev/mutwakil/androidide/build/config/BuildConfig.kt"
+TERMUX_CONSTANTS = ROOT / "termux/shared/src/main/java/com/termux/shared/termux/TermuxConstants.java"
 APP_GRADLE = ROOT / "core/app/build.gradle.kts"
 APK_INSTALLER = ROOT / "core/app/src/main/java/dev/mutwakil/androidide/utils/ApkInstaller.kt"
 ARABIC_STRINGS = ROOT / "core/resources/src/main/res/values-ar-rSA/strings.xml"
@@ -48,10 +49,24 @@ def main() -> None:
     require("applicationId = BuildConfig.APPLICATION_ID" in app_gradle,
             "Android applicationId uses the centralized MStudio identity constant")
 
+    termux_constants = TERMUX_CONSTANTS.read_text(encoding="utf-8")
+    require('TERMUX_PACKAGE_NAME = "com.magd.mstudio"' in termux_constants,
+            "TermuxApplication shared preferences resolve the installed MStudio package context")
+    require('TERMUX_PACKAGE_NAME = "dev.mutwakil.androidide"' not in termux_constants,
+            "Termux shared package identity never points at the inherited source namespace")
+
     root = ET.parse(MANIFEST).getroot()
     app = root.find("application")
     require(app is not None, "Android manifest has an application element")
     require(app.get(ANDROID + "allowBackup") == "false", "application backup is disabled")
+
+    provider_authorities = []
+    for provider in app.findall("provider"):
+        authorities = provider.get(ANDROID + "authorities", "").split(";")
+        require(all(authorities), "every content provider declares a non-empty authority")
+        provider_authorities.extend(authorities)
+    require(len(provider_authorities) == len(set(provider_authorities)),
+            "content provider authorities are unique and cannot collide at install time")
 
     exported = []
     component_tags = {"activity", "activity-alias", "receiver", "service", "provider"}
